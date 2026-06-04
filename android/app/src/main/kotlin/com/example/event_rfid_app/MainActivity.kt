@@ -208,6 +208,46 @@ class MainActivity: FlutterActivity() {
                         result.success(false)
                     }
                 }
+                "writeTag" -> {
+                    val password = call.argument<String>("password") ?: "00000000"
+                    val membank = call.argument<Int>("membank") ?: 1
+                    val address = call.argument<Int>("address") ?: 2
+                    val wordCount = call.argument<Int>("wordCount") ?: 3
+                    val hexData = call.argument<String>("hexData") ?: ""
+                    
+                    Thread {
+                        try {
+                            val connected = UHFReader.getInstance().connectState == com.xlzn.hcpda.uhf.enums.ConnectState.CONNECTED
+                            if (!connected) {
+                                Log.e(TAG, "writeTag: Reader not connected")
+                                runOnUiThread {
+                                    result.success(false)
+                                }
+                                return@Thread
+                            }
+                            Log.d(TAG, "writeTag: Writing EPC=$hexData")
+                            val readerResult = UHFReader.getInstance().write(
+                                password,
+                                membank,
+                                address,
+                                wordCount,
+                                hexData,
+                                null
+                            )
+                            val success = readerResult.data ?: false
+                            Log.d(TAG, "writeTag: Result=$success")
+                            runOnUiThread {
+                                result.success(success)
+                            }
+                        } catch (t: Throwable) {
+                            Log.e(TAG, "writeTag error: ${t.message}")
+                            t.printStackTrace()
+                            runOnUiThread {
+                                result.success(false)
+                            }
+                        }
+                    }.start()
+                }
                 else -> {
                     result.notImplemented()
                 }

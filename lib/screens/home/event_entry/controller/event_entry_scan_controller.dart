@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:get/get.dart';
-import '../models/rfid_tag.dart';
-import '../services/rfid_service.dart';
+import '../../../../models/rfid_tag.dart';
+import '../../../../services/rfid_service.dart';
 
-class RfidController extends GetxController {
+class EventEntryScannController extends GetxController {
   final RfidService _rfidService = RfidService();
 
   var isConnected = false.obs;
@@ -88,7 +88,7 @@ class RfidController extends GetxController {
       // Duplicate tag: update count and rssi
       var existingTag = tags[existingIndex];
       existingTag.count++;
-      // We'll replace the old tag object to trigger GetX reactivity nicely, 
+      // We'll replace the old tag object to trigger GetX reactivity nicely,
       // or we could use .refresh() on the list.
       tags[existingIndex] = RfidTag(
         epc: existingTag.epc,
@@ -98,13 +98,9 @@ class RfidController extends GetxController {
       );
     } else {
       // New tag
-      tags.add(RfidTag(
-        epc: epc,
-        rssi: rssi,
-        readTime: readTime,
-      ));
+      tags.add(RfidTag(epc: epc, rssi: rssi, readTime: readTime));
     }
-    
+
     // Update total read count (this counts every single scan event, or could just be tags.length for unique tags. Based on instructions: "Total Tags Count" usually means unique tags count, but sometimes total read counts. I will use tags.length for unique.)
     totalTagsCount.value = tags.length;
   }

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import '../controllers/rfid_controller.dart';
+import 'controller/event_entry_scan_controller.dart';
 
-class HomeScreen extends StatelessWidget {
-  final RfidController controller = Get.put(RfidController());
+class EventEntryScansScreen extends StatelessWidget {
+  final EventEntryScannController controller = Get.put(
+    EventEntryScannController(),
+  );
 
-  HomeScreen({super.key});
+  EventEntryScansScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +24,7 @@ class HomeScreen extends StatelessWidget {
           _buildActionButtons(),
           const Divider(),
           _buildListHeader(),
-          Expanded(
-            child: _buildTagList(),
-          ),
+          Expanded(child: _buildTagList()),
         ],
       ),
     );
@@ -39,14 +39,14 @@ class HomeScreen extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: isConnected 
-                ? Colors.green.withOpacity(0.4) 
+            color: isConnected
+                ? Colors.green.withOpacity(0.4)
                 : Colors.red.withOpacity(0.4),
             width: 1.5,
           ),
         ),
-        color: isConnected 
-            ? Colors.green.withOpacity(0.05) 
+        color: isConnected
+            ? Colors.green.withOpacity(0.05)
             : Colors.red.withOpacity(0.05),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
@@ -61,8 +61,8 @@ class HomeScreen extends StatelessWidget {
                   color: isConnected ? Colors.green : Colors.red,
                   boxShadow: [
                     BoxShadow(
-                      color: isConnected 
-                          ? Colors.green.withOpacity(0.6) 
+                      color: isConnected
+                          ? Colors.green.withOpacity(0.6)
                           : Colors.red.withOpacity(0.6),
                       blurRadius: 8,
                       spreadRadius: 2,
@@ -80,12 +80,14 @@ class HomeScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: isConnected ? Colors.green[300] : Colors.red[300],
+                        color: isConnected
+                            ? Colors.green[300]
+                            : Colors.red[300],
                       ),
                     ),
                     Text(
-                      isConnected 
-                          ? 'Real RFID Hardware Active' 
+                      isConnected
+                          ? 'Real RFID Hardware Active'
                           : 'Tap retry to check connection',
                       style: TextStyle(
                         fontSize: 12,
@@ -98,10 +100,18 @@ class HomeScreen extends StatelessWidget {
               if (!isConnected)
                 TextButton.icon(
                   onPressed: () => controller.retryConnection(),
-                  icon: const Icon(Icons.refresh, size: 16, color: Colors.orange),
+                  icon: const Icon(
+                    Icons.refresh,
+                    size: 16,
+                    color: Colors.orange,
+                  ),
                   label: const Text(
                     'Retry',
-                    style: TextStyle(color: Colors.orange, fontSize: 13, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.orange,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   style: TextButton.styleFrom(
                     visualDensity: VisualDensity.compact,
@@ -134,7 +144,9 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  isScanning ? 'Scan Status: Scanning...' : 'Scan Status: Stopped',
+                  isScanning
+                      ? 'Scan Status: Scanning...'
+                      : 'Scan Status: Stopped',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -169,7 +181,10 @@ class HomeScreen extends StatelessWidget {
               icon: const Icon(Icons.play_arrow),
               label: const Text('Start'),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 backgroundColor: Colors.green,
                 foregroundColor: Colors.white,
               ),
@@ -182,7 +197,10 @@ class HomeScreen extends StatelessWidget {
               icon: const Icon(Icons.stop),
               label: const Text('Stop'),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
               ),
@@ -207,10 +225,26 @@ class HomeScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(flex: 3, child: Text('EPC', style: TextStyle(fontWeight: FontWeight.bold))),
-          Expanded(flex: 1, child: Text('RSSI', style: TextStyle(fontWeight: FontWeight.bold))),
-          Expanded(flex: 1, child: Text('Count', style: TextStyle(fontWeight: FontWeight.bold))),
-          Expanded(flex: 1, child: Text('Time', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.right)),
+          Expanded(
+            flex: 3,
+            child: Text('EPC', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Expanded(
+            flex: 1,
+            child: Text('RSSI', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Expanded(
+            flex: 1,
+            child: Text('Count', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Expanded(
+            flex: 1,
+            child: Text(
+              'Time',
+              style: TextStyle(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.right,
+            ),
+          ),
         ],
       ),
     );
@@ -220,7 +254,10 @@ class HomeScreen extends StatelessWidget {
     return Obx(() {
       if (controller.tags.isEmpty) {
         return const Center(
-          child: Text('No tags scanned yet.', style: TextStyle(fontSize: 16, color: Colors.grey)),
+          child: Text(
+            'No tags scanned yet.',
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
         );
       }
       return ListView.builder(
@@ -228,7 +265,7 @@ class HomeScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           final tag = controller.tags[index];
           final timeFormat = DateFormat('hh:mm:ss a').format(tag.readTime);
-          
+
           return Card(
             margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
             elevation: 2,
@@ -244,7 +281,10 @@ class HomeScreen extends StatelessWidget {
                       children: [
                         Text(
                           tag.displayName,
-                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
                         ),
                         if (tag.isDecoded) ...[
                           const SizedBox(height: 2),
@@ -252,7 +292,9 @@ class HomeScreen extends StatelessWidget {
                             tag.epc,
                             style: TextStyle(
                               fontSize: 11,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                               fontStyle: FontStyle.italic,
                             ),
                           ),
@@ -279,7 +321,9 @@ class HomeScreen extends StatelessWidget {
                         '${tag.count}',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onPrimaryContainer,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
