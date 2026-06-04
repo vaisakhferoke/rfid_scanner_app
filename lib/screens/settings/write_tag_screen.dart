@@ -1,3 +1,4 @@
+import 'package:event_rfid_app/widgets/common_widgets/range_settings_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../services/rfid_service.dart';
@@ -13,6 +14,40 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
   final TextEditingController _epcController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final RfidService _rfidService = RfidService();
+  bool _isConnected = false;
+  bool _isConnecting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _connectToDevice();
+  }
+
+  Future<void> _connectToDevice() async {
+    if (!mounted) return;
+    setState(() {
+      _isConnecting = true;
+    });
+    try {
+      bool connected = await _rfidService.checkConnectionStatus();
+      if (!connected) {
+        connected = await _rfidService.initializeReader();
+      }
+      if (mounted) {
+        setState(() {
+          _isConnected = connected;
+        });
+      }
+    } catch (e) {
+      debugPrint('Connection error in WriteTagScreen: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isConnecting = false;
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -92,43 +127,62 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
     final String hexData = _stringToHex(textData);
     final navigator = Navigator.of(context);
 
-    _rfidService.writeTag(
-      hexData: hexData,
-      password: "00000000",
-      membank: 1,
-      address: 2,
-      wordCount: 3,
-    ).then((success) {
-      if (!mounted) return;
-      // Dismiss writing dialog
-      navigator.pop();
+    _rfidService
+        .writeTag(
+          hexData: hexData,
+          password: "00000000",
+          membank: 1,
+          address: 2,
+          wordCount: 3,
+        )
+        .then((success) {
+          if (!mounted) return;
+          // Dismiss writing dialog
+          navigator.pop();
 
-      if (success) {
-        Get.snackbar(
-          'Success',
-          'EPC successfully written to tag memory!',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFF10B981),
-          colorText: Colors.white,
-          margin: const EdgeInsets.all(16),
-          borderRadius: 12,
-          icon: const Icon(Icons.check_circle_rounded, color: Colors.white),
-          duration: const Duration(seconds: 3),
-        );
-      } else {
-        Get.snackbar(
-          'Error',
-          'Failed to write to tag. Make sure tag is close and reader is connected.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFFEF4444),
-          colorText: Colors.white,
-          margin: const EdgeInsets.all(16),
-          borderRadius: 12,
-          icon: const Icon(Icons.error_outline_rounded, color: Colors.white),
-          duration: const Duration(seconds: 3),
-        );
-      }
-    });
+          if (success) {
+            setState(() {
+              _isConnected = true;
+            });
+            Get.snackbar(
+              'Success',
+              'EPC successfully written to tag memory!',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: const Color(0xFF10B981),
+              colorText: Colors.white,
+              margin: const EdgeInsets.all(16),
+              borderRadius: 12,
+              icon: const Icon(Icons.check_circle_rounded, color: Colors.white),
+              duration: const Duration(seconds: 3),
+            );
+            // clear epc controller
+            _epcController.clear();
+            // closs keyboared
+            FocusScope.of(context).unfocus();
+          } else {
+            _rfidService.checkConnectionStatus().then((connected) {
+              if (mounted) {
+                setState(() {
+                  _isConnected = connected;
+                });
+              }
+            });
+            Get.snackbar(
+              'Error',
+              'Failed to write to tag. Make sure tag is close and reader is connected.',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: const Color(0xFFEF4444),
+              colorText: Colors.white,
+              margin: const EdgeInsets.all(16),
+              borderRadius: 12,
+              icon: const Icon(
+                Icons.error_outline_rounded,
+                color: Colors.white,
+              ),
+              duration: const Duration(seconds: 3),
+            );
+          }
+        });
   }
 
   @override
@@ -151,6 +205,7 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Get.back(),
         ),
+        actions: [RangeSettingsButton()],
       ),
       body: Container(
         width: double.infinity,
@@ -177,6 +232,10 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Connection Status Card
+                      _buildConnectionCard(context),
+                      const SizedBox(height: 20),
+
                       // Form card
                       Container(
                         padding: const EdgeInsets.all(20),
@@ -264,8 +323,8 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
                                 if (value == null || value.trim().isEmpty) {
                                   return 'Please enter EPC hex data';
                                 }
-                                if (value.length != 6) {
-                                  return 'EPC data must be exactly 6 characters';
+                                if (value.length < 6) {
+                                  return 'EPC data must be less than or equal to 6 characters';
                                 }
                                 // if (!_isValidHex(value)) {
                                 //   return 'EPC data must contain hexadecimal characters only';
@@ -300,7 +359,7 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.save_rounded, size: 24),
-                              const SizedBox(width: 8),
+                              SizedBox(width: 8),
                               Text(
                                 'Write to Tag',
                                 style: TextStyle(
@@ -320,6 +379,126 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildConnectionCard(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        color: _isConnected
+            ? const Color(0xFFECFDF5) // Light emerald green
+            : const Color(0xFFFEF2F2), // Light red
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: _isConnected
+              ? const Color(0xFF10B981).withOpacity(0.3)
+              : const Color(0xFFEF4444).withOpacity(0.3),
+          width: 1.5,
+        ),
+      ),
+      child: Row(
+        children: [
+          // Pulse-like status dot
+          _isConnecting
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFF64748B),
+                    ),
+                  ),
+                )
+              : Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _isConnected
+                        ? const Color(0xFF10B981)
+                        : const Color(0xFFEF4444),
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            (_isConnected
+                                    ? const Color(0xFF10B981)
+                                    : const Color(0xFFEF4444))
+                                .withOpacity(0.6),
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _isConnecting
+                      ? 'Connecting to Reader...'
+                      : _isConnected
+                      ? 'Reader Connected'
+                      : 'Reader Disconnected',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: _isConnecting
+                        ? const Color(0xFF475569)
+                        : _isConnected
+                        ? const Color(0xFF047857) // Dark green
+                        : const Color(0xFFB91C1C), // Dark red
+                    fontFamily: 'Inter',
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _isConnecting
+                      ? 'Please wait, initializing connection...'
+                      : _isConnected
+                      ? 'Real RFID Hardware is active and ready'
+                      : 'Tag writes will fail without connection',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: _isConnecting
+                        ? const Color(0xFF64748B)
+                        : _isConnected
+                        ? const Color(0xFF065F46)
+                        : const Color(0xFF991B1B),
+                    fontFamily: 'Inter',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (!_isConnected && !_isConnecting)
+            TextButton.icon(
+              onPressed: _connectToDevice,
+              icon: const Icon(
+                Icons.refresh_rounded,
+                size: 16,
+                color: Color(0xFFE31E24), // VKC Red Accent
+              ),
+              label: const Text(
+                'Connect',
+                style: TextStyle(
+                  color: Color(0xFFE31E24),
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
+                ),
+              ),
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
+            ),
+        ],
       ),
     );
   }
