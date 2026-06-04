@@ -1,3 +1,4 @@
+import 'package:event_rfid_app/services/range_settings_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -17,6 +18,16 @@ class EventEntryScansScreen extends StatelessWidget {
         title: const Text('RFID Scanner'),
         centerTitle: true,
         elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: () => RangeSettingsPopup.showRangeSettingsSheet(context),
+            icon: const Icon(
+              Icons.radar_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [

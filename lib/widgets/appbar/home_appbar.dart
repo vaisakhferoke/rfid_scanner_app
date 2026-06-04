@@ -15,20 +15,6 @@ class HomeAppbar extends StatelessWidget implements PreferredSizeWidget {
         icon: const Icon(Icons.menu, color: Colors.white),
         onPressed: () {},
       ),
-      actions: [
-        Container(
-          margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: Colors.white.withOpacity(0.5),
-              width: 1.5,
-            ),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Icon(Icons.star, color: Colors.white, size: 20),
-        ),
-      ],
     );
   }
 }

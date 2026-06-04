@@ -71,6 +71,28 @@ class RfidService {
     }
   }
 
+  // Get reader RF power (5-33 dBm)
+  Future<int> getPower() async {
+    try {
+      final int result = await _methodChannel.invokeMethod('getPower');
+      return result;
+    } on PlatformException catch (e) {
+      print("Failed to get power: '${e.message}'.");
+      return 30; // default fallback
+    }
+  }
+
+  // Set reader RF power (5-33 dBm)
+  Future<bool> setPower(int power) async {
+    try {
+      final bool result = await _methodChannel.invokeMethod('setPower', {'power': power});
+      return result;
+    } on PlatformException catch (e) {
+      print("Failed to set power: '${e.message}'.");
+      return false;
+    }
+  }
+
   // Stream of RFID tag events
   Stream<Map<String, dynamic>> get tagStream {
     return _eventChannel.receiveBroadcastStream().map((dynamic event) {

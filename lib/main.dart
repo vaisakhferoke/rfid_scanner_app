@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'controllers/battery_controller.dart';
+import 'controllers/range_controller.dart';
 import 'screens/main_navigation_screen.dart';
+import 'screens/splash_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   Get.put(BatteryController());
+  Get.put(RangeController());
   runApp(const MyApp());
 }
 
@@ -29,7 +32,7 @@ class MyApp extends StatelessWidget {
           elevation: 0,
         ),
       ),
-      home: MainNavigationScreen(),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

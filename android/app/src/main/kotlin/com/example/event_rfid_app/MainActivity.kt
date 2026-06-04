@@ -248,6 +248,60 @@ class MainActivity: FlutterActivity() {
                         }
                     }.start()
                 }
+                "setPower" -> {
+                    val power = call.argument<Int>("power") ?: 30
+                    Thread {
+                        try {
+                            val connected = UHFReader.getInstance().connectState == com.xlzn.hcpda.uhf.enums.ConnectState.CONNECTED
+                            if (!connected) {
+                                Log.e(TAG, "setPower: Reader not connected")
+                                runOnUiThread {
+                                    result.success(false)
+                                }
+                                return@Thread
+                            }
+                            Log.d(TAG, "setPower: Setting power to $power dBm")
+                            val readerResult = UHFReader.getInstance().setPower(power)
+                            val success = readerResult.data ?: false
+                            Log.d(TAG, "setPower result: $success")
+                            runOnUiThread {
+                                result.success(success)
+                            }
+                        } catch (t: Throwable) {
+                            Log.e(TAG, "setPower error: ${t.message}")
+                            t.printStackTrace()
+                            runOnUiThread {
+                                result.success(false)
+                            }
+                        }
+                    }.start()
+                }
+                "getPower" -> {
+                    Thread {
+                        try {
+                            val connected = UHFReader.getInstance().connectState == com.xlzn.hcpda.uhf.enums.ConnectState.CONNECTED
+                            if (!connected) {
+                                Log.e(TAG, "getPower: Reader not connected")
+                                runOnUiThread {
+                                    result.success(0)
+                                }
+                                return@Thread
+                            }
+                            val readerResult = UHFReader.getInstance().getPower()
+                            val power = readerResult.data ?: 30
+                            Log.d(TAG, "getPower result: $power dBm")
+                            runOnUiThread {
+                                result.success(power)
+                            }
+                        } catch (t: Throwable) {
+                            Log.e(TAG, "getPower error: ${t.message}")
+                            t.printStackTrace()
+                            runOnUiThread {
+                                result.success(0)
+                            }
+                        }
+                    }.start()
+                }
                 else -> {
                     result.notImplemented()
                 }
