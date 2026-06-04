@@ -1,6 +1,7 @@
 import 'package:event_rfid_app/widgets/common_widgets/range_settings_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../controllers/range_controller.dart';
 import '../../services/rfid_service.dart';
 
 class WriteTagScreen extends StatefulWidget {
@@ -71,6 +72,9 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
   void _executeWrite() {
     if (!_formKey.currentState!.validate()) return;
 
+    final RangeController rangeController = Get.find<RangeController>();
+    final int power = rangeController.powerLevel.value;
+
     // Show writing progress dialog
     showDialog(
       context: context,
@@ -116,6 +120,66 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
                     fontFamily: 'Inter',
                   ),
                 ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: rangeController.rangeColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: rangeController.rangeColor.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.sensors_rounded,
+                        color: rangeController.rangeColor,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Power: $power dBm (${rangeController.rangeLabel})',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: rangeController.rangeColor,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (power < 20) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.warning_amber_rounded,
+                        color: Colors.amber,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Note: Low power level ($power dBm) might reduce write range. Hold the tag closer to the scanner.',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.amber,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -127,62 +191,68 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
     final String hexData = _stringToHex(textData);
     final navigator = Navigator.of(context);
 
-    _rfidService
-        .writeTag(
-          hexData: hexData,
-          password: "00000000",
-          membank: 1,
-          address: 2,
-          wordCount: 3,
-        )
-        .then((success) {
-          if (!mounted) return;
-          // Dismiss writing dialog
-          navigator.pop();
+    // Apply the saved power setting right before writing to make sure reader is configured correctly
+    _rfidService.setPower(power).then((_) {
+      _rfidService
+          .writeTag(
+            hexData: hexData,
+            password: "00000000",
+            membank: 1,
+            address: 2,
+            wordCount: 3,
+          )
+          .then((success) {
+            if (!mounted) return;
+            // Dismiss writing dialog
+            navigator.pop();
 
-          if (success) {
-            setState(() {
-              _isConnected = true;
-            });
-            Get.snackbar(
-              'Success',
-              'EPC successfully written to tag memory!',
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: const Color(0xFF10B981),
-              colorText: Colors.white,
-              margin: const EdgeInsets.all(16),
-              borderRadius: 12,
-              icon: const Icon(Icons.check_circle_rounded, color: Colors.white),
-              duration: const Duration(seconds: 3),
-            );
-            // clear epc controller
-            _epcController.clear();
-            // closs keyboared
-            FocusScope.of(context).unfocus();
-          } else {
-            _rfidService.checkConnectionStatus().then((connected) {
-              if (mounted) {
-                setState(() {
-                  _isConnected = connected;
-                });
-              }
-            });
-            Get.snackbar(
-              'Error',
-              'Failed to write to tag. Make sure tag is close and reader is connected.',
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: const Color(0xFFEF4444),
-              colorText: Colors.white,
-              margin: const EdgeInsets.all(16),
-              borderRadius: 12,
-              icon: const Icon(
-                Icons.error_outline_rounded,
-                color: Colors.white,
-              ),
-              duration: const Duration(seconds: 3),
-            );
-          }
-        });
+            if (success) {
+              setState(() {
+                _isConnected = true;
+              });
+              Get.snackbar(
+                'Success',
+                'EPC successfully written to tag memory!',
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: const Color(0xFF10B981),
+                colorText: Colors.white,
+                margin: const EdgeInsets.all(16),
+                borderRadius: 12,
+                icon: const Icon(
+                  Icons.check_circle_rounded,
+                  color: Colors.white,
+                ),
+                duration: const Duration(seconds: 3),
+              );
+              // clear epc controller
+              _epcController.clear();
+              // closs keyboared
+              FocusScope.of(context).unfocus();
+            } else {
+              _rfidService.checkConnectionStatus().then((connected) {
+                if (mounted) {
+                  setState(() {
+                    _isConnected = connected;
+                  });
+                }
+              });
+              Get.snackbar(
+                'Error',
+                'Failed to write to tag. Make sure tag is close and reader is connected.',
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: const Color(0xFFEF4444),
+                colorText: Colors.white,
+                margin: const EdgeInsets.all(16),
+                borderRadius: 12,
+                icon: const Icon(
+                  Icons.error_outline_rounded,
+                  color: Colors.white,
+                ),
+                duration: const Duration(seconds: 3),
+              );
+            }
+          });
+    });
   }
 
   @override
