@@ -8,7 +8,7 @@ class ReportsPlaceholderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: HomeAppbar(),
+      appBar: HomeAppbar(title: 'Reports'),
       body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

@@ -13,7 +13,7 @@ class HomeScreen extends StatelessWidget {
     final BatteryController batteryController = Get.find<BatteryController>();
     return Scaffold(
       backgroundColor: const Color(0xFF0043A4),
-      appBar: HomeAppbar(),
+      appBar: HomeAppbar(title: 'Home'),
       body: Container(
         width: double.infinity,
         decoration: const BoxDecoration(
@@ -52,9 +52,9 @@ class HomeScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Home',
+                                'VKC Event – 2025–2026',
                                 style: TextStyle(
-                                  fontSize: 32,
+                                  fontSize: 25,
                                   fontWeight: FontWeight.bold,
                                   color: Color(0xFF0F172A),
                                   fontFamily: 'Inter',
@@ -62,7 +62,7 @@ class HomeScreen extends StatelessWidget {
                               ),
                               SizedBox(height: 6),
                               Text(
-                                'VKC Event – 2025–2026, Kerala, Kozhikode',
+                                'Kerala, Kozhikode , Pin: 673001',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color(0xFF64748B),
@@ -89,7 +89,9 @@ class HomeScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(8),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFFE31E24).withOpacity(0.2),
+                                    color: const Color(
+                                      0xFFE31E24,
+                                    ).withOpacity(0.2),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -108,12 +110,17 @@ class HomeScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                             Obx(() {
-                              final batteryLevel = batteryController.batteryLevel.value;
-                              final batteryColor = batteryController.batteryColor;
+                              final batteryLevel =
+                                  batteryController.batteryLevel.value;
+                              final batteryColor =
+                                  batteryController.batteryColor;
                               final batteryIcon = batteryController.batteryIcon;
 
                               return Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
                                 decoration: BoxDecoration(
                                   color: batteryColor.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(20),
@@ -165,7 +172,9 @@ class HomeScreen extends StatelessWidget {
                           if (batteryController.isLowBattery) {
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 14.0),
-                              child: _buildBatteryWarningBanner(batteryController),
+                              child: _buildBatteryWarningBanner(
+                                batteryController,
+                              ),
                             );
                           }
                           return const SizedBox.shrink();
@@ -629,10 +638,7 @@ class HomeScreen extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFFCA5A5),
-          width: 1.5,
-        ),
+        border: Border.all(color: const Color(0xFFFCA5A5), width: 1.5),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFFEF4444).withOpacity(0.06),

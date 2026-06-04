@@ -11,7 +11,7 @@ class SettingsPlaceholderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: HomeAppbar(),
+      appBar: HomeAppbar(title: 'Settings'),
       body: Container(
         width: double.infinity,
         decoration: const BoxDecoration(
@@ -90,16 +90,16 @@ class SettingsPlaceholderScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 14),
 
-                          // Find Tag Card
-                          _buildMenuCard(
-                            icon: Icons.radar_rounded,
-                            iconColor: const Color(0xFF0043A4),
-                            iconBgColor: const Color(0xFFEFF6FF),
-                            title: 'Find Tag',
-                            subtitle: 'Locate Tag',
-                            onTap: () => Get.to(() => const FindTagScreen()),
-                          ),
-                          const SizedBox(height: 14),
+                          // // Find Tag Card
+                          // _buildMenuCard(
+                          //   icon: Icons.radar_rounded,
+                          //   iconColor: const Color(0xFF0043A4),
+                          //   iconBgColor: const Color(0xFFEFF6FF),
+                          //   title: 'Find Tag',
+                          //   subtitle: 'Locate Tag',
+                          //   onTap: () => Get.to(() => const FindTagScreen()),
+                          // ),
+                          // const SizedBox(height: 14),
 
                           // Write Card
                           _buildMenuCard(
