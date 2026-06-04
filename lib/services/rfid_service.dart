@@ -1,4 +1,6 @@
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import '../controllers/range_controller.dart';
 
 class RfidService {
   static const MethodChannel _methodChannel = MethodChannel('com.example.event_rfid_app/rfid_channel');
@@ -8,6 +10,14 @@ class RfidService {
   Future<bool> initializeReader() async {
     try {
       final bool result = await _methodChannel.invokeMethod('initializeReader');
+      if (result) {
+        try {
+          final RangeController rangeController = Get.find<RangeController>();
+          await rangeController.applyPersistedPower();
+        } catch (e) {
+          print("Failed to apply persisted power on reader init: $e");
+        }
+      }
       return result;
     } on PlatformException catch (e) {
       print("Failed to initialize reader: '${e.message}'.");
