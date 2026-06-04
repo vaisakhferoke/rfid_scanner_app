@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../services/range_settings_popup.dart';
 import '../../widgets/appbar/home_appbar.dart';
 import 'find_tag_screen.dart';
 import 'write_tag_screen.dart';
@@ -108,6 +109,20 @@ class SettingsPlaceholderScreen extends StatelessWidget {
                             title: 'Write',
                             subtitle: 'write EPC data',
                             onTap: () => Get.to(() => const WriteTagScreen()),
+                          ),
+                          const SizedBox(height: 14),
+
+                          // Range Settings Card
+                          _buildMenuCard(
+                            icon: Icons.sensors_rounded,
+                            iconColor: const Color(0xFF0043A4),
+                            iconBgColor: const Color(0xFFEFF6FF),
+                            title: 'Range Settings',
+                            subtitle: 'Configure RF output power',
+                            onTap: () =>
+                                RangeSettingsPopup.showRangeSettingsSheet(
+                                  context,
+                                ),
                           ),
                           const SizedBox(height: 28),
 
