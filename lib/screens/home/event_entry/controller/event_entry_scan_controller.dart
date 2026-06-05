@@ -1,11 +1,13 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import '../../../../models/rfid_tag.dart';
 import '../../../../services/rfid_service.dart';
 
-class EventEntryScannController extends GetxController {
+class EventEntryScannController extends GetxController
+    with WidgetsBindingObserver {
   final RfidService _rfidService = RfidService();
 
   var isConnected = false.obs;
@@ -25,10 +27,12 @@ class EventEntryScannController extends GetxController {
   StreamSubscription? _tagSubscription;
   Timer? _apiSyncTimer;
   bool _isSyncing = false;
+  bool _showResumeWarning = false;
 
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     _initializeReader();
     _startApiSyncTimer();
     _rfidService.registerPhysicalTriggerCallback(_handlePhysicalTrigger);
@@ -48,9 +52,11 @@ class EventEntryScannController extends GetxController {
     final tag = pendingTags.first;
 
     try {
-      final response = await http.get(
-        Uri.parse('http://192.168.1.43:81/api/event_entry?id=${tag.epc}'),
-      ).timeout(const Duration(seconds: 5));
+      final response = await http
+          .get(
+            Uri.parse('http://192.168.1.43:81/api/event_entry?id=${tag.epc}'),
+          )
+          .timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
         pendingTags.removeAt(0);
@@ -157,6 +163,7 @@ class EventEntryScannController extends GetxController {
       }
     }
     scannedTags.clear();
+    pendingTags.clear();
     tags.clear();
     totalTagsCount.value = 0;
   }
@@ -168,20 +175,23 @@ class EventEntryScannController extends GetxController {
     String cleanEpc = epc.trim().toLowerCase();
 
     // Check if tag is already in pending list or scanned list
-    bool isPending = pendingTags.any((t) => t.epc.trim().toLowerCase() == cleanEpc);
-    bool isScanned = scannedTags.any((t) => t.epc.trim().toLowerCase() == cleanEpc);
+    bool isPending = pendingTags.any(
+      (t) => t.epc.trim().toLowerCase() == cleanEpc,
+    );
+    bool isScanned = scannedTags.any(
+      (t) => t.epc.trim().toLowerCase() == cleanEpc,
+    );
 
     if (!isPending && !isScanned) {
       // Add to pendingTags list
-      pendingTags.add(RfidTag(
-        epc: epc,
-        rssi: rssi,
-        readTime: readTime,
-        count: 1,
-      ));
+      pendingTags.add(
+        RfidTag(epc: epc, rssi: rssi, readTime: readTime, count: 1),
+      );
     } else if (isPending) {
       // If it's already pending, increment count or update RSSI
-      int index = pendingTags.indexWhere((t) => t.epc.trim().toLowerCase() == cleanEpc);
+      int index = pendingTags.indexWhere(
+        (t) => t.epc.trim().toLowerCase() == cleanEpc,
+      );
       if (index != -1) {
         var existing = pendingTags[index];
         pendingTags[index] = RfidTag(
@@ -193,7 +203,9 @@ class EventEntryScannController extends GetxController {
       }
     } else if (isScanned) {
       // If it's already scanned/synced, increment its count in the scanned list
-      int index = scannedTags.indexWhere((t) => t.epc.trim().toLowerCase() == cleanEpc);
+      int index = scannedTags.indexWhere(
+        (t) => t.epc.trim().toLowerCase() == cleanEpc,
+      );
       if (index != -1) {
         var existing = scannedTags[index];
         scannedTags[index] = RfidTag(
@@ -208,7 +220,50 @@ class EventEntryScannController extends GetxController {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (isScanning.value) {
+        stopScan();
+        _showResumeWarning = true;
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      if (_showResumeWarning) {
+        _showResumeWarning = false;
+        Get.dialog(
+          AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                SizedBox(width: 8),
+                Text('Warning'),
+              ],
+            ),
+            content: const Text(
+              'RFID scanning was automatically stopped because the app went to the background.',
+              style: TextStyle(fontSize: 15),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(),
+                child: const Text(
+                  'OK',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  }
+
+  @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
     _tagSubscription?.cancel();
     _apiSyncTimer?.cancel();
     _rfidService.stopInventory();

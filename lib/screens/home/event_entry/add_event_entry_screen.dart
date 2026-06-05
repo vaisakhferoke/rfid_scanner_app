@@ -16,50 +16,60 @@ class AddEventEntryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF213AEC), // Vibrant brand blue/indigo
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Get.back(),
-        ),
-        title: const Text(
-          'Add Event Entry',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
+    return Obx(() {
+      final isScanning = controller.isScanning.value;
+      return PopScope(
+        canPop: !isScanning,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop) return;
+          _handleBackPress(context);
+        },
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            backgroundColor: const Color(0xFF213AEC), // Vibrant brand blue/indigo
+            foregroundColor: Colors.white,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => _handleBackPress(context),
+            ),
+            title: const Text(
+              'Add Event Entry',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+            centerTitle: true,
+            actions: [
+              _buildRangeSettingsButton(context),
+            ],
+          ),
+          body: SafeArea(
+            child: Column(
+              children: [
+                const SizedBox(height: 16),
+                _buildConnectionCard(context),
+                const SizedBox(height: 16),
+                _buildActionButtons(),
+                const SizedBox(height: 12),
+                _buildScanStatus(),
+                const SizedBox(height: 16),
+                _buildTabSelectors(),
+                const SizedBox(height: 16),
+                _buildListHeader(),
+                const SizedBox(height: 4),
+                Expanded(
+                  child: _buildTagList(),
+                ),
+              ],
+            ),
           ),
         ),
-        centerTitle: true,
-        actions: [
-          _buildRangeSettingsButton(context),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 16),
-            _buildConnectionCard(context),
-            const SizedBox(height: 16),
-            _buildActionButtons(),
-            const SizedBox(height: 12),
-            _buildScanStatus(),
-            const SizedBox(height: 16),
-            _buildTabSelectors(),
-            const SizedBox(height: 16),
-            _buildListHeader(),
-            const SizedBox(height: 4),
-            Expanded(
-              child: _buildTagList(),
-            ),
-          ],
-        ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildRangeSettingsButton(BuildContext context) {
@@ -460,9 +470,7 @@ class AddEventEntryScreen extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         itemBuilder: (context, index) {
           final tag = list[index];
-          final timeStr = isPendingSelected
-              ? '--'
-              : DateFormat('hh:mm a').format(tag.readTime).toLowerCase();
+          final timeStr = DateFormat('hh:mm a').format(tag.readTime).toLowerCase();
 
           return Container(
             margin: const EdgeInsets.only(bottom: 10.0),
@@ -527,23 +535,69 @@ class AddEventEntryScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        final timeString = DateFormat('yyyy-MM-dd hh:mm:ss a').format(tag.readTime);
+        // Dynamic attendee generation based on EPC
+        int getIndex(String epcStr) {
+          final digits = RegExp(r'\d+').firstMatch(epcStr)?.group(0);
+          if (digits != null) {
+            return int.tryParse(digits) ?? 0;
+          }
+          return epcStr.hashCode;
+        }
+
+        String stringToHex(String input) {
+          StringBuffer sb = StringBuffer();
+          for (int i = 0; i < input.length; i++) {
+            sb.write(input.codeUnitAt(i).toRadixString(16));
+          }
+          String result = sb.toString();
+          if (result.length < 16) {
+            result = result.padRight(16, '0');
+          }
+          return result;
+        }
+
+        final idx = getIndex(tag.epc);
+        final names = [
+          'John Doe', 'Jane Smith', 'Alice Johnson', 'Bob Brown', 
+          'Charlie Green', 'David White', 'Eva Black', 'Frank Gray', 
+          'Grace Blue', 'Henry Red', 'Ivy Violet', 'Jack Orange', 'Kate Yellow'
+        ];
+        final name = names[idx % names.length];
+
+        final ids = [1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033];
+        final id = ids[idx % ids.length];
+
+        final codes = ['QR-8829-X', 'QR-5541-Y', 'QR-1234-A', 'QR-9876-B', 'QR-4567-C'];
+        final code = codes[idx % codes.length];
+
+        final companies = ['Precision Logistics', 'Tech Innovations', 'Global Trade', 'Vanguard Services', 'Nexus Industries'];
+        final company = companies[idx % companies.length];
+
+        final awards = ['Gold Member', 'Silver Member', 'Bronze Member', 'VIP Member', 'Premium Member'];
+        final award = awards[idx % awards.length];
+
+        final buses = ['B-42', 'B-15', 'B-08', 'B-33', 'B-24'];
+        final bus = buses[idx % buses.length];
+
+        final photoStatuses = ['Completed', 'Pending', 'In Progress'];
+        final photoStatus = photoStatuses[idx % photoStatuses.length];
+
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(24),
           ),
           elevation: 0,
           backgroundColor: Colors.transparent,
           child: Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
               shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(24),
               boxShadow: const [
                 BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 10.0,
+                  color: Colors.black12,
+                  blurRadius: 20.0,
                   offset: Offset(0.0, 10.0),
                 ),
               ],
@@ -552,6 +606,7 @@ class AddEventEntryScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Title & Close Button
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -564,32 +619,95 @@ class AddEventEntryScreen extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, color: Colors.grey),
+                      icon: const Icon(Icons.close, color: Color(0xFF64748B)),
                       onPressed: () => Navigator.of(context).pop(),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),
                   ],
                 ),
-                const Divider(height: 24),
-                _buildDetailRow('EPC:', tag.epc),
-                const SizedBox(height: 8),
-                _buildDetailRow('Display Name:', tag.displayName),
-                const SizedBox(height: 8),
-                _buildDetailRow(
-                  'Status:',
-                  isScanned ? 'Scanned' : 'Pending',
-                  valueColor: isScanned ? const Color(0xFF22C55E) : const Color(0xFFEF4444),
+                const Divider(height: 24, thickness: 1, color: Color(0xFFE2E8F0)),
+                
+                // Avatar & Name Centered
+                Center(
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+                        ),
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/logo/avatar_john_doe.png',
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => const Icon(
+                              Icons.person,
+                              size: 48,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 8),
-                _buildDetailRow('Scan Count:', '${tag.count}'),
-                if (isScanned) ...[
-                  const SizedBox(height: 8),
-                  _buildDetailRow('Last Scan Time:', timeString),
-                  const SizedBox(height: 8),
-                  _buildDetailRow('RSSI Strength:', '${tag.rssi} dBm'),
-                ],
+                const SizedBox(height: 20),
+
+                // Key-Value rows
+                _buildPopupRow('ID:', Text(id.toString(), style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A)))),
+                _buildPopupRow('Code:', Text(code, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A)))),
+                _buildPopupRow('Company Name:', Text(company, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A)))),
+                _buildPopupRow('Check-in Status:', Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isScanned ? const Color(0xFFEEF2FF) : const Color(0xFFFEF2F2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    isScanned ? 'Checked In' : 'Pending',
+                    style: TextStyle(
+                      color: isScanned ? const Color(0xFF213AEC) : const Color(0xFFEF4444),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                )),
+                _buildPopupRow('Check-in Time:', Text(
+                  isScanned ? DateFormat('hh:mm a').format(tag.readTime) : '--',
+                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A))
+                )),
+                _buildPopupRow('Award Status:', Text(
+                  award,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFFDC2626))
+                )),
+                _buildPopupRow('Photobooth Status:', Text(
+                  photoStatus,
+                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A))
+                )),
+                _buildPopupRow('Bus No:', Text(
+                  bus,
+                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A))
+                )),
+                _buildPopupRow('IFID:', Text(
+                  stringToHex(tag.epc),
+                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A))
+                )),
+
                 const SizedBox(height: 24),
+                
+                // Close Button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -601,11 +719,11 @@ class AddEventEntryScreen extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     child: const Text(
                       'Close',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                     ),
                   ),
                 ),
@@ -617,32 +735,76 @@ class AddEventEntryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value, {Color? valueColor}) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
+  Widget _buildPopupRow(String label, Widget valueWidget) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
             label,
             style: const TextStyle(
-              fontWeight: FontWeight.w600,
+              fontSize: 14,
               color: Color(0xFF64748B),
-              fontSize: 14,
+              fontWeight: FontWeight.w500,
             ),
           ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: valueColor ?? const Color(0xFF0F172A),
-              fontSize: 14,
-            ),
-          ),
-        ),
-      ],
+          valueWidget,
+        ],
+      ),
     );
+  }
+
+  void _handleBackPress(BuildContext context) {
+    if (controller.isScanning.value) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: Colors.red),
+                SizedBox(width: 8),
+                Text('Warning'),
+              ],
+            ),
+            content: const Text(
+              'Scanning is currently running. You want to close this screen? Please stop scanning first.',
+              style: TextStyle(fontSize: 15),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(), // Close dialog
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.of(context).pop(); // Close dialog
+                  await controller.stopScan(); // Stop scanning
+                  Get.back(); // Go back
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFEF4444),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text('Stop & Exit'),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      Get.back();
+    }
   }
 }
