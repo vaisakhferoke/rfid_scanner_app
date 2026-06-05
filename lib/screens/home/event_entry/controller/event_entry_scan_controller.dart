@@ -8,6 +8,15 @@ class EventEntryScannController extends GetxController {
 
   var isConnected = false.obs;
   var isScanning = false.obs;
+
+  // Tab index: 0 for Pending, 1 for Scanned
+  var selectedTab = 0.obs;
+
+  // Track pending and scanned tags
+  var pendingTags = <RfidTag>[].obs;
+  var scannedTags = <RfidTag>[].obs;
+
+  // Backwards compatibility list
   var tags = <RfidTag>[].obs;
   var totalTagsCount = 0.obs;
 
@@ -17,6 +26,7 @@ class EventEntryScannController extends GetxController {
   void onInit() {
     super.onInit();
     _initializeReader();
+
     _rfidService.registerPhysicalTriggerCallback(_handlePhysicalTrigger);
   }
 
@@ -70,7 +80,20 @@ class EventEntryScannController extends GetxController {
     isConnected.value = connected;
   }
 
+  // Clear resets scanned to 0 and all to Pending
   void clearData() {
+    // Move all scanned tags to pending
+    for (var tag in scannedTags) {
+      // Avoid duplicates in pending
+      if (!pendingTags.any(
+        (t) => t.epc.trim().toLowerCase() == tag.epc.trim().toLowerCase(),
+      )) {
+        pendingTags.add(
+          RfidTag(epc: tag.epc, rssi: 0, readTime: DateTime.now(), count: 0),
+        );
+      }
+    }
+    scannedTags.clear();
     tags.clear();
     totalTagsCount.value = 0;
   }
@@ -78,31 +101,53 @@ class EventEntryScannController extends GetxController {
   void _handleTagEvent(Map<String, dynamic> event) {
     String epc = event['epc'];
     int rssi = event['rssi'];
-    // For simplicity, we just use current time for readTime
     DateTime readTime = DateTime.now();
+    String cleanEpc = epc.trim().toLowerCase();
 
-    // Check if tag already exists in the list
-    int existingIndex = tags.indexWhere((tag) => tag.epc == epc);
+    // Check if tag is in pending list
+    int pendingIndex = pendingTags.indexWhere(
+      (t) => t.epc.trim().toLowerCase() == cleanEpc,
+    );
 
-    if (existingIndex != -1) {
-      // Duplicate tag: update count and rssi
-      var existingTag = tags[existingIndex];
-      existingTag.count++;
-      // We'll replace the old tag object to trigger GetX reactivity nicely,
-      // or we could use .refresh() on the list.
-      tags[existingIndex] = RfidTag(
-        epc: existingTag.epc,
-        rssi: rssi, // update with latest rssi
-        readTime: readTime, // update with latest readTime
-        count: existingTag.count,
+    if (pendingIndex != -1) {
+      // It's in pending! Move it to scanned
+      var pendingTag = pendingTags[pendingIndex];
+      pendingTags.removeAt(pendingIndex);
+
+      var newScannedTag = RfidTag(
+        epc: pendingTag.epc,
+        rssi: rssi,
+        readTime: readTime,
+        count: 1,
       );
+      scannedTags.insert(0, newScannedTag); // insert at top of scanned list
     } else {
-      // New tag
-      tags.add(RfidTag(epc: epc, rssi: rssi, readTime: readTime));
+      // Check if tag already exists in scanned list
+      int existingIndex = scannedTags.indexWhere(
+        (tag) => tag.epc.trim().toLowerCase() == cleanEpc,
+      );
+
+      if (existingIndex != -1) {
+        // Duplicate tag in scanned list: update count and rssi
+        var existingTag = scannedTags[existingIndex];
+        scannedTags[existingIndex] = RfidTag(
+          epc: existingTag.epc,
+          rssi: rssi,
+          readTime: readTime,
+          count: existingTag.count + 1,
+        );
+      } else {
+        // Completely new tag not in pending: add to scanned list
+        scannedTags.insert(
+          0,
+          RfidTag(epc: epc, rssi: rssi, readTime: readTime, count: 1),
+        );
+      }
     }
 
-    // Update total read count (this counts every single scan event, or could just be tags.length for unique tags. Based on instructions: "Total Tags Count" usually means unique tags count, but sometimes total read counts. I will use tags.length for unique.)
-    totalTagsCount.value = tags.length;
+    // Keep tags list and total count synchronized for compatibility
+    tags.assignAll(scannedTags);
+    totalTagsCount.value = scannedTags.length;
   }
 
   @override

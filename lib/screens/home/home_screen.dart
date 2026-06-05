@@ -1,4 +1,4 @@
-import 'package:event_rfid_app/screens/home/event_entry/event_entry_scans_screen.dart';
+import 'package:event_rfid_app/screens/home/event_entry/add_event_entry_screen.dart';
 import 'package:event_rfid_app/widgets/appbar/home_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -55,7 +55,7 @@ class HomeScreen extends StatelessWidget {
                                 'assets/logo/event_logo.png',
                                 height: 45,
                                 fit: BoxFit.contain,
-                                 errorBuilder: (context, error, stackTrace) {
+                                errorBuilder: (context, error, stackTrace) {
                                   return const Text(
                                     'VKC Global Confluence 2026',
                                     style: TextStyle(
@@ -235,15 +235,13 @@ class HomeScreen extends StatelessWidget {
                 title: 'Event Entry Scan',
                 subtitle: '100/100',
                 onTap: () {
-                  Get.to(() => EventEntryScansScreen());
+                  Get.to(() => AddEventEntryScreen());
                 },
-                onViewClick: () {},
               ),
             ),
             const SizedBox(width: 14),
             Expanded(
               child: _buildQuickActionCard(
-                onViewClick: () {},
                 icon: Icons.directions_bus,
                 iconColor: const Color(0xFF0043A4),
                 iconBgColor: const Color(0xFFEFF6FF),
@@ -262,7 +260,7 @@ class HomeScreen extends StatelessWidget {
           title: 'Onward Scan',
           subtitle: '81/70',
           onTap: () {},
-          onViewClick: () {},
+
           isFullWidth: true,
         ),
       ],
@@ -276,7 +274,7 @@ class HomeScreen extends StatelessWidget {
     required String title,
     required String subtitle,
     required VoidCallback onTap,
-    required VoidCallback onViewClick,
+
     bool isFullWidth = false,
   }) {
     return InkWell(
@@ -335,32 +333,6 @@ class HomeScreen extends StatelessWidget {
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      ElevatedButton(
-                        onPressed: onViewClick,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0043A4),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
-                          ),
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          elevation: 0,
-                        ),
-                        child: const Text(
-                          'View',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Inter',
-                          ),
                         ),
                       ),
                     ],

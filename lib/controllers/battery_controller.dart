@@ -81,8 +81,12 @@ class BatteryController extends GetxController {
 
   @override
   void onClose() {
-    _stateSubscription?.cancel();
-    _pollingTimer?.cancel();
+    try {
+      _stateSubscription?.cancel();
+    } catch (_) {}
+    try {
+      _pollingTimer?.cancel();
+    } catch (_) {}
     super.onClose();
   }
 }
