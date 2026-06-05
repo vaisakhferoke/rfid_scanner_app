@@ -47,22 +47,29 @@ class HomeScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'VKC Event – 2025–2026',
-                                style: TextStyle(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF0F172A),
-                                  fontFamily: 'Inter',
-                                ),
+                              Image.asset(
+                                'assets/logo/event_logo.png',
+                                height: 45,
+                                fit: BoxFit.contain,
+                                 errorBuilder: (context, error, stackTrace) {
+                                  return const Text(
+                                    'VKC Global Confluence 2026',
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF0F172A),
+                                      fontFamily: 'Inter',
+                                    ),
+                                  );
+                                },
                               ),
-                              SizedBox(height: 6),
-                              Text(
-                                'Kerala, Kozhikode , Pin: 673001',
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Phuket, Thailand | June 16 - 20, 2026',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color(0xFF64748B),

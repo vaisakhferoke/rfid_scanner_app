@@ -9,7 +9,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -101,10 +102,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       );
                     },
                     child: Container(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                      margin: const EdgeInsets.symmetric(horizontal: 32),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.15),
@@ -114,32 +119,32 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           ),
                         ],
                       ),
-                      child: ClipOval(
-                        child: Image.asset(
-                          'assets/logo/app_logo.png',
-                          width: 110,
-                          height: 110,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) {
-                            // Fallback in case of asset loading issues
-                            return Container(
-                              width: 110,
-                              height: 110,
-                              color: const Color(0xFFE31E24), // VKC brand red
-                              child: const Center(
-                                child: Text(
-                                  'VKC',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 1.5,
-                                  ),
+                      child: Image.asset(
+                        'assets/logo/event_logo.png',
+                        width: 280,
+                        height: 90,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          // Fallback in case of asset loading issues
+                          return Container(
+                            width: 280,
+                            height: 90,
+                            color: const Color(0xFFE31E24), // VKC brand red
+                            child: const Center(
+                              child: Text(
+                                'VKC GLOBAL CONFLUENCE 2026',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1.0,
+                                  fontFamily: 'Inter',
                                 ),
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -169,11 +174,22 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         ),
                         SizedBox(height: 8),
                         Text(
-                          'VKC Event Management',
+                          'VKC Global Confluence 2026',
                           style: TextStyle(
                             color: Color(0xFF93C5FD),
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
+                            letterSpacing: 0.5,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Phuket | June 16 - 20, 2026',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
                             letterSpacing: 0.5,
                             fontFamily: 'Inter',
                           ),
@@ -184,21 +200,19 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 ],
               ),
             ),
-            // Bottom loading status
+            // Bottom loading status and git DGTL developer logo
             Positioned(
-              bottom: 60,
+              bottom: 40,
               left: 0,
               right: 0,
               child: Center(
                 child: AnimatedBuilder(
                   animation: _controller,
                   builder: (context, child) {
-                    return Opacity(
-                      opacity: _fadeAnimation.value,
-                      child: child,
-                    );
+                    return Opacity(opacity: _fadeAnimation.value, child: child);
                   },
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       SizedBox(
                         width: 22,
@@ -218,6 +232,51 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           fontSize: 12,
                           letterSpacing: 0.5,
                           fontFamily: 'Inter',
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      Text(
+                        'Powered by',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.5),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1.0,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Image.asset(
+                          'assets/logo/git_logo.png',
+                          height: 25,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Text(
+                              'git DGTL',
+                              style: TextStyle(
+                                color: Color(0xFF0F172A),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                fontFamily: 'Inter',
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
