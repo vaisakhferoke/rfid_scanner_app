@@ -1,163 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../models/location_model.dart';
-import '../../config/api_config.dart';
-import '../../repository/location_repository.dart';
+import '../../controllers/location_master_controller.dart';
 
-class LocationMasterScreen extends StatefulWidget {
+class LocationMasterScreen extends GetView<LocationMasterController> {
   const LocationMasterScreen({super.key});
 
-  @override
-  State<LocationMasterScreen> createState() => _LocationMasterScreenState();
-}
-
-class _LocationMasterScreenState extends State<LocationMasterScreen> {
-  final LocationRepository _locationRepository = LocationRepository();
-
-  String _baseUrl = '';
-  bool _isLoading = false;
-  List<LocationModel> _locations = [];
-  List<LocationModel> _filteredLocations = [];
-  final TextEditingController _searchController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _loadBaseUrlAndFetch();
-  }
-
-  Future<void> _loadBaseUrlAndFetch() async {
-    final baseUrl = await ApiConfig.getBaseUrl();
-    setState(() {
-      _baseUrl = baseUrl;
-    });
-    _fetchLocations();
-  }
-
-  Future<void> _fetchLocations() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final list = await _locationRepository.fetchLocations();
-      setState(() {
-        _locations = list;
-        _filterLocations(_searchController.text);
-      });
-    } catch (e) {
-      debugPrint('Error fetching locations: $e');
-      _showErrorSnackbar(e.toString().replaceAll('Exception: ', ''));
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  void _filterLocations(String query) {
-    if (query.isEmpty) {
-      setState(() {
-        _filteredLocations = List.from(_locations);
-      });
-      return;
-    }
-
-    final lowerQuery = query.toLowerCase();
-    setState(() {
-      _filteredLocations = _locations.where((loc) {
-        return loc.name.toLowerCase().contains(lowerQuery);
-      }).toList();
-    });
-  }
-
-  Future<void> _saveLocation({
-    required String type, // 'add' or 'edit'
-    String? id,
-    required String name,
-  }) async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      bool success = false;
-      if (type == 'add') {
-        success = await _locationRepository.addLocation(name: name);
-      } else if (type == 'edit' && id != null) {
-        success = await _locationRepository.editLocation(id: id, name: name);
-      }
-
-      if (success) {
-        Get.snackbar(
-          'Success',
-          'Location ${type == 'add' ? 'added' : 'updated'} successfully!',
-          backgroundColor: const Color(0xFF10B981),
-          colorText: Colors.white,
-          borderRadius: 12,
-          margin: const EdgeInsets.all(16),
-        );
-        _fetchLocations();
-      }
-    } catch (e) {
-      debugPrint('Error saving location: $e');
-      _showErrorSnackbar(e.toString().replaceAll('Exception: ', ''));
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _deleteLocation(String id) async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      bool success = await _locationRepository.deleteLocation(id);
-      if (success) {
-        Get.snackbar(
-          'Success',
-          'Location deleted successfully!',
-          backgroundColor: const Color(0xFF10B981),
-          colorText: Colors.white,
-          borderRadius: 12,
-          margin: const EdgeInsets.all(16),
-        );
-        _fetchLocations();
-      }
-    } catch (e) {
-      debugPrint('Error deleting location: $e');
-      _showErrorSnackbar(e.toString().replaceAll('Exception: ', ''));
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  void _showErrorSnackbar(String message) {
-    Get.snackbar(
-      'Error',
-      message,
-      backgroundColor: const Color(0xFFEF4444),
-      colorText: Colors.white,
-      borderRadius: 12,
-      margin: const EdgeInsets.all(16),
-      icon: const Icon(Icons.error_outline_rounded, color: Colors.white),
-      duration: const Duration(seconds: 4),
+  void _showBaseUrlConfigDialog(BuildContext context) {
+    final textController = TextEditingController(
+      text: controller.baseUrl.value,
     );
-  }
-
-  void _showBaseUrlConfigDialog() {
-    final controller = TextEditingController(text: _baseUrl);
     showDialog(
       context: context,
       builder: (context) {
@@ -196,7 +48,7 @@ class _LocationMasterScreenState extends State<LocationMasterScreen> {
               ),
               const SizedBox(height: 12),
               TextField(
-                controller: controller,
+                controller: textController,
                 decoration: InputDecoration(
                   hintText: 'e.g. http://newtest.vkcparivar.com/api/',
                   border: OutlineInputBorder(
@@ -227,17 +79,11 @@ class _LocationMasterScreenState extends State<LocationMasterScreen> {
               ),
             ),
             ElevatedButton(
-              onPressed: () async {
-                String inputUrl = controller.text.trim();
+              onPressed: () {
+                String inputUrl = textController.text.trim();
                 if (inputUrl.isNotEmpty) {
-                  await ApiConfig.setBaseUrl(inputUrl);
-                  setState(() {
-                    _baseUrl = inputUrl;
-                  });
-                  if (context.mounted) {
-                    Navigator.pop(context);
-                  }
-                  _fetchLocations();
+                  controller.updateBaseUrl(inputUrl);
+                  Navigator.pop(context);
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -261,7 +107,7 @@ class _LocationMasterScreenState extends State<LocationMasterScreen> {
     );
   }
 
-  void _showFormDialog({LocationModel? location}) {
+  void _showFormDialog(BuildContext context, {LocationModel? location}) {
     final formKey = GlobalKey<FormState>();
     final nameController = TextEditingController(text: location?.name ?? '');
 
@@ -339,7 +185,7 @@ class _LocationMasterScreenState extends State<LocationMasterScreen> {
               onPressed: () {
                 if (formKey.currentState!.validate()) {
                   Navigator.pop(context);
-                  _saveLocation(
+                  controller.saveLocation(
                     type: location == null ? 'add' : 'edit',
                     id: location?.id,
                     name: nameController.text.trim(),
@@ -367,7 +213,7 @@ class _LocationMasterScreenState extends State<LocationMasterScreen> {
     );
   }
 
-  void _confirmDeleteDialog(LocationModel location) {
+  void _confirmDeleteDialog(BuildContext context, LocationModel location) {
     showDialog(
       context: context,
       builder: (context) {
@@ -408,7 +254,7 @@ class _LocationMasterScreenState extends State<LocationMasterScreen> {
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context);
-                _deleteLocation(location.id);
+                controller.deleteLocation(location.id);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFEF4444),
@@ -456,7 +302,7 @@ class _LocationMasterScreenState extends State<LocationMasterScreen> {
           IconButton(
             icon: const Icon(Icons.settings_input_component_rounded),
             tooltip: 'Server Settings',
-            onPressed: _showBaseUrlConfigDialog,
+            onPressed: () => _showBaseUrlConfigDialog(context),
           ),
         ],
       ),
@@ -487,64 +333,30 @@ class _LocationMasterScreenState extends State<LocationMasterScreen> {
                   ),
                   child: Column(
                     children: [
-                      // Active Base Url display
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.link,
-                            size: 16,
-                            color: Color(0xFF64748B),
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              'Server: $_baseUrl',
-                              style: const TextStyle(
-                                fontFamily: 'monospace',
-                                fontSize: 11,
-                                color: Color(0xFF64748B),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          InkWell(
-                            onTap: _showBaseUrlConfigDialog,
-                            child: const Text(
-                              'Change',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0043A4),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
                       // Search field
                       TextField(
-                        controller: _searchController,
-                        onChanged: _filterLocations,
+                        controller: controller.searchController,
+                        onChanged: controller.filterLocations,
                         decoration: InputDecoration(
                           hintText: 'Search by location name...',
                           prefixIcon: const Icon(
                             Icons.search_rounded,
                             color: Color(0xFF64748B),
                           ),
-                          suffixIcon: _searchController.text.isNotEmpty
-                              ? IconButton(
-                                  icon: const Icon(
-                                    Icons.clear,
-                                    color: Color(0xFF64748B),
-                                  ),
-                                  onPressed: () {
-                                    _searchController.clear();
-                                    _filterLocations('');
-                                  },
-                                )
-                              : null,
+                          suffixIcon: Obx(
+                            () => controller.searchQuery.value.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(
+                                      Icons.clear,
+                                      color: Color(0xFF64748B),
+                                    ),
+                                    onPressed: () {
+                                      controller.searchController.clear();
+                                      controller.filterLocations('');
+                                    },
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
                           filled: true,
                           fillColor: const Color(0xFFF1F5F9),
                           border: OutlineInputBorder(
@@ -572,154 +384,160 @@ class _LocationMasterScreenState extends State<LocationMasterScreen> {
                 // Location List area
                 Expanded(
                   child: RefreshIndicator(
-                    onRefresh: _fetchLocations,
+                    onRefresh: controller.fetchLocations,
                     color: const Color(0xFF0043A4),
-                    child: _isLoading && _locations.isEmpty
-                        ? const Center(
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Color(0xFF0043A4),
+                    child: Obx(() {
+                      if (controller.isLoading.value &&
+                          controller.locations.isEmpty) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Color(0xFF0043A4),
+                            ),
+                          ),
+                        );
+                      }
+
+                      if (controller.filteredLocations.isEmpty) {
+                        return ListView(
+                          children: [
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.2,
+                            ),
+                            const Center(
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.location_off_rounded,
+                                    size: 72,
+                                    color: Color(0xFFCBD5E1),
+                                  ),
+                                  SizedBox(height: 16),
+                                  Text(
+                                    'No Locations Found',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF64748B),
+                                    ),
+                                  ),
+                                  SizedBox(height: 6),
+                                  Text(
+                                    'Pull down to refresh or add a new location.',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 12,
+                                      color: Color(0xFF94A3B8),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          )
-                        : _filteredLocations.isEmpty
-                        ? ListView(
-                            children: [
-                              SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.2,
-                              ),
-                              const Center(
-                                child: Column(
-                                  children: [
-                                    Icon(
-                                      Icons.location_off_rounded,
-                                      size: 72,
-                                      color: Color(0xFFCBD5E1),
-                                    ),
-                                    SizedBox(height: 16),
-                                    Text(
-                                      'No Locations Found',
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF64748B),
-                                      ),
-                                    ),
-                                    SizedBox(height: 6),
-                                    Text(
-                                      'Pull down to refresh or add a new location.',
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontSize: 12,
-                                        color: Color(0xFF94A3B8),
-                                      ),
-                                    ),
-                                  ],
+                          ],
+                        );
+                      }
+
+                      return ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        itemCount: controller.filteredLocations.length,
+                        itemBuilder: (context, index) {
+                          final location = controller.filteredLocations[index];
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(
+                                    0xFF0F172A,
+                                  ).withOpacity(0.03),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
                                 ),
-                              ),
-                            ],
-                          )
-                        : ListView.builder(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
+                              ],
                             ),
-                            itemCount: _filteredLocations.length,
-                            itemBuilder: (context, index) {
-                              final location = _filteredLocations[index];
-                              return Container(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  boxShadow: [
-                                    BoxShadow(
+                            child: Padding(
+                              padding: const EdgeInsets.all(14),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
                                       color: const Color(
-                                        0xFF0F172A,
-                                      ).withOpacity(0.03),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
+                                        0xFF0043A4,
+                                      ).withOpacity(0.08),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                  ],
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(14),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: const Color(
-                                            0xFF0043A4,
-                                          ).withOpacity(0.08),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
+                                    child: const Icon(
+                                      Icons.location_on_rounded,
+                                      color: Color(0xFF0043A4),
+                                      size: 24,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          location.name,
+                                          style: const TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF0F172A),
                                           ),
                                         ),
-                                        child: const Icon(
-                                          Icons.location_on_rounded,
-                                          color: Color(0xFF0043A4),
-                                          size: 24,
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          'ID: ${location.id}',
+                                          style: const TextStyle(
+                                            fontFamily: 'monospace',
+                                            fontSize: 11,
+                                            color: Color(0xFF94A3B8),
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 14),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              location.name,
-                                              style: const TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                                color: Color(0xFF0F172A),
-                                              ),
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              'ID: ${location.id}',
-                                              style: const TextStyle(
-                                                fontFamily: 'monospace',
-                                                fontSize: 11,
-                                                color: Color(0xFF94A3B8),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.edit_rounded,
-                                          color: Color(0xFF94A3B8),
-                                          size: 20,
-                                        ),
-                                        onPressed: () =>
-                                            _showFormDialog(location: location),
-                                        constraints: const BoxConstraints(),
-                                        padding: const EdgeInsets.all(6),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.delete_outline_rounded,
-                                          color: Color(0xFFEF4444),
-                                          size: 20,
-                                        ),
-                                        onPressed: () =>
-                                            _confirmDeleteDialog(location),
-                                        constraints: const BoxConstraints(),
-                                        padding: const EdgeInsets.all(6),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.edit_rounded,
+                                      color: Color(0xFF94A3B8),
+                                      size: 20,
+                                    ),
+                                    onPressed: () => _showFormDialog(
+                                      context,
+                                      location: location,
+                                    ),
+                                    constraints: const BoxConstraints(),
+                                    padding: const EdgeInsets.all(6),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete_outline_rounded,
+                                      color: Color(0xFFEF4444),
+                                      size: 20,
+                                    ),
+                                    onPressed: () =>
+                                        _confirmDeleteDialog(context, location),
+                                    constraints: const BoxConstraints(),
+                                    padding: const EdgeInsets.all(6),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    }),
                   ),
                 ),
               ],
@@ -728,7 +546,7 @@ class _LocationMasterScreenState extends State<LocationMasterScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showFormDialog(),
+        onPressed: () => _showFormDialog(context),
         backgroundColor: const Color(0xFF0043A4),
         foregroundColor: Colors.white,
         elevation: 4,

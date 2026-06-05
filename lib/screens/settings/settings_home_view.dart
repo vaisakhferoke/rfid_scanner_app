@@ -5,6 +5,8 @@ import '../../widgets/appbar/home_appbar.dart';
 import 'write_tag_screen.dart';
 import 'vehicle_master_screen.dart';
 import 'location_master_screen.dart';
+import '../../controllers/vehicle_master_controller.dart';
+import '../../controllers/location_master_controller.dart';
 
 class SettingsPlaceholderScreen extends StatelessWidget {
   const SettingsPlaceholderScreen({super.key});
@@ -145,7 +147,10 @@ class SettingsPlaceholderScreen extends StatelessWidget {
                             iconBgColor: const Color(0xFFEFF6FF),
                             title: 'Vehicle Master',
                             subtitle: 'Manage vehicles and dropdown options',
-                            onTap: () => Get.to(() => const VehicleMasterScreen()),
+                            onTap: () {
+                              Get.put(VehicleMasterController());
+                              Get.to(() => const VehicleMasterScreen());
+                            },
                           ),
                           const SizedBox(height: 14),
 
@@ -156,7 +161,10 @@ class SettingsPlaceholderScreen extends StatelessWidget {
                             iconBgColor: const Color(0xFFEFF6FF),
                             title: 'Location Master',
                             subtitle: 'Manage trip checkpoint locations',
-                            onTap: () => Get.to(() => const LocationMasterScreen()),
+                            onTap: () {
+                              Get.put(LocationMasterController());
+                              Get.to(() => const LocationMasterScreen());
+                            },
                           ),
                           const SizedBox(height: 28),
 
