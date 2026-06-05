@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import '../../../../models/rfid_tag.dart';
 import '../../../../services/rfid_service.dart';
 
@@ -21,13 +23,74 @@ class EventEntryScannController extends GetxController {
   var totalTagsCount = 0.obs;
 
   StreamSubscription? _tagSubscription;
+  Timer? _apiSyncTimer;
+  bool _isSyncing = false;
 
   @override
   void onInit() {
     super.onInit();
     _initializeReader();
-
+    _startApiSyncTimer();
     _rfidService.registerPhysicalTriggerCallback(_handlePhysicalTrigger);
+  }
+
+  void _startApiSyncTimer() {
+    _apiSyncTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      _processNextPendingTag();
+    });
+  }
+
+  Future<void> _processNextPendingTag() async {
+    if (_isSyncing) return;
+    if (pendingTags.isEmpty) return;
+
+    _isSyncing = true;
+    final tag = pendingTags.first;
+
+    try {
+      final response = await http.get(
+        Uri.parse('http://192.168.1.43:81/api/event_entry?id=${tag.epc}'),
+      ).timeout(const Duration(seconds: 5));
+
+      if (response.statusCode == 200) {
+        pendingTags.removeAt(0);
+
+        // Check if tag already exists in scannedTags
+        int existingIndex = scannedTags.indexWhere(
+          (t) => t.epc.trim().toLowerCase() == tag.epc.trim().toLowerCase(),
+        );
+
+        if (existingIndex != -1) {
+          var existingTag = scannedTags[existingIndex];
+          scannedTags[existingIndex] = RfidTag(
+            epc: existingTag.epc,
+            rssi: tag.rssi > 0 ? tag.rssi : existingTag.rssi,
+            readTime: DateTime.now(),
+            count: existingTag.count + tag.count,
+          );
+        } else {
+          scannedTags.insert(
+            0,
+            RfidTag(
+              epc: tag.epc,
+              rssi: tag.rssi,
+              readTime: DateTime.now(),
+              count: tag.count,
+            ),
+          );
+        }
+
+        // Keep tags list and total count synchronized for compatibility
+        tags.assignAll(scannedTags);
+        totalTagsCount.value = scannedTags.length;
+      } else {
+        debugPrint('Failed to sync tag ${tag.epc}: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error syncing tag ${tag.epc}: $e');
+    } finally {
+      _isSyncing = false;
+    }
   }
 
   Future<void> _initializeReader() async {
@@ -104,55 +167,50 @@ class EventEntryScannController extends GetxController {
     DateTime readTime = DateTime.now();
     String cleanEpc = epc.trim().toLowerCase();
 
-    // Check if tag is in pending list
-    int pendingIndex = pendingTags.indexWhere(
-      (t) => t.epc.trim().toLowerCase() == cleanEpc,
-    );
+    // Check if tag is already in pending list or scanned list
+    bool isPending = pendingTags.any((t) => t.epc.trim().toLowerCase() == cleanEpc);
+    bool isScanned = scannedTags.any((t) => t.epc.trim().toLowerCase() == cleanEpc);
 
-    if (pendingIndex != -1) {
-      // It's in pending! Move it to scanned
-      var pendingTag = pendingTags[pendingIndex];
-      pendingTags.removeAt(pendingIndex);
-
-      var newScannedTag = RfidTag(
-        epc: pendingTag.epc,
+    if (!isPending && !isScanned) {
+      // Add to pendingTags list
+      pendingTags.add(RfidTag(
+        epc: epc,
         rssi: rssi,
         readTime: readTime,
         count: 1,
-      );
-      scannedTags.insert(0, newScannedTag); // insert at top of scanned list
-    } else {
-      // Check if tag already exists in scanned list
-      int existingIndex = scannedTags.indexWhere(
-        (tag) => tag.epc.trim().toLowerCase() == cleanEpc,
-      );
-
-      if (existingIndex != -1) {
-        // Duplicate tag in scanned list: update count and rssi
-        var existingTag = scannedTags[existingIndex];
-        scannedTags[existingIndex] = RfidTag(
-          epc: existingTag.epc,
+      ));
+    } else if (isPending) {
+      // If it's already pending, increment count or update RSSI
+      int index = pendingTags.indexWhere((t) => t.epc.trim().toLowerCase() == cleanEpc);
+      if (index != -1) {
+        var existing = pendingTags[index];
+        pendingTags[index] = RfidTag(
+          epc: existing.epc,
           rssi: rssi,
           readTime: readTime,
-          count: existingTag.count + 1,
-        );
-      } else {
-        // Completely new tag not in pending: add to scanned list
-        scannedTags.insert(
-          0,
-          RfidTag(epc: epc, rssi: rssi, readTime: readTime, count: 1),
+          count: existing.count + 1,
         );
       }
+    } else if (isScanned) {
+      // If it's already scanned/synced, increment its count in the scanned list
+      int index = scannedTags.indexWhere((t) => t.epc.trim().toLowerCase() == cleanEpc);
+      if (index != -1) {
+        var existing = scannedTags[index];
+        scannedTags[index] = RfidTag(
+          epc: existing.epc,
+          rssi: rssi,
+          readTime: readTime,
+          count: existing.count + 1,
+        );
+        tags.assignAll(scannedTags);
+      }
     }
-
-    // Keep tags list and total count synchronized for compatibility
-    tags.assignAll(scannedTags);
-    totalTagsCount.value = scannedTags.length;
   }
 
   @override
   void onClose() {
     _tagSubscription?.cancel();
+    _apiSyncTimer?.cancel();
     _rfidService.stopInventory();
     super.onClose();
   }
