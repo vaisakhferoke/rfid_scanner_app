@@ -57,7 +57,7 @@ class VehicleRepository {
     return _parseStatusResponse(response);
   }
 
-  bool _parseStatusResponse(httpResponse) {
+  bool _parseStatusResponse(dynamic httpResponse) {
     if (httpResponse.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(httpResponse.body);
       if (data['status'] == true || data['status'] == 'true') {

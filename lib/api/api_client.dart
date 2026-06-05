@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 
 class ApiClient {
-  static const Duration _timeoutDuration = Duration(seconds: 10);
+  static const Duration _timeoutDuration = Duration(seconds: 20);
 
   static Future<http.Response> get(String path) async {
     final String baseUrl = await ApiConfig.getBaseUrl();

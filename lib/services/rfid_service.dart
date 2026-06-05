@@ -1,10 +1,15 @@
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import '../controllers/range_controller.dart';
 
 class RfidService {
-  static const MethodChannel _methodChannel = MethodChannel('com.example.event_rfid_app/rfid_channel');
-  static const EventChannel _eventChannel = EventChannel('com.example.event_rfid_app/rfid_events');
+  static const MethodChannel _methodChannel = MethodChannel(
+    'com.example.event_rfid_app/rfid_channel',
+  );
+  static const EventChannel _eventChannel = EventChannel(
+    'com.example.event_rfid_app/rfid_events',
+  );
 
   // Initialize the reader
   Future<bool> initializeReader() async {
@@ -15,12 +20,12 @@ class RfidService {
           final RangeController rangeController = Get.find<RangeController>();
           await rangeController.applyPersistedPower();
         } catch (e) {
-          print("Failed to apply persisted power on reader init: $e");
+          debugPrint("Failed to apply persisted power on reader init: $e");
         }
       }
       return result;
     } on PlatformException catch (e) {
-      print("Failed to initialize reader: '${e.message}'.");
+      debugPrint("Failed to initialize reader: '${e.message}'.");
       return false;
     }
   }
@@ -28,10 +33,12 @@ class RfidService {
   // Check connection status
   Future<bool> checkConnectionStatus() async {
     try {
-      final bool result = await _methodChannel.invokeMethod('checkConnectionStatus');
+      final bool result = await _methodChannel.invokeMethod(
+        'checkConnectionStatus',
+      );
       return result;
     } on PlatformException catch (e) {
-      print("Failed to check connection status: '${e.message}'.");
+      debugPrint("Failed to check connection status: '${e.message}'.");
       return false;
     }
   }
@@ -42,7 +49,7 @@ class RfidService {
       final bool result = await _methodChannel.invokeMethod('startInventory');
       return result;
     } on PlatformException catch (e) {
-      print("Failed to start inventory: '${e.message}'.");
+      debugPrint("Failed to start inventory: '${e.message}'.");
       return false;
     }
   }
@@ -53,7 +60,7 @@ class RfidService {
       final bool result = await _methodChannel.invokeMethod('stopInventory');
       return result;
     } on PlatformException catch (e) {
-      print("Failed to stop inventory: '${e.message}'.");
+      debugPrint("Failed to stop inventory: '${e.message}'.");
       return false;
     }
   }
@@ -76,7 +83,7 @@ class RfidService {
       });
       return result;
     } on PlatformException catch (e) {
-      print("Failed to write tag: '${e.message}'.");
+      debugPrint("Failed to write tag: '${e.message}'.");
       return false;
     }
   }
@@ -87,7 +94,7 @@ class RfidService {
       final int result = await _methodChannel.invokeMethod('getPower');
       return result;
     } on PlatformException catch (e) {
-      print("Failed to get power: '${e.message}'.");
+      debugPrint("Failed to get power: '${e.message}'.");
       return 30; // default fallback
     }
   }
@@ -95,10 +102,12 @@ class RfidService {
   // Set reader RF power (5-33 dBm)
   Future<bool> setPower(int power) async {
     try {
-      final bool result = await _methodChannel.invokeMethod('setPower', {'power': power});
+      final bool result = await _methodChannel.invokeMethod('setPower', {
+        'power': power,
+      });
       return result;
     } on PlatformException catch (e) {
-      print("Failed to set power: '${e.message}'.");
+      debugPrint("Failed to set power: '${e.message}'.");
       return false;
     }
   }

@@ -1,5 +1,3 @@
-import 'package:event_rfid_app/controllers/range_controller.dart';
-import 'package:event_rfid_app/services/range_settings_popup.dart';
 import 'package:event_rfid_app/widgets/common_widgets/range_settings_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
