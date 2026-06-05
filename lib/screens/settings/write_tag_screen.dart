@@ -387,7 +387,7 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
                                   onPressed: () => _epcController.clear(),
                                 ),
                               ),
-                              maxLength: 24,
+
                               keyboardType: TextInputType.text,
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {

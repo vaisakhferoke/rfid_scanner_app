@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../services/range_settings_popup.dart';
 import '../../widgets/appbar/home_appbar.dart';
-import 'find_tag_screen.dart';
 import 'write_tag_screen.dart';
+import 'vehicle_master_screen.dart';
+import 'location_master_screen.dart';
 
 class SettingsPlaceholderScreen extends StatelessWidget {
   const SettingsPlaceholderScreen({super.key});
@@ -123,6 +124,39 @@ class SettingsPlaceholderScreen extends StatelessWidget {
                                 RangeSettingsPopup.showRangeSettingsSheet(
                                   context,
                                 ),
+                          ),
+                          const SizedBox(height: 28),
+
+                          const Text(
+                            'Master Configurations',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0F172A),
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+
+                          // Vehicle Master Card
+                          _buildMenuCard(
+                            icon: Icons.directions_bus_rounded,
+                            iconColor: const Color(0xFF0043A4),
+                            iconBgColor: const Color(0xFFEFF6FF),
+                            title: 'Vehicle Master',
+                            subtitle: 'Manage vehicles and dropdown options',
+                            onTap: () => Get.to(() => const VehicleMasterScreen()),
+                          ),
+                          const SizedBox(height: 14),
+
+                          // Location Master Card
+                          _buildMenuCard(
+                            icon: Icons.location_on_rounded,
+                            iconColor: const Color(0xFF0043A4),
+                            iconBgColor: const Color(0xFFEFF6FF),
+                            title: 'Location Master',
+                            subtitle: 'Manage trip checkpoint locations',
+                            onTap: () => Get.to(() => const LocationMasterScreen()),
                           ),
                           const SizedBox(height: 28),
 
