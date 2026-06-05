@@ -1,4 +1,5 @@
 import 'package:event_rfid_app/screens/home/event_entry/add_event_entry_screen.dart';
+import 'package:event_rfid_app/screens/home/bus_scan/bus_scan_screen.dart';
 import 'package:event_rfid_app/widgets/appbar/home_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,7 +13,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final BatteryController batteryController = Get.find<BatteryController>();
     return Scaffold(
-      backgroundColor: const Color(0xFF0043A4),
+      // backgroundColor: const Color(0xFF0043A4),
       appBar: HomeAppbar(title: 'Home'),
       body: Container(
         width: double.infinity,
@@ -84,38 +85,6 @@ class HomeScreen extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(
-                                  0xFFE31E24,
-                                ), // VKC brand red color
-                                borderRadius: BorderRadius.circular(8),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(
-                                      0xFFE31E24,
-                                    ).withOpacity(0.2),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: const Text(
-                                'VKC',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 18,
-                                  letterSpacing: 1.2,
-                                  fontFamily: 'Inter',
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
                             Obx(() {
                               final batteryLevel =
                                   batteryController.batteryLevel.value;
@@ -190,13 +159,13 @@ class HomeScreen extends StatelessWidget {
                         const SizedBox(height: 14),
                         _buildQuickActions(context),
                         const SizedBox(height: 28),
-                        _buildSectionTitle('Overview'),
-                        const SizedBox(height: 14),
-                        _buildOverviewGrid(),
-                        const SizedBox(height: 28),
-                        _buildRecentActivityHeader(),
-                        const SizedBox(height: 14),
-                        _buildRecentActivityList(),
+                        // _buildSectionTitle('Overview'),
+                        // const SizedBox(height: 14),
+                        // _buildOverviewGrid(),
+                        // const SizedBox(height: 28),
+                        // _buildRecentActivityHeader(),
+                        // const SizedBox(height: 14),
+                        // _buildRecentActivityList(),
                       ],
                     ),
                   ),
@@ -233,7 +202,7 @@ class HomeScreen extends StatelessWidget {
                 iconColor: const Color(0xFF0043A4),
                 iconBgColor: const Color(0xFFEFF6FF),
                 title: 'Event Entry Scan',
-                subtitle: '100/100',
+                subtitle: '0/200',
                 onTap: () {
                   Get.to(() => AddEventEntryScreen());
                 },
@@ -242,25 +211,56 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(width: 14),
             Expanded(
               child: _buildQuickActionCard(
-                icon: Icons.directions_bus,
+                icon: Icons.card_giftcard,
+                iconColor: const Color(0xFF10B981),
+                iconBgColor: const Color(0xFFECFDF5),
+                title: 'Award Entry Scan',
+                subtitle: '0/80',
+                onTap: () {},
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            Expanded(
+              child: _buildQuickActionCard(
+                icon: Icons.photo,
                 iconColor: const Color(0xFF0043A4),
                 iconBgColor: const Color(0xFFEFF6FF),
-                title: 'Bus Scan',
-                subtitle: '200/120',
-                onTap: () => navController.changeIndex(1),
+                title: 'Photo Booth Scan',
+                subtitle: '0/80',
+                onTap: () {
+                  Get.to(() => AddEventEntryScreen());
+                },
+              ),
+            ),
+
+            const SizedBox(width: 14),
+            Expanded(
+              child: _buildQuickActionCard(
+                icon: Icons.verified_user,
+                iconColor: const Color(0xFF10B981),
+                iconBgColor: const Color(0xFFECFDF5),
+                title: 'Special Award Scan',
+                subtitle: '0/4',
+                onTap: () {},
               ),
             ),
           ],
         ),
         const SizedBox(height: 14),
         _buildQuickActionCard(
-          icon: Icons.verified_user,
-          iconColor: const Color(0xFF10B981),
-          iconBgColor: const Color(0xFFECFDF5),
-          title: 'Onward Scan',
-          subtitle: '81/70',
-          onTap: () {},
-
+          icon: Icons.directions_bus,
+          iconColor: const Color(0xFF0043A4),
+          iconBgColor: const Color(0xFFEFF6FF),
+          title: 'Bus Scan',
+          subtitle: '200/120',
+          onTap: () {
+            Get.to(() => BusScanScreen());
+          },
           isFullWidth: true,
         ),
       ],
