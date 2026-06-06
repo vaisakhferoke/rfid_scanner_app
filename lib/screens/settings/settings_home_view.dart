@@ -5,8 +5,10 @@ import '../../widgets/appbar/home_appbar.dart';
 import 'write_tag_screen.dart';
 import 'vehicle_master_screen.dart';
 import 'location_master_screen.dart';
+import 'event_settings_screen.dart';
 import '../../controllers/vehicle_master_controller.dart';
 import '../../controllers/location_master_controller.dart';
+import '../../controllers/event_settings_controller.dart';
 import '../../config/api_config.dart';
 
 class SettingsPlaceholderScreen extends StatelessWidget {
@@ -181,6 +183,20 @@ class SettingsPlaceholderScreen extends StatelessWidget {
                             onTap: () {
                               Get.put(LocationMasterController());
                               Get.to(() => const LocationMasterScreen());
+                            },
+                          ),
+                          const SizedBox(height: 14),
+
+                          // Configuration Settings Card
+                          _buildMenuCard(
+                            icon: Icons.settings_suggest_rounded,
+                            iconColor: const Color(0xFF0043A4),
+                            iconBgColor: const Color(0xFFEFF6FF),
+                            title: 'Configuration Settings',
+                            subtitle: 'Manage event configuration variables',
+                            onTap: () {
+                              Get.put(EventSettingsController());
+                              Get.to(() => const EventSettingsScreen());
                             },
                           ),
                           const SizedBox(height: 32),
