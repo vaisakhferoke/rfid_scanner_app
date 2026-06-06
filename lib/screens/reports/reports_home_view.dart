@@ -9,26 +9,122 @@ class ReportsPlaceholderScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: HomeAppbar(title: 'Reports'),
-      body: const Center(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.bar_chart, size: 80, color: Color(0xFF94A3B8)),
-            SizedBox(height: 16),
-            Text(
-              'Reports Screen Placeholder',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF475569),
-              ),
+            _buildSectionHeader('Bus'),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: [
+                _ReportCard(
+                  title: 'Scanned\nReport',
+                  icon: Icons.qr_code_scanner,
+                  onTap: () {
+                    // TODO: Navigate to Scanned Report
+                  },
+                ),
+                _ReportCard(
+                  title: 'Missing\nReport',
+                  icon: Icons.assignment_late,
+                  onTap: () {
+                    // TODO: Navigate to Missing Report
+                  },
+                ),
+                _ReportCard(
+                  title: 'Baggage\nReport',
+                  icon: Icons.luggage,
+                  onTap: () {
+                    // TODO: Navigate to Baggage Report
+                  },
+                ),
+              ],
             ),
-            SizedBox(height: 8),
-            Text(
-              'Scan data analytics and metrics will appear here.',
-              style: TextStyle(color: Color(0xFF64748B)),
+            const SizedBox(height: 32),
+            _buildSectionHeader('Event Entry'),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: [
+                _ReportCard(
+                  title: 'Check in\nReport',
+                  icon: Icons.how_to_reg,
+                  onTap: () {
+                    // TODO: Navigate to Check in Report
+                  },
+                ),
+                _ReportCard(
+                  title: 'Not checkin\nReport',
+                  icon: Icons.person_off,
+                  onTap: () {
+                    // TODO: Navigate to Not check in Report
+                  },
+                ),
+              ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 22,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF1E293B),
+      ),
+    );
+  }
+}
+
+class _ReportCard extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _ReportCard({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      elevation: 2,
+      shadowColor: Colors.black.withOpacity(0.1),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: 100,
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 32, color: Theme.of(context).primaryColor),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF475569),
+                  height: 1.2,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

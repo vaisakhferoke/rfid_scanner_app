@@ -475,18 +475,18 @@ class ScanDetailsScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              if (count > 0)
-                GestureDetector(
-                  onTap: () {},
-                  child: const Text(
-                    'View all',
-                    style: TextStyle(
-                      color: Color(0xFF213AEC),
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+              // if (count > 0)
+              //   GestureDetector(
+              //     onTap: () {},
+              //     child: const Text(
+              //       'View all',
+              //       style: TextStyle(
+              //         color: Color(0xFF213AEC),
+              //         fontSize: 13,
+              //         fontWeight: FontWeight.bold,
+              //       ),
+              //     ),
+              //   ),
             ],
           ),
           const SizedBox(height: 12),
@@ -665,8 +665,12 @@ class ScanDetailsScreen extends StatelessWidget {
                           ),
                           const SizedBox(width: 12),
                           OutlinedButton(
-                            onPressed: () =>
-                                _confirmUpdateBus(context, name, scannedBus),
+                            onPressed: () => _confirmUpdateBus(
+                              context,
+                              uniqId,
+                              name,
+                              scannedBus,
+                            ),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: const Color(0xFF213AEC),
                               side: const BorderSide(color: Color(0xFF213AEC)),
@@ -862,6 +866,7 @@ class ScanDetailsScreen extends StatelessWidget {
 
   void _confirmUpdateBus(
     BuildContext context,
+    String uniqId,
     String passengerName,
     String busCode,
   ) {
@@ -888,17 +893,25 @@ class ScanDetailsScreen extends StatelessWidget {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Get.snackbar(
-                  'Success',
-                  'Bus assignment updated for $passengerName.',
-                  backgroundColor: const Color(0xFF10B981),
-                  colorText: Colors.white,
-                  snackPosition: SnackPosition.BOTTOM,
-                  borderRadius: 12,
-                  margin: const EdgeInsets.all(16),
-                );
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close dialog
+                bool success = await controller.updateUserBus(uniqId);
+                if (success) {
+                  Get.back(); // Pop ScanDetailsScreen
+                  // controller.checkStatus(
+                  //   from: 'update',
+                  // ); // Re-trigger checkStatus to refresh the screen
+
+                  Get.snackbar(
+                    'Success',
+                    'Bus assignment updated for $passengerName.',
+                    backgroundColor: const Color(0xFF10B981),
+                    colorText: Colors.white,
+                    snackPosition: SnackPosition.BOTTOM,
+                    borderRadius: 12,
+                    margin: const EdgeInsets.all(16),
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF213AEC),

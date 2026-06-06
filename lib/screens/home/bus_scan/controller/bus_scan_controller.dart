@@ -474,6 +474,76 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
     );
   }
 
+  Future<bool> updateUserBus(String userId) async {
+    if (selectedBus.value == null) {
+      Get.snackbar(
+        'Validation Error',
+        'No bus selected.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+
+    Get.dialog(
+      const Center(child: CircularProgressIndicator(color: Color(0xFF213AEC))),
+      barrierDismissible: false,
+    );
+
+    try {
+      final String vehicleId = selectedBus.value!.id;
+      final Map<String, String> payload = {
+        "user_id": userId,
+        "vehicle_id": vehicleId,
+        "day": "1",
+      };
+
+      final String baseUrl = await ApiConfig.getBaseUrl();
+      final String fullUrl = '$baseUrl${ApiUrls.updateUserBus}';
+      debugPrint('BusScanController updateUserBus POST: $fullUrl');
+      debugPrint('Payload: ${json.encode(payload)}');
+
+      final response = await http
+          .post(
+            Uri.parse(fullUrl),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode(payload),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        Get.snackbar(
+          'API Error',
+          'Failed to update bus. Server responded with code ${response.statusCode}.',
+          backgroundColor: const Color(0xFFEF4444),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return false;
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      debugPrint('Error updating user bus: $e');
+      Get.snackbar(
+        'Network Error',
+        'Could not connect to the server. Please check your network connection.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+  }
+
   Future<bool> submitTrip() async {
     if (selectedBus.value == null ||
         selectedFromLocation.value == null ||
