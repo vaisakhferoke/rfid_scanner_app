@@ -45,7 +45,18 @@ class AddEventEntryScreen extends StatelessWidget {
               ),
             ),
             centerTitle: true,
-            actions: [_buildRangeSettingsButton(context)],
+            actions: [
+              IconButton(
+                icon: const Icon(
+                  Icons.edit_note_rounded,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                tooltip: 'Manual Entry',
+                onPressed: () => _showManualEntryDialog(context),
+              ),
+              _buildRangeSettingsButton(context),
+            ],
           ),
           body: SafeArea(
             child: Column(
@@ -992,5 +1003,105 @@ class AddEventEntryScreen extends StatelessWidget {
     } else {
       Get.back();
     }
+  }
+
+  void _showManualEntryDialog(BuildContext context) {
+    final TextEditingController codeController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              const Icon(Icons.edit_note_rounded, color: Color(0xFF213AEC), size: 28),
+              const SizedBox(width: 8),
+              Text(
+                'Manual ${controller.type.capitalize} Entry',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Enter the attendee code or tag ID manually:',
+                style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: codeController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: 'Attendee Code',
+                  hintText: 'e.g., git002',
+                  prefixIcon: const Icon(Icons.badge_outlined, color: Color(0xFF64748B)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFF213AEC), width: 2),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final String code = codeController.text.trim();
+                if (code.isEmpty) {
+                  Get.snackbar(
+                    'Validation Error',
+                    'Please enter a valid attendee code.',
+                    backgroundColor: const Color(0xFFEF4444),
+                    colorText: Colors.white,
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                  return;
+                }
+                Navigator.of(context).pop(); // Close dialog
+                bool success = await controller.manuallyUpdateTag(code);
+                if (success) {
+                  Get.snackbar(
+                    'Success',
+                    'Attendee $code checked in successfully.',
+                    backgroundColor: const Color(0xFF10B981),
+                    colorText: Colors.white,
+                    snackPosition: SnackPosition.BOTTOM,
+                    borderRadius: 12,
+                    margin: const EdgeInsets.all(16),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF213AEC),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              ),
+              child: const Text(
+                'Submit',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

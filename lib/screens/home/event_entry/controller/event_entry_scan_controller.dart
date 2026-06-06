@@ -270,6 +270,94 @@ class EventEntryScannController extends GetxController
     }
   }
 
+  Future<bool> manuallyUpdateTag(String tagCode) async {
+    final String cleanCode = tagCode.trim();
+    if (cleanCode.isEmpty) {
+      Get.snackbar(
+        'Required',
+        'Please enter a valid code.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+
+    Get.dialog(
+      const Center(child: CircularProgressIndicator(color: Color(0xFF213AEC))),
+      barrierDismissible: false,
+    );
+
+    try {
+      final String baseUrl = await ApiConfig.getBaseUrl2();
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/event_entry?id=$cleanCode&type=$type'),
+          )
+          .timeout(const Duration(seconds: 5));
+
+      if (Get.isDialogOpen ?? false) {
+        Get.back(); // Pop loading dialog
+      }
+
+      if (response.statusCode == 200) {
+        // Add to scannedTags list (or increment count if already exists)
+        String cleanEpc = cleanCode.toLowerCase();
+        int existingIndex = scannedTags.indexWhere(
+          (t) => t.epc.trim().toLowerCase() == cleanEpc,
+        );
+
+        if (existingIndex != -1) {
+          var existingTag = scannedTags[existingIndex];
+          scannedTags[existingIndex] = RfidTag(
+            epc: existingTag.epc,
+            rssi: existingTag.rssi,
+            readTime: DateTime.now(),
+            count: existingTag.count + 1,
+          );
+        } else {
+          scannedTags.insert(
+            0,
+            RfidTag(
+              epc: cleanCode,
+              rssi: 0,
+              readTime: DateTime.now(),
+              count: 1,
+            ),
+          );
+        }
+
+        // Keep tags list and total count synchronized for compatibility
+        tags.assignAll(scannedTags);
+        totalTagsCount.value = scannedTags.length;
+        
+        return true;
+      } else {
+        Get.snackbar(
+          'Sync Error',
+          'Failed to update code. Server responded with code ${response.statusCode}.',
+          backgroundColor: const Color(0xFFEF4444),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return false;
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) {
+        Get.back(); // Pop loading dialog
+      }
+      debugPrint('Error manually syncing tag: $e');
+      Get.snackbar(
+        'Network Error',
+        'Could not connect to the server. Please check your network connection.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+  }
+
   @override
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
