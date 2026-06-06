@@ -510,6 +510,16 @@ class _BaseUrlConfigDialogState extends State<BaseUrlConfigDialog> {
                 vehController.fetchVehicles();
               }
               navigator.pop();
+              Get.snackbar(
+                'Success',
+                'API Base URLs updated successfully!',
+                backgroundColor: const Color(0xFF10B981),
+                colorText: Colors.white,
+                borderRadius: 12,
+                margin: const EdgeInsets.all(16),
+                icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white),
+                snackPosition: SnackPosition.BOTTOM,
+              );
             }
           },
           style: ElevatedButton.styleFrom(

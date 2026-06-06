@@ -2,20 +2,49 @@ import 'package:event_rfid_app/screens/reports/reports_home_view.dart';
 import 'package:event_rfid_app/screens/settings/settings_home_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../config/api_config.dart';
 import '../controllers/navigation_controller.dart';
 import 'home/home_screen.dart';
 
-class MainNavigationScreen extends StatelessWidget {
-  final NavigationController navController = Get.put(NavigationController());
+class MainNavigationScreen extends StatefulWidget {
+  const MainNavigationScreen({super.key});
 
-  MainNavigationScreen({super.key});
+  @override
+  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+}
+
+class _MainNavigationScreenState extends State<MainNavigationScreen> {
+  final NavigationController navController = Get.put(NavigationController());
 
   final List<Widget> _screens = [
     const HomeScreen(),
-
     const ReportsPlaceholderScreen(),
     const SettingsPlaceholderScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkBaseUrls();
+    });
+  }
+
+  Future<void> _checkBaseUrls() async {
+    final prefs = await SharedPreferences.getInstance();
+    final url1 = prefs.getString(ApiConfig.urlPrefKey);
+    final url2 = prefs.getString(ApiConfig.urlPrefKey2);
+    if (url1 == null || url2 == null) {
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const BaseUrlConfigDialog(),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +98,6 @@ class MainNavigationScreen extends StatelessWidget {
                 ),
                 label: 'Home',
               ),
-
               BottomNavigationBarItem(
                 icon: Padding(
                   padding: const EdgeInsets.only(bottom: 4.0),

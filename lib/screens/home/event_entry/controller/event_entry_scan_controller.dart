@@ -54,14 +54,15 @@ class EventEntryScannController extends GetxController
 
     try {
       // http://192.168.1.14:81/api/event_entry?id=git002,git003&type=evententry
-      // print('Printing Process Starting');
+      print('Printing Process Starting');
       final String baseUrl = await ApiConfig.getBaseUrl2();
 
+      print(
+        'Printing URL: $baseUrl/event_entry?id=${tag.displayName}&type=$type',
+      );
       final response = await http
           .get(
-            Uri.parse(
-              'http://$baseUrl/event_entry?id=${tag.displayName}&type=$type',
-            ),
+            Uri.parse('$baseUrl/event_entry?id=${tag.displayName}&type=$type'),
           )
           .timeout(const Duration(seconds: 5));
 

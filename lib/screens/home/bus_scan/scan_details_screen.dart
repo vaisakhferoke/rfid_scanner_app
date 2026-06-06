@@ -535,6 +535,10 @@ class ScanDetailsScreen extends StatelessWidget {
                 final String uniqId = passenger['uniq_id'] ?? '';
                 final String scannedBus = passenger['scanned_bus'] ?? '';
                 final String assignedBus = passenger['assigned_bus'] ?? '';
+                final String scannedBusName =
+                    passenger['scanned_bus_name'] ?? '';
+                final String assignedBusName =
+                    passenger['assigned_bus_name'] ?? '';
 
                 return Container(
                   padding: const EdgeInsets.all(12),
@@ -617,7 +621,7 @@ class ScanDetailsScreen extends StatelessWidget {
                                         const SizedBox(width: 4),
                                         Expanded(
                                           child: Text(
-                                            'Scanned Bus\n$scannedBus',
+                                            'Scanned Bus\n$scannedBusName',
                                             textAlign: TextAlign.center,
                                             style: const TextStyle(
                                               fontSize: 10,
@@ -669,7 +673,7 @@ class ScanDetailsScreen extends StatelessWidget {
                                         const SizedBox(width: 4),
                                         Expanded(
                                           child: Text(
-                                            'Assigned Bus\n$assignedBus',
+                                            'Assigned Bus\n$assignedBusName',
                                             textAlign: TextAlign.center,
                                             style: const TextStyle(
                                               fontSize: 10,
