@@ -7,6 +7,7 @@ import 'vehicle_master_screen.dart';
 import 'location_master_screen.dart';
 import '../../controllers/vehicle_master_controller.dart';
 import '../../controllers/location_master_controller.dart';
+import '../../config/api_config.dart';
 
 class SettingsPlaceholderScreen extends StatelessWidget {
   const SettingsPlaceholderScreen({super.key});
@@ -126,6 +127,22 @@ class SettingsPlaceholderScreen extends StatelessWidget {
                                 RangeSettingsPopup.showRangeSettingsSheet(
                                   context,
                                 ),
+                          ),
+                          const SizedBox(height: 14),
+
+                          // Server Settings Card
+                          _buildMenuCard(
+                            icon: Icons.settings_input_component_rounded,
+                            iconColor: const Color(0xFF0043A4),
+                            iconBgColor: const Color(0xFFEFF6FF),
+                            title: 'Server Settings',
+                            subtitle: 'Configure backend API Base URLs',
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => const BaseUrlConfigDialog(),
+                              );
+                            },
                           ),
                           const SizedBox(height: 28),
 
@@ -315,6 +332,202 @@ class SettingsPlaceholderScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class BaseUrlConfigDialog extends StatefulWidget {
+  const BaseUrlConfigDialog({super.key});
+
+  @override
+  State<BaseUrlConfigDialog> createState() => _BaseUrlConfigDialogState();
+}
+
+class _BaseUrlConfigDialogState extends State<BaseUrlConfigDialog> {
+  late TextEditingController _urlController;
+  late TextEditingController _url2Controller;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _urlController = TextEditingController();
+    _url2Controller = TextEditingController();
+    _loadUrls();
+  }
+
+  Future<void> _loadUrls() async {
+    final url = await ApiConfig.getBaseUrl();
+    final url2 = await ApiConfig.getBaseUrl2();
+    if (mounted) {
+      setState(() {
+        _urlController.text = url;
+        _url2Controller.text = url2;
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _urlController.dispose();
+    _url2Controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const AlertDialog(
+        content: SizedBox(
+          height: 100,
+          child: Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0043A4)),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: const Row(
+        children: [
+          Icon(
+            Icons.settings_input_component_rounded,
+            color: Color(0xFF0043A4),
+          ),
+          SizedBox(width: 8),
+          Text(
+            'API Server Address',
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'API Base URL 1:',
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF475569),
+              ),
+            ),
+            const SizedBox(height: 6),
+            TextField(
+              controller: _urlController,
+              decoration: InputDecoration(
+                hintText: 'e.g. http://newtest.vkcparivar.com/api/',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF0043A4),
+                    width: 2,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+              ),
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'API Base URL 2:',
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF475569),
+              ),
+            ),
+            const SizedBox(height: 6),
+            TextField(
+              controller: _url2Controller,
+              decoration: InputDecoration(
+                hintText: 'Optional secondary server address',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF0043A4),
+                    width: 2,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+              ),
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 14),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text(
+            'Cancel',
+            style: TextStyle(color: Color(0xFF64748B), fontFamily: 'Inter'),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            String inputUrl = _urlController.text.trim();
+            String inputUrl2 = _url2Controller.text.trim();
+            if (inputUrl.isNotEmpty) {
+              final navigator = Navigator.of(context);
+              await ApiConfig.setBaseUrl(inputUrl, inputUrl2);
+              if (Get.isRegistered<LocationMasterController>()) {
+                final locController = Get.find<LocationMasterController>();
+                locController.baseUrl.value = inputUrl;
+                locController.baseUrl2.value = inputUrl2;
+                locController.fetchLocations();
+              }
+              if (Get.isRegistered<VehicleMasterController>()) {
+                final vehController = Get.find<VehicleMasterController>();
+                vehController.baseUrl.value = inputUrl;
+                vehController.baseUrl2.value = inputUrl2;
+                vehController.fetchVehicles();
+              }
+              navigator.pop();
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF0043A4),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          child: const Text(
+            'Save & Reconnect',
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

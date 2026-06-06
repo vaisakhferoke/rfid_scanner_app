@@ -8,6 +8,7 @@ class LocationMasterController extends GetxController {
   final LocationRepository _locationRepository = LocationRepository();
 
   final RxString baseUrl = ''.obs;
+  final RxString baseUrl2 = ''.obs;
   final RxBool isLoading = false.obs;
   final RxList<LocationModel> locations = <LocationModel>[].obs;
   final RxList<LocationModel> filteredLocations = <LocationModel>[].obs;
@@ -31,7 +32,9 @@ class LocationMasterController extends GetxController {
 
   Future<void> loadBaseUrlAndFetch() async {
     final url = await ApiConfig.getBaseUrl();
+    final url2 = await ApiConfig.getBaseUrl2();
     baseUrl.value = url;
+    baseUrl2.value = url2;
     fetchLocations();
   }
 
@@ -119,10 +122,11 @@ class LocationMasterController extends GetxController {
     }
   }
 
-  Future<void> updateBaseUrl(String newUrl) async {
+  Future<void> updateBaseUrl(String newUrl, String newUrl2) async {
     if (newUrl.isNotEmpty) {
-      await ApiConfig.setBaseUrl(newUrl);
+      await ApiConfig.setBaseUrl(newUrl, newUrl2);
       baseUrl.value = newUrl;
+      baseUrl2.value = newUrl2;
       fetchLocations();
     }
   }

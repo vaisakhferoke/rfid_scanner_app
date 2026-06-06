@@ -6,106 +6,6 @@ import '../../controllers/vehicle_master_controller.dart';
 class VehicleMasterScreen extends GetView<VehicleMasterController> {
   const VehicleMasterScreen({super.key});
 
-  void _showBaseUrlConfigDialog(BuildContext context) {
-    final textController = TextEditingController(
-      text: controller.baseUrl.value,
-    );
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: const Row(
-            children: [
-              Icon(
-                Icons.settings_input_component_rounded,
-                color: Color(0xFF0043A4),
-              ),
-              SizedBox(width: 8),
-              Text(
-                'API Server Address',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Enter the backend API Base URL:',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 13,
-                  color: Color(0xFF64748B),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: textController,
-                decoration: InputDecoration(
-                  hintText: 'e.g. http://newtest.vkcparivar.com/api/',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color(0xFF0043A4),
-                      width: 2,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                ),
-                style: const TextStyle(fontFamily: 'monospace', fontSize: 14),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: Color(0xFF64748B), fontFamily: 'Inter'),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                String inputUrl = textController.text.trim();
-                if (inputUrl.isNotEmpty) {
-                  controller.updateBaseUrl(inputUrl);
-                  Navigator.pop(context);
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0043A4),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: const Text(
-                'Save & Reconnect',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   void _showFormDialog(BuildContext context, {VehicleModel? vehicle}) {
     final formKey = GlobalKey<FormState>();
@@ -409,13 +309,7 @@ class VehicleMasterScreen extends GetView<VehicleMasterController> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Get.back(),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_input_component_rounded),
-            tooltip: 'Server Settings',
-            onPressed: () => _showBaseUrlConfigDialog(context),
-          ),
-        ],
+
       ),
       body: Container(
         width: double.infinity,

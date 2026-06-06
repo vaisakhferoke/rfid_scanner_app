@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:event_rfid_app/config/api_config.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -53,18 +54,19 @@ class EventEntryScannController extends GetxController
 
     try {
       // http://192.168.1.14:81/api/event_entry?id=git002,git003&type=evententry
-      print('Printing Process Starting');
+      // print('Printing Process Starting');
+      final String baseUrl = await ApiConfig.getBaseUrl2();
 
       final response = await http
           .get(
             Uri.parse(
-              'http://192.168.1.14:81/api/event_entry?id=${tag.displayName}&type=$type',
+              'http://$baseUrl/event_entry?id=${tag.displayName}&type=$type',
             ),
           )
           .timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
-        print('Printing Process Completed');
+        // print('Printing Process Completed');
         pendingTags.removeAt(0);
 
         // Check if tag already exists in scannedTags
