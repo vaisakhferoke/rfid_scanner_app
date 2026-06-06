@@ -1009,138 +1009,210 @@ class AddEventEntryScreen extends StatelessWidget {
       context: context,
       barrierDismissible: false, // Prevents closing accidentally
       builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: Row(
-            children: [
-              const Icon(
-                Icons.edit_note_rounded,
-                color: Color(0xFF213AEC),
-                size: 28,
+        List<String> sessionAdded = [];
+        String? feedback;
+        bool isError = false;
+        bool isLoading = false;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            Future<void> submitCode() async {
+              final String code = codeController.text.trim();
+              if (code.isEmpty) {
+                setState(() {
+                  feedback = 'Please enter a valid code.';
+                  isError = true;
+                });
+                focusNode.requestFocus();
+                return;
+              }
+
+              setState(() {
+                isLoading = true;
+                feedback = null;
+              });
+
+              bool success = await controller.manuallyUpdateTag(code, showLoading: false);
+              setState(() {
+                isLoading = false;
+                if (success) {
+                  feedback = 'Attendee $code checked in successfully.';
+                  isError = false;
+                  if (!sessionAdded.contains(code)) {
+                    sessionAdded.insert(0, code);
+                  }
+                  codeController.clear();
+                } else {
+                  feedback = 'Failed to check in attendee $code.';
+                  isError = true;
+                }
+              });
+
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                focusNode.requestFocus();
+              });
+            }
+
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
-              const SizedBox(width: 8),
-              Text(
-                'Manual ${controller.type.capitalize} Entry',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+              title: Row(
+                children: [
+                  const Icon(
+                    Icons.edit_note_rounded,
+                    color: Color(0xFF213AEC),
+                    size: 28,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Manual ${controller.type.capitalize} Entry',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Enter attendee code. Dialog remains open for speedy sequential entry.',
+                      style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: codeController,
+                            focusNode: focusNode,
+                            autofocus: true,
+                            textInputAction: TextInputAction.send,
+                            onSubmitted: (_) => submitCode(),
+                            decoration: InputDecoration(
+                              labelText: 'Attendee Code',
+                              hintText: 'e.g., git002',
+                              prefixIcon: const Icon(
+                                Icons.badge_outlined,
+                                color: Color(0xFF64748B),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFF213AEC),
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: isLoading ? null : submitCode,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF213AEC),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.add_rounded, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                    if (feedback != null) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            isError ? Icons.error_outline_rounded : Icons.check_circle_outline_rounded,
+                            color: isError ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+                            size: 16,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              feedback!,
+                              style: TextStyle(
+                                color: isError ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    if (sessionAdded.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Added in this session:',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: sessionAdded.map((code) => Chip(
+                          label: Text(
+                            code,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF213AEC),
+                            ),
+                          ),
+                          backgroundColor: const Color(0xFF213AEC).withOpacity(0.08),
+                          padding: EdgeInsets.zero,
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: const BorderSide(color: Color(0xFF213AEC), width: 0.5),
+                          ),
+                        )).toList(),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Enter attendee code. Dialog remains open for speedy sequential entry.',
-                style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: codeController,
-                focusNode: focusNode,
-                autofocus: true,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (value) async {
-                  final String code = value.trim();
-                  if (code.isNotEmpty) {
-                    bool success = await controller.manuallyUpdateTag(code);
-                    if (success) {
-                      codeController.clear();
-                      focusNode.requestFocus();
-                      Get.snackbar(
-                        'Added',
-                        'Attendee $code checked in successfully.',
-                        backgroundColor: const Color(0xFF10B981),
-                        colorText: Colors.white,
-                        snackPosition: SnackPosition.BOTTOM,
-                        duration: const Duration(seconds: 1),
-                      );
-                    }
-                  }
-                },
-                decoration: InputDecoration(
-                  labelText: 'Attendee Code',
-                  hintText: 'e.g., git002',
-                  prefixIcon: const Icon(
-                    Icons.badge_outlined,
-                    color: Color(0xFF64748B),
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color(0xFF213AEC),
-                      width: 2,
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    focusNode.dispose();
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'Done / Close',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                focusNode.dispose();
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'Done / Close',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final String code = codeController.text.trim();
-                if (code.isEmpty) {
-                  Get.snackbar(
-                    'Validation Error',
-                    'Please enter a valid attendee code.',
-                    backgroundColor: const Color(0xFFEF4444),
-                    colorText: Colors.white,
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
-                  return;
-                }
-                bool success = await controller.manuallyUpdateTag(code);
-                if (success) {
-                  codeController.clear();
-                  focusNode.requestFocus();
-                  Get.snackbar(
-                    'Added',
-                    'Attendee $code checked in successfully.',
-                    backgroundColor: const Color(0xFF10B981),
-                    colorText: Colors.white,
-                    snackPosition: SnackPosition.BOTTOM,
-                    duration: const Duration(seconds: 1),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF213AEC),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-              ),
-              child: const Text(
-                'Submit',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         );
       },
     );

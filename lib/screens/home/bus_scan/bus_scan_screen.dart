@@ -660,13 +660,27 @@ class BusScanScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () => _showAttendeeDetails(context, tag),
-                    child: const Icon(
-                      Icons.visibility_outlined,
-                      color: Color(0xFF64748B),
-                      size: 20,
-                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      GestureDetector(
+                        onTap: () => _showAttendeeDetails(context, tag),
+                        child: const Icon(
+                          Icons.visibility_outlined,
+                          color: Color(0xFF64748B),
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      GestureDetector(
+                        onTap: () => _showDeleteConfirmation(context, tag),
+                        child: const Icon(
+                          Icons.delete_outline_rounded,
+                          color: Color(0xFFEF4444),
+                          size: 20,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -675,6 +689,74 @@ class BusScanScreen extends StatelessWidget {
         },
       );
     });
+  }
+
+  void _showDeleteConfirmation(BuildContext context, RfidTag tag) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Row(
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                color: Color(0xFFEF4444),
+                size: 28,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Delete Scanned Tag',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+            ],
+          ),
+          content: Text(
+            'Are you sure you want to remove "${tag.displayName}" from the scanned list?',
+            style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                controller.removeTag(tag.epc);
+                Navigator.of(context).pop();
+                Get.snackbar(
+                  'Deleted',
+                  'Tag "${tag.displayName}" removed.',
+                  backgroundColor: const Color(0xFFEF4444),
+                  colorText: Colors.white,
+                  snackPosition: SnackPosition.BOTTOM,
+                  duration: const Duration(seconds: 1),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEF4444),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'Delete',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildBottomBar(BuildContext context) {
@@ -1395,131 +1477,213 @@ class BusScanScreen extends StatelessWidget {
       context: context,
       barrierDismissible: false, // Prevents closing accidentally
       builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: const Row(
-            children: [
-              Icon(Icons.edit_note_rounded, color: Color(0xFF213AEC), size: 28),
-              SizedBox(width: 8),
-              Text(
-                'Manual Bus Scan Entry',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Enter attendee code. Dialog remains open for speedy sequential entry.',
-                style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: codeController,
-                focusNode: focusNode,
-                autofocus: true,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (value) {
-                  final String code = value.trim();
-                  if (code.isNotEmpty) {
-                    bool success = controller.manuallyAddTag(code);
-                    if (success) {
-                      codeController.clear();
-                      focusNode.requestFocus();
-                      Get.snackbar(
-                        'Added',
-                        'Attendee $code added manually.',
-                        backgroundColor: const Color(0xFF10B981),
-                        colorText: Colors.white,
-                        snackPosition: SnackPosition.BOTTOM,
-                        duration: const Duration(seconds: 1),
-                      );
-                    }
+        List<String> sessionAdded = [];
+        String? feedback;
+        bool isError = false;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            void submitCode() {
+              final String code = codeController.text.trim();
+              if (code.isEmpty) {
+                setState(() {
+                  feedback = 'Please enter a valid code.';
+                  isError = true;
+                });
+                focusNode.requestFocus();
+                return;
+              }
+
+              bool success = controller.manuallyAddTag(code);
+              setState(() {
+                if (success) {
+                  feedback = 'Attendee $code added successfully.';
+                  isError = false;
+                  if (!sessionAdded.contains(code)) {
+                    sessionAdded.insert(0, code);
                   }
-                },
-                decoration: InputDecoration(
-                  labelText: 'Attendee Code',
-                  hintText: 'e.g., E453',
-                  prefixIcon: const Icon(
-                    Icons.badge_outlined,
-                    color: Color(0xFF64748B),
+                  codeController.clear();
+                } else {
+                  feedback = 'Failed to add attendee $code.';
+                  isError = true;
+                }
+              });
+
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                focusNode.requestFocus();
+              });
+            }
+
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: const Row(
+                children: [
+                  Icon(
+                    Icons.edit_note_rounded,
+                    color: Color(0xFF213AEC),
+                    size: 28,
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  SizedBox(width: 8),
+                  Text(
+                    'Manual Bus Scan Entry',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color(0xFF213AEC),
-                      width: 2,
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Enter attendee code. Dialog remains open for speedy sequential entry.',
+                      style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: codeController,
+                            focusNode: focusNode,
+                            autofocus: true,
+                            textInputAction: TextInputAction.send,
+                            onSubmitted: (_) => submitCode(),
+                            decoration: InputDecoration(
+                              labelText: 'Attendee Code',
+                              hintText: 'e.g., E453',
+                              prefixIcon: const Icon(
+                                Icons.badge_outlined,
+                                color: Color(0xFF64748B),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFF213AEC),
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: submitCode,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF213AEC),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.add_rounded,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (feedback != null) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            isError
+                                ? Icons.error_outline_rounded
+                                : Icons.check_circle_outline_rounded,
+                            color: isError
+                                ? const Color(0xFFEF4444)
+                                : const Color(0xFF10B981),
+                            size: 16,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              feedback!,
+                              style: TextStyle(
+                                color: isError
+                                    ? const Color(0xFFEF4444)
+                                    : const Color(0xFF10B981),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    if (sessionAdded.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Added in this session:',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: sessionAdded
+                            .map(
+                              (code) => Chip(
+                                label: Text(
+                                  code,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF213AEC),
+                                  ),
+                                ),
+                                backgroundColor: const Color(
+                                  0xFF213AEC,
+                                ).withOpacity(0.08),
+                                padding: EdgeInsets.zero,
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  side: const BorderSide(
+                                    color: Color(0xFF213AEC),
+                                    width: 0.5,
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    focusNode.dispose();
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'Done / Close',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                focusNode.dispose();
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'Done / Close',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final String code = codeController.text.trim();
-                if (code.isEmpty) {
-                  Get.snackbar(
-                    'Validation Error',
-                    'Please enter a valid attendee code.',
-                    backgroundColor: const Color(0xFFEF4444),
-                    colorText: Colors.white,
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
-                  return;
-                }
-                bool success = controller.manuallyAddTag(code);
-                if (success) {
-                  codeController.clear();
-                  focusNode.requestFocus();
-                  Get.snackbar(
-                    'Added',
-                    'Attendee $code added manually.',
-                    backgroundColor: const Color(0xFF10B981),
-                    colorText: Colors.white,
-                    snackPosition: SnackPosition.BOTTOM,
-                    duration: const Duration(seconds: 1),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF213AEC),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-              ),
-              child: const Text(
-                'Submit',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         );
       },
     );

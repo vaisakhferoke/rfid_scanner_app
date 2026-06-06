@@ -270,23 +270,27 @@ class EventEntryScannController extends GetxController
     }
   }
 
-  Future<bool> manuallyUpdateTag(String tagCode) async {
+  Future<bool> manuallyUpdateTag(String tagCode, {bool showLoading = true}) async {
     final String cleanCode = tagCode.trim();
     if (cleanCode.isEmpty) {
-      Get.snackbar(
-        'Required',
-        'Please enter a valid code.',
-        backgroundColor: const Color(0xFFEF4444),
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      if (showLoading) {
+        Get.snackbar(
+          'Required',
+          'Please enter a valid code.',
+          backgroundColor: const Color(0xFFEF4444),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
       return false;
     }
 
-    Get.dialog(
-      const Center(child: CircularProgressIndicator(color: Color(0xFF213AEC))),
-      barrierDismissible: false,
-    );
+    if (showLoading) {
+      Get.dialog(
+        const Center(child: CircularProgressIndicator(color: Color(0xFF213AEC))),
+        barrierDismissible: false,
+      );
+    }
 
     try {
       final String baseUrl = await ApiConfig.getBaseUrl2();
@@ -296,7 +300,7 @@ class EventEntryScannController extends GetxController
           )
           .timeout(const Duration(seconds: 5));
 
-      if (Get.isDialogOpen ?? false) {
+      if (showLoading && (Get.isDialogOpen ?? false)) {
         Get.back(); // Pop loading dialog
       }
 
@@ -333,30 +337,35 @@ class EventEntryScannController extends GetxController
         
         return true;
       } else {
+        if (showLoading) {
+          Get.snackbar(
+            'Sync Error',
+            'Failed to update code. Server responded with code ${response.statusCode}.',
+            backgroundColor: const Color(0xFFEF4444),
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        }
+        return false;
+      }
+    } catch (e) {
+      if (showLoading && (Get.isDialogOpen ?? false)) {
+        Get.back(); // Pop loading dialog
+      }
+      debugPrint('Error manually syncing tag: $e');
+      if (showLoading) {
         Get.snackbar(
-          'Sync Error',
-          'Failed to update code. Server responded with code ${response.statusCode}.',
+          'Network Error',
+          'Could not connect to the server. Please check your network connection.',
           backgroundColor: const Color(0xFFEF4444),
           colorText: Colors.white,
           snackPosition: SnackPosition.BOTTOM,
         );
-        return false;
       }
-    } catch (e) {
-      if (Get.isDialogOpen ?? false) {
-        Get.back(); // Pop loading dialog
-      }
-      debugPrint('Error manually syncing tag: $e');
-      Get.snackbar(
-        'Network Error',
-        'Could not connect to the server. Please check your network connection.',
-        backgroundColor: const Color(0xFFEF4444),
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
       return false;
     }
   }
+
 
   @override
   void onClose() {
