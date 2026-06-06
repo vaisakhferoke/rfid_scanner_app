@@ -711,6 +711,11 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
     return true;
   }
 
+  void removeTag(String epc) {
+    scannedTags.removeWhere((t) => t.epc.trim().toLowerCase() == epc.trim().toLowerCase());
+  }
+
+
   @override
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
