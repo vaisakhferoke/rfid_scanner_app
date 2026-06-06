@@ -274,7 +274,11 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
     try {
       final String vehicleId = selectedBus.value!.id;
       final List<Map<String, String>> payload = scannedTags.map((tag) {
-        return {"vehicle_id": vehicleId, "uniq_id": tag.epc, "day": "1"};
+        return {
+          "vehicle_id": vehicleId,
+          "uniq_id": tag.displayName,
+          "day": "1",
+        };
       }).toList();
 
       final String baseUrl = await ApiConfig.getBaseUrl();
@@ -296,15 +300,20 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
+        final bool status = data['status'] ?? false;
 
-        Get.to(
-          () => ScanDetailsScreen(
-            scanDetails: data,
-            fromLocation: selectedFromLocation.value?.name ?? 'Airport',
-            toLocation: selectedToLocation.value?.name ?? 'Hotel',
-            busName: selectedBus.value?.name ?? '03',
-          ),
-        );
+        if (status) {
+          _showStatusTrueConfirmDialog(data);
+        } else {
+          Get.to(
+            () => ScanDetailsScreen(
+              scanDetails: data,
+              fromLocation: selectedFromLocation.value?.name ?? '',
+              toLocation: selectedToLocation.value?.name ?? '',
+              busName: selectedBus.value?.name ?? '0',
+            ),
+          );
+        }
       } else {
         Get.snackbar(
           'API Error',
@@ -327,6 +336,142 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
         snackPosition: SnackPosition.BOTTOM,
       );
     }
+  }
+
+  void _showStatusTrueConfirmDialog(Map<String, dynamic> data) {
+    final String busName = selectedBus.value?.name ?? 'Unknown';
+    final String fromLocation = selectedFromLocation.value?.name ?? 'Unknown';
+    final String toLocation = selectedToLocation.value?.name ?? 'Unknown';
+    final int passengerCount = data['totalpassengers'] ?? scannedTags.length;
+
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.assignment_outlined, color: Color(0xFF213AEC)),
+            SizedBox(width: 8),
+            Text('Submit Confirmation'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Please review the trip summary before submitting to the server:',
+              style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            _buildSummaryRow('From Location:', fromLocation),
+            _buildSummaryRow('To Location:', toLocation),
+            _buildSummaryRow('Selected Bus:', busName),
+            const Divider(height: 24),
+            _buildSummaryRow(
+              'Total Passengers:',
+              passengerCount.toString(),
+              isBold: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Get.back(); // Close summary dialog
+              bool success = await submitTrip();
+              if (success) {
+                _showSuccessDialog();
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF213AEC),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Submit',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  void _showSuccessDialog() {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.check_circle, color: Color(0xFF22C55E)),
+            SizedBox(width: 8),
+            Text('Success'),
+          ],
+        ),
+        content: const Text(
+          'Trip data submitted successfully!',
+          style: TextStyle(fontSize: 15),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Get.back(); // Close success dialog
+              Get.back(); // Pop BusScanScreen (returns to home)
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF213AEC),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'OK',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  Widget _buildSummaryRow(String label, String value, {bool isBold = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFF64748B),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              color: const Color(0xFF0F172A),
+              fontSize: 14,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<bool> submitTrip() async {
@@ -354,11 +499,7 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
     }
 
     Get.dialog(
-      const Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFF213AEC),
-        ),
-      ),
+      const Center(child: CircularProgressIndicator(color: Color(0xFF213AEC))),
       barrierDismissible: false,
     );
 
@@ -370,10 +511,10 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
       final List<Map<String, String>> payload = scannedTags.map((tag) {
         return {
           "vehicle_id": vehicleId,
-          "uniq_id": tag.epc,
+          "uniq_id": tag.displayName,
           "from_location_id": fromLocId,
           "to_location_id": toLocId,
-          "day": "1"
+          "day": "1",
         };
       }).toList();
 
@@ -382,11 +523,13 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
       debugPrint('BusScanController submitTrip POST: $fullUrl');
       debugPrint('Payload: ${json.encode(payload)}');
 
-      final response = await http.post(
-        Uri.parse(fullUrl),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(payload),
-      ).timeout(const Duration(seconds: 15));
+      final response = await http
+          .post(
+            Uri.parse(fullUrl),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode(payload),
+          )
+          .timeout(const Duration(seconds: 15));
 
       if (Get.isDialogOpen ?? false) {
         Get.back();

@@ -27,25 +27,25 @@ class AddEventEntryScreen extends StatelessWidget {
         child: Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
-            backgroundColor: const Color(0xFF213AEC), // Vibrant brand blue/indigo
+            backgroundColor: const Color(
+              0xFF213AEC,
+            ), // Vibrant brand blue/indigo
             foregroundColor: Colors.white,
             elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () => _handleBackPress(context),
             ),
-            title: const Text(
-              'Add Event Entry',
-              style: TextStyle(
+            title: Text(
+              "${controller.type.capitalize}" + " Scan",
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
               ),
             ),
             centerTitle: true,
-            actions: [
-              _buildRangeSettingsButton(context),
-            ],
+            actions: [_buildRangeSettingsButton(context)],
           ),
           body: SafeArea(
             child: Column(
@@ -61,9 +61,7 @@ class AddEventEntryScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 _buildListHeader(),
                 const SizedBox(height: 4),
-                Expanded(
-                  child: _buildTagList(),
-                ),
+                Expanded(child: _buildTagList()),
               ],
             ),
           ),
@@ -120,19 +118,22 @@ class AddEventEntryScreen extends StatelessWidget {
   Widget _buildConnectionCard(BuildContext context) {
     return Obx(() {
       final isConnected = controller.isConnected.value;
-      final Color cardBorderColor = isConnected ? const Color(0xFF22C55E) : const Color(0xFFEF4444);
-      final Color cardBgColor = isConnected ? const Color(0xFFF0FDF4) : const Color(0xFFFEF2F2);
-      final Color textColor = isConnected ? const Color(0xFF16A34A) : const Color(0xFFDC2626);
+      final Color cardBorderColor = isConnected
+          ? const Color(0xFF22C55E)
+          : const Color(0xFFEF4444);
+      final Color cardBgColor = isConnected
+          ? const Color(0xFFF0FDF4)
+          : const Color(0xFFFEF2F2);
+      final Color textColor = isConnected
+          ? const Color(0xFF16A34A)
+          : const Color(0xFFDC2626);
 
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 16.0),
         decoration: BoxDecoration(
           color: cardBgColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: cardBorderColor,
-            width: 1.5,
-          ),
+          border: Border.all(color: cardBorderColor, width: 1.5),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
@@ -144,7 +145,9 @@ class AddEventEntryScreen extends StatelessWidget {
                 height: 24,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isConnected ? const Color(0xFF22C55E).withOpacity(0.15) : const Color(0xFFEF4444).withOpacity(0.15),
+                  color: isConnected
+                      ? const Color(0xFF22C55E).withOpacity(0.15)
+                      : const Color(0xFFEF4444).withOpacity(0.15),
                 ),
                 child: Center(
                   child: Container(
@@ -152,7 +155,9 @@ class AddEventEntryScreen extends StatelessWidget {
                     height: 10,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: isConnected ? const Color(0xFF22C55E) : const Color(0xFFEF4444),
+                      color: isConnected
+                          ? const Color(0xFF22C55E)
+                          : const Color(0xFFEF4444),
                     ),
                   ),
                 ),
@@ -171,7 +176,9 @@ class AddEventEntryScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      isConnected ? 'Real RFID Hardware Active' : 'Tap retry to check connection',
+                      isConnected
+                          ? 'Real RFID Hardware Active'
+                          : 'Tap retry to check connection',
                       style: const TextStyle(
                         fontSize: 12,
                         color: Color(0xFF64748B),
@@ -230,7 +237,9 @@ class AddEventEntryScreen extends StatelessWidget {
                   ),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    backgroundColor: isEnabled ? const Color(0xFF22C55E) : const Color(0xFFBBF7D0),
+                    backgroundColor: isEnabled
+                        ? const Color(0xFF22C55E)
+                        : const Color(0xFFBBF7D0),
                     foregroundColor: Colors.white,
                     disabledBackgroundColor: const Color(0xFFBBF7D0),
                     disabledForegroundColor: Colors.white.withOpacity(0.8),
@@ -259,9 +268,13 @@ class AddEventEntryScreen extends StatelessWidget {
                   ),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    backgroundColor: isEnabled ? const Color(0xFFEF4444) : const Color(0xFFFCA5A5).withOpacity(0.5),
+                    backgroundColor: isEnabled
+                        ? const Color(0xFFEF4444)
+                        : const Color(0xFFFCA5A5).withOpacity(0.5),
                     foregroundColor: Colors.white,
-                    disabledBackgroundColor: const Color(0xFFFCA5A5).withOpacity(0.5),
+                    disabledBackgroundColor: const Color(
+                      0xFFFCA5A5,
+                    ).withOpacity(0.5),
                     disabledForegroundColor: Colors.white.withOpacity(0.8),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -325,7 +338,9 @@ class AddEventEntryScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: isScanning ? const Color(0xFF213AEC) : const Color(0xFF64748B),
+              color: isScanning
+                  ? const Color(0xFF213AEC)
+                  : const Color(0xFF64748B),
             ),
           ),
         ],
@@ -352,11 +367,16 @@ class AddEventEntryScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      color: selectedIndex == 0 ? const Color(0xFFEEF2FF) : Colors.white,
+                      color: selectedIndex == 0
+                          ? const Color(0xFFEEF2FF)
+                          : Colors.white,
                       borderRadius: BorderRadius.circular(24),
                       border: selectedIndex == 0
                           ? null
-                          : Border.all(color: const Color(0xFFC7D2FE), width: 1.5),
+                          : Border.all(
+                              color: const Color(0xFFC7D2FE),
+                              width: 1.5,
+                            ),
                     ),
                     alignment: Alignment.center,
                     child: Text(
@@ -364,7 +384,9 @@ class AddEventEntryScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: selectedIndex == 0 ? const Color(0xFF213AEC) : const Color(0xFF475569),
+                        color: selectedIndex == 0
+                            ? const Color(0xFF213AEC)
+                            : const Color(0xFF475569),
                       ),
                     ),
                   ),
@@ -380,11 +402,16 @@ class AddEventEntryScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      color: selectedIndex == 1 ? const Color(0xFFEEF2FF) : Colors.white,
+                      color: selectedIndex == 1
+                          ? const Color(0xFFEEF2FF)
+                          : Colors.white,
                       borderRadius: BorderRadius.circular(24),
                       border: selectedIndex == 1
                           ? null
-                          : Border.all(color: const Color(0xFFC7D2FE), width: 1.5),
+                          : Border.all(
+                              color: const Color(0xFFC7D2FE),
+                              width: 1.5,
+                            ),
                     ),
                     alignment: Alignment.center,
                     child: Text(
@@ -392,7 +419,9 @@ class AddEventEntryScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: selectedIndex == 1 ? const Color(0xFF213AEC) : const Color(0xFF475569),
+                        color: selectedIndex == 1
+                            ? const Color(0xFF213AEC)
+                            : const Color(0xFF475569),
                       ),
                     ),
                   ),
@@ -415,14 +444,22 @@ class AddEventEntryScreen extends StatelessWidget {
             flex: 4,
             child: Text(
               'EPC',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 15),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontSize: 15,
+              ),
             ),
           ),
           Expanded(
             flex: 3,
             child: Text(
               'Time',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 15),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontSize: 15,
+              ),
               textAlign: TextAlign.center,
             ),
           ),
@@ -430,7 +467,11 @@ class AddEventEntryScreen extends StatelessWidget {
             flex: 2,
             child: Text(
               'Action',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 15),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontSize: 15,
+              ),
               textAlign: TextAlign.right,
             ),
           ),
@@ -442,7 +483,9 @@ class AddEventEntryScreen extends StatelessWidget {
   Widget _buildTagList() {
     return Obx(() {
       final isPendingSelected = controller.selectedTab.value == 0;
-      final list = isPendingSelected ? controller.pendingTags : controller.scannedTags;
+      final list = isPendingSelected
+          ? controller.pendingTags
+          : controller.scannedTags;
 
       if (list.isEmpty) {
         return Center(
@@ -450,13 +493,17 @@ class AddEventEntryScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                isPendingSelected ? Icons.assignment_turned_in : Icons.wifi_tethering_off,
+                isPendingSelected
+                    ? Icons.assignment_turned_in
+                    : Icons.wifi_tethering_off,
                 size: 48,
                 color: Colors.grey[400],
               ),
               const SizedBox(height: 8),
               Text(
-                isPendingSelected ? 'All tags have been scanned!' : 'No tags scanned yet.',
+                isPendingSelected
+                    ? 'All tags have been scanned!'
+                    : 'No tags scanned yet.',
                 style: const TextStyle(fontSize: 15, color: Colors.grey),
               ),
             ],
@@ -470,7 +517,9 @@ class AddEventEntryScreen extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         itemBuilder: (context, index) {
           final tag = list[index];
-          final timeStr = DateFormat('hh:mm a').format(tag.readTime).toLowerCase();
+          final timeStr = DateFormat(
+            'hh:mm a',
+          ).format(tag.readTime).toLowerCase();
 
           return Container(
             margin: const EdgeInsets.only(bottom: 10.0),
@@ -479,7 +528,10 @@ class AddEventEntryScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 14.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12.0,
+                vertical: 14.0,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -513,7 +565,11 @@ class AddEventEntryScreen extends StatelessWidget {
                     child: Align(
                       alignment: Alignment.centerRight,
                       child: GestureDetector(
-                        onTap: () => _showAttendeeDetails(context, tag, !isPendingSelected),
+                        onTap: () => _showAttendeeDetails(
+                          context,
+                          tag,
+                          !isPendingSelected,
+                        ),
                         child: const Icon(
                           Icons.visibility_outlined,
                           color: Color(0xFF64748B),
@@ -558,22 +614,61 @@ class AddEventEntryScreen extends StatelessWidget {
 
         final idx = getIndex(tag.epc);
         final names = [
-          'John Doe', 'Jane Smith', 'Alice Johnson', 'Bob Brown', 
-          'Charlie Green', 'David White', 'Eva Black', 'Frank Gray', 
-          'Grace Blue', 'Henry Red', 'Ivy Violet', 'Jack Orange', 'Kate Yellow'
+          'John Doe',
+          'Jane Smith',
+          'Alice Johnson',
+          'Bob Brown',
+          'Charlie Green',
+          'David White',
+          'Eva Black',
+          'Frank Gray',
+          'Grace Blue',
+          'Henry Red',
+          'Ivy Violet',
+          'Jack Orange',
+          'Kate Yellow',
         ];
         final name = names[idx % names.length];
 
-        final ids = [1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033];
+        final ids = [
+          1024,
+          1025,
+          1026,
+          1027,
+          1028,
+          1029,
+          1030,
+          1031,
+          1032,
+          1033,
+        ];
         final id = ids[idx % ids.length];
 
-        final codes = ['QR-8829-X', 'QR-5541-Y', 'QR-1234-A', 'QR-9876-B', 'QR-4567-C'];
+        final codes = [
+          'QR-8829-X',
+          'QR-5541-Y',
+          'QR-1234-A',
+          'QR-9876-B',
+          'QR-4567-C',
+        ];
         final code = codes[idx % codes.length];
 
-        final companies = ['Precision Logistics', 'Tech Innovations', 'Global Trade', 'Vanguard Services', 'Nexus Industries'];
+        final companies = [
+          'Precision Logistics',
+          'Tech Innovations',
+          'Global Trade',
+          'Vanguard Services',
+          'Nexus Industries',
+        ];
         final company = companies[idx % companies.length];
 
-        final awards = ['Gold Member', 'Silver Member', 'Bronze Member', 'VIP Member', 'Premium Member'];
+        final awards = [
+          'Gold Member',
+          'Silver Member',
+          'Bronze Member',
+          'VIP Member',
+          'Premium Member',
+        ];
         final award = awards[idx % awards.length];
 
         final buses = ['B-42', 'B-15', 'B-08', 'B-33', 'B-24'];
@@ -626,8 +721,12 @@ class AddEventEntryScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                const Divider(height: 24, thickness: 1, color: Color(0xFFE2E8F0)),
-                
+                const Divider(
+                  height: 24,
+                  thickness: 1,
+                  color: Color(0xFFE2E8F0),
+                ),
+
                 // Avatar & Name Centered
                 Center(
                   child: Column(
@@ -637,17 +736,21 @@ class AddEventEntryScreen extends StatelessWidget {
                         height: 80,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+                          border: Border.all(
+                            color: const Color(0xFFE2E8F0),
+                            width: 1.5,
+                          ),
                         ),
                         child: ClipOval(
                           child: Image.asset(
                             'assets/logo/avatar_john_doe.png',
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => const Icon(
-                              Icons.person,
-                              size: 48,
-                              color: Color(0xFF64748B),
-                            ),
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(
+                                  Icons.person,
+                                  size: 48,
+                                  color: Color(0xFF64748B),
+                                ),
                           ),
                         ),
                       ),
@@ -666,47 +769,124 @@ class AddEventEntryScreen extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 // Key-Value rows
-                _buildPopupRow('ID:', Text(id.toString(), style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A)))),
-                _buildPopupRow('Code:', Text(code, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A)))),
-                _buildPopupRow('Company Name:', Text(company, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A)))),
-                _buildPopupRow('Check-in Status:', Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: isScanned ? const Color(0xFFEEF2FF) : const Color(0xFFFEF2F2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    isScanned ? 'Checked In' : 'Pending',
-                    style: TextStyle(
-                      color: isScanned ? const Color(0xFF213AEC) : const Color(0xFFEF4444),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                _buildPopupRow(
+                  'ID:',
+                  Text(
+                    id.toString(),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      color: Color(0xFF0F172A),
                     ),
                   ),
-                )),
-                _buildPopupRow('Check-in Time:', Text(
-                  isScanned ? DateFormat('hh:mm a').format(tag.readTime) : '--',
-                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A))
-                )),
-                _buildPopupRow('Award Status:', Text(
-                  award,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFFDC2626))
-                )),
-                _buildPopupRow('Photobooth Status:', Text(
-                  photoStatus,
-                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A))
-                )),
-                _buildPopupRow('Bus No:', Text(
-                  bus,
-                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A))
-                )),
-                _buildPopupRow('IFID:', Text(
-                  stringToHex(tag.epc),
-                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A))
-                )),
+                ),
+                _buildPopupRow(
+                  'Code:',
+                  Text(
+                    code,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ),
+                _buildPopupRow(
+                  'Company Name:',
+                  Text(
+                    company,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ),
+                _buildPopupRow(
+                  'Check-in Status:',
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isScanned
+                          ? const Color(0xFFEEF2FF)
+                          : const Color(0xFFFEF2F2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      isScanned ? 'Checked In' : 'Pending',
+                      style: TextStyle(
+                        color: isScanned
+                            ? const Color(0xFF213AEC)
+                            : const Color(0xFFEF4444),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+                _buildPopupRow(
+                  'Check-in Time:',
+                  Text(
+                    isScanned
+                        ? DateFormat('hh:mm a').format(tag.readTime)
+                        : '--',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ),
+                _buildPopupRow(
+                  'Award Status:',
+                  Text(
+                    award,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Color(0xFFDC2626),
+                    ),
+                  ),
+                ),
+                _buildPopupRow(
+                  'Photobooth Status:',
+                  Text(
+                    photoStatus,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ),
+                _buildPopupRow(
+                  'Bus No:',
+                  Text(
+                    bus,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ),
+                _buildPopupRow(
+                  'IFID:',
+                  Text(
+                    stringToHex(tag.epc),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ),
 
                 const SizedBox(height: 24),
-                
+
                 // Close Button
                 SizedBox(
                   width: double.infinity,
@@ -723,7 +903,10 @@ class AddEventEntryScreen extends StatelessWidget {
                     ),
                     child: const Text(
                       'Close',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
                     ),
                   ),
                 ),
@@ -780,7 +963,10 @@ class AddEventEntryScreen extends StatelessWidget {
                 onPressed: () => Navigator.of(context).pop(), // Close dialog
                 child: const Text(
                   'Cancel',
-                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               ElevatedButton(

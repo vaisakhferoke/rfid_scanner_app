@@ -4,5 +4,5 @@ class ApiUrls {
   static const String viewLocation = 'flutter/event_phuket/view_location.aspx';
   static const String location = 'flutter/event_phuket/location.aspx';
   static const String checkStatus = 'flutter/event_phuket/check_status.aspx';
-  static const String submitTrip = 'flutter/trip/trip.aspx';
+  static const String submitTrip = 'flutter/event_phuket/trip.aspx';
 }

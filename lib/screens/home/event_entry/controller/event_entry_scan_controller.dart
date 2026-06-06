@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import '../../../../models/rfid_tag.dart';
@@ -9,6 +8,7 @@ import '../../../../services/rfid_service.dart';
 class EventEntryScannController extends GetxController
     with WidgetsBindingObserver {
   final RfidService _rfidService = RfidService();
+  final String type = Get.arguments['type'] ?? '';
 
   var isConnected = false.obs;
   var isScanning = false.obs;
@@ -52,13 +52,19 @@ class EventEntryScannController extends GetxController
     final tag = pendingTags.first;
 
     try {
+      // http://192.168.1.14:81/api/event_entry?id=git002,git003&type=evententry
+      print('Printing Process Starting');
+
       final response = await http
           .get(
-            Uri.parse('http://192.168.1.43:81/api/event_entry?id=${tag.epc}'),
+            Uri.parse(
+              'http://192.168.1.14:81/api/event_entry?id=${tag.displayName}&type=$type',
+            ),
           )
           .timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
+        print('Printing Process Completed');
         pendingTags.removeAt(0);
 
         // Check if tag already exists in scannedTags

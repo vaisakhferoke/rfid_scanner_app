@@ -204,7 +204,10 @@ class HomeScreen extends StatelessWidget {
                 title: 'Event Entry Scan',
                 subtitle: '0/200',
                 onTap: () {
-                  Get.to(() => AddEventEntryScreen());
+                  Get.to(
+                    () => AddEventEntryScreen(),
+                    arguments: {'type': 'evententry'},
+                  );
                 },
               ),
             ),
@@ -216,7 +219,12 @@ class HomeScreen extends StatelessWidget {
                 iconBgColor: const Color(0xFFECFDF5),
                 title: 'Award Entry Scan',
                 subtitle: '0/80',
-                onTap: () {},
+                onTap: () {
+                  Get.to(
+                    () => AddEventEntryScreen(),
+                    arguments: {'type': 'award'},
+                  );
+                },
               ),
             ),
           ],
@@ -233,7 +241,10 @@ class HomeScreen extends StatelessWidget {
                 title: 'Photo Booth Scan',
                 subtitle: '0/80',
                 onTap: () {
-                  Get.to(() => AddEventEntryScreen());
+                  Get.to(
+                    () => AddEventEntryScreen(),
+                    arguments: {'type': 'photobooth'},
+                  );
                 },
               ),
             ),
@@ -246,7 +257,12 @@ class HomeScreen extends StatelessWidget {
                 iconBgColor: const Color(0xFFECFDF5),
                 title: 'Special Award Scan',
                 subtitle: '0/4',
-                onTap: () {},
+                onTap: () {
+                  Get.to(
+                    () => AddEventEntryScreen(),
+                    arguments: {'type': 'specialaward'},
+                  );
+                },
               ),
             ),
           ],
