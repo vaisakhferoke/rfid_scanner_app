@@ -676,6 +676,41 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
     }
   }
 
+  bool manuallyAddTag(String tagCode) {
+    final String cleanCode = tagCode.trim();
+    if (cleanCode.isEmpty) {
+      Get.snackbar(
+        'Validation Error',
+        'Please enter a valid code.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+
+    final String cleanEpc = cleanCode.toLowerCase();
+    int index = scannedTags.indexWhere(
+      (t) => t.epc.trim().toLowerCase() == cleanEpc,
+    );
+
+    if (index == -1) {
+      scannedTags.insert(
+        0,
+        RfidTag(epc: cleanCode, rssi: 0, readTime: DateTime.now(), count: 1),
+      );
+    } else {
+      var existing = scannedTags[index];
+      scannedTags[index] = RfidTag(
+        epc: existing.epc,
+        rssi: existing.rssi,
+        readTime: DateTime.now(),
+        count: existing.count + 1,
+      );
+    }
+    return true;
+  }
+
   @override
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);

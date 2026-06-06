@@ -45,18 +45,7 @@ class AddEventEntryScreen extends StatelessWidget {
               ),
             ),
             centerTitle: true,
-            actions: [
-              IconButton(
-                icon: const Icon(
-                  Icons.edit_note_rounded,
-                  color: Colors.white,
-                  size: 28,
-                ),
-                tooltip: 'Manual Entry',
-                onPressed: () => _showManualEntryDialog(context),
-              ),
-              _buildRangeSettingsButton(context),
-            ],
+            actions: [_buildRangeSettingsButton(context)],
           ),
           body: SafeArea(
             child: Column(
@@ -75,6 +64,13 @@ class AddEventEntryScreen extends StatelessWidget {
                 Expanded(child: _buildTagList()),
               ],
             ),
+          ),
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: const Color(0xFF213AEC),
+            foregroundColor: Colors.white,
+            shape: const CircleBorder(),
+            onPressed: () => _showManualEntryDialog(context),
+            child: const Icon(Icons.edit_note_rounded, size: 28),
           ),
         ),
       );
