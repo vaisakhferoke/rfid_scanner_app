@@ -68,7 +68,12 @@ class ScanDetailsScreen extends StatelessWidget {
                   children: [
                     _buildRouteCard(),
                     const SizedBox(height: 16),
-                    _buildStatsRow(totalPassengers, boardedCount, missingCount),
+                    _buildStatsRow(
+                      totalPassengers,
+                      boardedCount,
+                      missingCount,
+                      wrongBusCount,
+                    ),
                     const SizedBox(height: 20),
                     _buildMissingSection(missingList),
                     const SizedBox(height: 20),
@@ -230,37 +235,55 @@ class ScanDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsRow(int total, int boarded, int missing) {
-    return Row(
+  Widget _buildStatsRow(int total, int boarded, int missing, int wrongBus) {
+    return Column(
       children: [
-        Expanded(
-          child: _buildStatCard(
-            label: 'Total Passengers',
-            value: total.toString().padLeft(2, '0'),
-            icon: Icons.group_outlined,
-            bgColor: const Color(0xFFEEF2FF),
-            textColor: const Color(0xFF213AEC),
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: _buildStatCard(
+                label: 'Total Passengers',
+                value: total.toString().padLeft(2, '0'),
+                icon: Icons.group_outlined,
+                bgColor: const Color(0xFFEEF2FF),
+                textColor: const Color(0xFF213AEC),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildStatCard(
+                label: 'Boarded',
+                value: boarded.toString().padLeft(2, '0'),
+                icon: Icons.check_circle_outline_rounded,
+                bgColor: const Color(0xFFF0FDF4),
+                textColor: const Color(0xFF22C55E),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _buildStatCard(
-            label: 'Boarded',
-            value: boarded.toString().padLeft(2, '0'),
-            icon: Icons.check_circle_outline_rounded,
-            bgColor: const Color(0xFFF0FDF4),
-            textColor: const Color(0xFF22C55E),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _buildStatCard(
-            label: 'Missing',
-            value: missing.toString().padLeft(2, '0'),
-            icon: Icons.error_outline_rounded,
-            bgColor: const Color(0xFFFEF2F2),
-            textColor: const Color(0xFFEF4444),
-          ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _buildStatCard(
+                label: 'Missing',
+                value: missing.toString().padLeft(2, '0'),
+                icon: Icons.error_outline_rounded,
+                bgColor: const Color(0xFFFEF2F2),
+                textColor: const Color(0xFFEF4444),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildStatCard(
+                label: 'Wrong Bus',
+                value: wrongBus.toString().padLeft(2, '0'),
+                icon: Icons.warning_amber_rounded,
+                bgColor: const Color(0xFFFFFBEB),
+                textColor: const Color(0xFFF59E0B),
+              ),
+            ),
+          ],
         ),
       ],
     );
