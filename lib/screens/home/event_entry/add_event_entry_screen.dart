@@ -1,10 +1,14 @@
+import 'dart:convert';
 import 'package:event_rfid_app/controllers/range_controller.dart';
 import 'package:event_rfid_app/services/range_settings_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
 import '../../../../models/rfid_tag.dart';
+import '../../../../config/api_config.dart';
 import 'controller/event_entry_scan_controller.dart';
+
 
 class AddEventEntryScreen extends StatelessWidget {
   final EventEntryScannController controller = Get.put(
@@ -595,94 +599,176 @@ class AddEventEntryScreen extends StatelessWidget {
   }
 
   void _showAttendeeDetails(BuildContext context, RfidTag tag, bool isScanned) {
+    // Show a loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(
+            color: Color(0xFF213AEC),
+          ),
+        );
+      },
+    );
+
+    // Call API to fetch user profile
+    ApiConfig.getBaseUrl().then((baseUrl) {
+      final String cleanEpc = tag.epc.trim();
+      final String urlString = '$baseUrl/flutter/event_phuket/list_users.aspx?id=$cleanEpc&unique_id=$cleanEpc';
+      
+      http.get(Uri.parse(urlString)).timeout(const Duration(seconds: 8)).then((response) {
+        Navigator.of(context).pop(); // Close loading dialog
+
+        if (response.statusCode == 200) {
+          try {
+            final Map<String, dynamic> data = json.decode(response.body);
+            if (data['status'] == true && data['data'] != null && (data['data'] as List).isNotEmpty) {
+              final Map<String, dynamic> userMap = data['data'][0];
+              _showUserProfileDialog(context, userMap);
+            } else {
+              _showErrorDialog(context, data['Message'] ?? 'User details not found.');
+            }
+          } catch (e) {
+            _showErrorDialog(context, 'Failed to parse user details.');
+          }
+        } else {
+          _showErrorDialog(context, 'Server responded with status code: ${response.statusCode}');
+        }
+      }).catchError((error) {
+        Navigator.of(context).pop(); // Close loading dialog
+        _showErrorDialog(context, 'Failed to connect to server: $error');
+      });
+    }).catchError((error) {
+      Navigator.of(context).pop(); // Close loading dialog
+      _showErrorDialog(context, 'Failed to load configuration: $error');
+    });
+  }
+
+  void _showUserProfileDialog(BuildContext context, Map<String, dynamic> userMap) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        // Dynamic attendee generation based on EPC
-        int getIndex(String epcStr) {
-          final digits = RegExp(r'\d+').firstMatch(epcStr)?.group(0);
-          if (digits != null) {
-            return int.tryParse(digits) ?? 0;
+        final String title = userMap['title'] ?? '';
+        final String name = userMap['name'] ?? 'Unknown Name';
+        final String fullName = title.isNotEmpty ? '$title $name' : name;
+        final String uniqueId = userMap['unique_id'] ?? '';
+        final String code = userMap['code'] ?? '';
+        final String state = userMap['state'] ?? '';
+        final String type = userMap['type'] ?? 'Attendee';
+        final String checkinStatus = userMap['checkin_status'] ?? 'Pending';
+        final String checkinTime = userMap['checkin_time'] ?? '';
+        final String awardStatus = userMap['award_status'] ?? 'Pending';
+        final String awardTime = userMap['award_time'] ?? '';
+        final String photoStatus = userMap['photobooth_status'] ?? 'Pending';
+        final String photoTime = userMap['photobooth_time'] ?? '';
+        final String bus = userMap['bus'] ?? '';
+
+        // Initials for avatar
+        String initials = '';
+        if (name.isNotEmpty) {
+          final parts = name.split(' ');
+          if (parts.isNotEmpty) {
+            initials += parts[0][0].toUpperCase();
+            if (parts.length > 1 && parts[1].isNotEmpty) {
+              initials += parts[1][0].toUpperCase();
+            }
           }
-          return epcStr.hashCode;
+        }
+        if (initials.isEmpty) initials = '?';
+
+        Widget buildStatusRow(String label, String status, String time, IconData icon, Color color) {
+          final bool isActive = status.toLowerCase() == 'checked in' || 
+                               status.toLowerCase() == 'awarded' || 
+                               status.toLowerCase() == 'completed';
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isActive ? color.withOpacity(0.06) : Colors.grey[50],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isActive ? color.withOpacity(0.15) : Colors.grey[200]!,
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, color: isActive ? color : Colors.grey[400], size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        status,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: isActive ? color : Colors.grey[600],
+                        ),
+                      ),
+                      if (isActive && time.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          time,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
         }
 
-        String stringToHex(String input) {
-          StringBuffer sb = StringBuffer();
-          for (int i = 0; i < input.length; i++) {
-            sb.write(input.codeUnitAt(i).toRadixString(16));
-          }
-          String result = sb.toString();
-          if (result.length < 16) {
-            result = result.padRight(16, '0');
-          }
-          return result;
+        Widget buildInfoField(String label, String value, IconData icon) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Row(
+              children: [
+                Icon(icon, color: const Color(0xFF213AEC), size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[400],
+                        ),
+                      ),
+                      Text(
+                        value.isNotEmpty ? value : 'N/A',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1E293B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
         }
-
-        final idx = getIndex(tag.epc);
-        final names = [
-          'John Doe',
-          'Jane Smith',
-          'Alice Johnson',
-          'Bob Brown',
-          'Charlie Green',
-          'David White',
-          'Eva Black',
-          'Frank Gray',
-          'Grace Blue',
-          'Henry Red',
-          'Ivy Violet',
-          'Jack Orange',
-          'Kate Yellow',
-        ];
-        final name = names[idx % names.length];
-
-        final ids = [
-          1024,
-          1025,
-          1026,
-          1027,
-          1028,
-          1029,
-          1030,
-          1031,
-          1032,
-          1033,
-        ];
-        final id = ids[idx % ids.length];
-
-        final codes = [
-          'QR-8829-X',
-          'QR-5541-Y',
-          'QR-1234-A',
-          'QR-9876-B',
-          'QR-4567-C',
-        ];
-        final code = codes[idx % codes.length];
-
-        final companies = [
-          'Precision Logistics',
-          'Tech Innovations',
-          'Global Trade',
-          'Vanguard Services',
-          'Nexus Industries',
-        ];
-        final company = companies[idx % companies.length];
-
-        final awards = [
-          'Gold Member',
-          'Silver Member',
-          'Bronze Member',
-          'VIP Member',
-          'Premium Member',
-        ];
-        final award = awards[idx % awards.length];
-
-        final buses = ['B-42', 'B-15', 'B-08', 'B-33', 'B-24'];
-        final bus = buses[idx % buses.length];
-
-        final photoStatuses = ['Completed', 'Pending', 'In Progress'];
-        final photoStatus = photoStatuses[idx % photoStatuses.length];
 
         return Dialog(
           shape: RoundedRectangleBorder(
@@ -691,7 +777,7 @@ class AddEventEntryScreen extends StatelessWidget {
           elevation: 0,
           backgroundColor: Colors.transparent,
           child: Container(
-            padding: const EdgeInsets.all(24),
+            constraints: const BoxConstraints(maxWidth: 400),
             decoration: BoxDecoration(
               color: Colors.white,
               shape: BoxShape.rectangle,
@@ -704,220 +790,134 @@ class AddEventEntryScreen extends StatelessWidget {
                 ),
               ],
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Title & Close Button
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Tag Details',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0F172A),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Color(0xFF64748B)),
-                      onPressed: () => Navigator.of(context).pop(),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
-                ),
-                const Divider(
-                  height: 24,
-                  thickness: 1,
-                  color: Color(0xFFE2E8F0),
-                ),
-
-                // Avatar & Name Centered
-                Center(
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: const Color(0xFFE2E8F0),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: ClipOval(
-                          child: Image.asset(
-                            'assets/logo/avatar_john_doe.png',
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(
-                                  Icons.person,
-                                  size: 48,
-                                  color: Color(0xFF64748B),
-                                ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        name,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0F172A),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Key-Value rows
-                _buildPopupRow(
-                  'ID:',
-                  Text(
-                    id.toString(),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                      color: Color(0xFF0F172A),
-                    ),
-                  ),
-                ),
-                _buildPopupRow(
-                  'Code:',
-                  Text(
-                    code,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                      color: Color(0xFF0F172A),
-                    ),
-                  ),
-                ),
-                _buildPopupRow(
-                  'Company Name:',
-                  Text(
-                    company,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                      color: Color(0xFF0F172A),
-                    ),
-                  ),
-                ),
-                _buildPopupRow(
-                  'Check-in Status:',
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isScanned
-                          ? const Color(0xFFEEF2FF)
-                          : const Color(0xFFFEF2F2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      isScanned ? 'Checked In' : 'Pending',
-                      style: TextStyle(
-                        color: isScanned
-                            ? const Color(0xFF213AEC)
-                            : const Color(0xFFEF4444),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF213AEC), Color(0xFF5D71F4)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(24),
+                        topRight: Radius.circular(24),
                       ),
                     ),
-                  ),
-                ),
-                _buildPopupRow(
-                  'Check-in Time:',
-                  Text(
-                    isScanned
-                        ? DateFormat('hh:mm a').format(tag.readTime)
-                        : '--',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                      color: Color(0xFF0F172A),
+                    child: Column(
+                      children: [
+                        CircleAvatar(
+                          radius: 36,
+                          backgroundColor: Colors.white,
+                          child: Text(
+                            initials,
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF213AEC),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          fullName,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            type.toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                _buildPopupRow(
-                  'Award Status:',
-                  Text(
-                    award,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: Color(0xFFDC2626),
+                  
+                  // Info Details Section
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'PERSONAL DETAILS',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF64748B),
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        buildInfoField('Employee Code', code, Icons.badge_outlined),
+                        buildInfoField('Unique ID', uniqueId, Icons.fingerprint),
+                        buildInfoField('State / Location', state, Icons.location_on_outlined),
+                        if (bus.isNotEmpty) buildInfoField('Assigned Bus', bus, Icons.directions_bus_outlined),
+                        
+                        const SizedBox(height: 16),
+                        const Text(
+                          'EVENT CHECKLIST & STATUS',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF64748B),
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        buildStatusRow('BUS CHECK-IN', checkinStatus, checkinTime, Icons.directions_bus, const Color(0xFF10B981)),
+                        buildStatusRow('AWARDS STAGE', awardStatus, awardTime, Icons.emoji_events, const Color(0xFFF59E0B)),
+                        buildStatusRow('PHOTOBOOTH', photoStatus, photoTime, Icons.camera_alt, const Color(0xFF06B6D4)),
+                      ],
                     ),
                   ),
-                ),
-                _buildPopupRow(
-                  'Photobooth Status:',
-                  Text(
-                    photoStatus,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                      color: Color(0xFF0F172A),
-                    ),
-                  ),
-                ),
-                _buildPopupRow(
-                  'Bus No:',
-                  Text(
-                    bus,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                      color: Color(0xFF0F172A),
-                    ),
-                  ),
-                ),
-                _buildPopupRow(
-                  'IFID:',
-                  Text(
-                    stringToHex(tag.epc),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                      color: Color(0xFF0F172A),
-                    ),
-                  ),
-                ),
 
-                const SizedBox(height: 24),
-
-                // Close Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF213AEC),
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    child: const Text(
-                      'Close',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                  // Actions
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF213AEC),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: const Text(
+                          'Close Profile',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
@@ -925,25 +925,42 @@ class AddEventEntryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPopupRow(String label, Widget valueWidget) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF64748B),
-              fontWeight: FontWeight.w500,
-            ),
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-          valueWidget,
-        ],
-      ),
+          title: const Row(
+            children: [
+              Icon(Icons.error_outline_rounded, color: Color(0xFFEF4444), size: 28),
+              SizedBox(width: 8),
+              Text(
+                'Fetch Error',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+            ],
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'OK',
+                style: TextStyle(color: Color(0xFF213AEC), fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
+
 
   void _handleBackPress(BuildContext context) {
     if (controller.isScanning.value) {
