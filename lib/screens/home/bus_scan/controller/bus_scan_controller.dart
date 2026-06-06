@@ -11,6 +11,7 @@ import '../../../../controllers/location_master_controller.dart';
 import '../../../../controllers/vehicle_master_controller.dart';
 import '../../../../config/api_config.dart';
 import '../../../../api/api_urls.dart';
+import '../../../../api/api_client.dart';
 import '../scan_details_screen.dart';
 
 class BusScanController extends GetxController with WidgetsBindingObserver {
@@ -39,6 +40,10 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
   StreamSubscription? _tagSubscription;
   bool _showResumeWarning = false;
 
+  // Event day info
+
+  var day = 'day1'.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -46,6 +51,7 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
 
     _initializeReader();
     _rfidService.registerPhysicalTriggerCallback(_handlePhysicalTrigger);
+    fetchEventDay();
   }
 
   bool setFromLocation(LocationModel location) {
@@ -277,7 +283,7 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
         return {
           "vehicle_id": vehicleId,
           "uniq_id": tag.displayName,
-          "day": "1",
+          "day": day.value,
         };
       }).toList();
 
@@ -496,7 +502,7 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
       final Map<String, String> payload = {
         "user_id": userId,
         "vehicle_id": vehicleId,
-        "day": "1",
+        "day": day.value,
       };
 
       final String baseUrl = await ApiConfig.getBaseUrl();
@@ -584,7 +590,7 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
           "uniq_id": tag.displayName,
           "from_location_id": fromLocId,
           "to_location_id": toLocId,
-          "day": "1",
+          "day": day.value,
         };
       }).toList();
 
@@ -630,6 +636,43 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
         snackPosition: SnackPosition.BOTTOM,
       );
       return false;
+    }
+  }
+
+  Future<void> fetchEventDay() async {
+    try {
+      final response = await ApiClient.get(
+        'flutter/event_phuket/view_event_settings.aspx',
+      );
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        if (responseData['status'] == true) {
+          final List<dynamic> data = responseData['data'] ?? [];
+          var daySetting = data.firstWhereOrNull(
+            (item) =>
+                item['value']?.toString().toLowerCase() == 'current day' ||
+                item['key']?.toString().toLowerCase() == 'current day',
+          );
+          daySetting ??= data.firstWhereOrNull(
+            (item) =>
+                item['key']?.toString().toLowerCase().contains('day') == true ||
+                item['value']?.toString().toLowerCase().contains('day') == true,
+          );
+
+          if (daySetting != null) {
+            final keyStr = daySetting['key']?.toString() ?? "";
+            final valStr = daySetting['value']?.toString() ?? "";
+
+            if (valStr.toLowerCase() == "current day") {
+              day.value = keyStr;
+            } else {
+              day.value = valStr;
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching event day: $e');
     }
   }
 

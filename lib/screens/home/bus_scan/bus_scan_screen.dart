@@ -32,13 +32,31 @@ class BusScanScreen extends StatelessWidget {
               icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () => _handleBackPress(context),
             ),
-            title: const Text(
-              'Bus Scanning',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
+            title: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Bus Scanning',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                Obx(() {
+                  final day = controller.day.value.toUpperCase();
+                  if (day.isEmpty) return const SizedBox.shrink();
+                  return Text(
+                    day,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Inter',
+                    ),
+                  );
+                }),
+              ],
             ),
             centerTitle: true,
             actions: [_buildRangeSettingsButton(context)],
