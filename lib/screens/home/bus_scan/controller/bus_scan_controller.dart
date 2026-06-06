@@ -1,19 +1,28 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import '../../../../models/rfid_tag.dart';
 import '../../../../models/location_model.dart';
 import '../../../../models/vehicle_model.dart';
 import '../../../../services/rfid_service.dart';
 import '../../../../controllers/location_master_controller.dart';
 import '../../../../controllers/vehicle_master_controller.dart';
+import '../../../../config/api_config.dart';
+import '../../../../api/api_urls.dart';
+import '../scan_details_screen.dart';
 
 class BusScanController extends GetxController with WidgetsBindingObserver {
   final RfidService _rfidService = RfidService();
-  
+
   // Master controllers
-  final LocationMasterController locationMasterController = Get.put(LocationMasterController());
-  final VehicleMasterController vehicleMasterController = Get.put(VehicleMasterController());
+  final LocationMasterController locationMasterController = Get.put(
+    LocationMasterController(),
+  );
+  final VehicleMasterController vehicleMasterController = Get.put(
+    VehicleMasterController(),
+  );
 
   // Connection and Scanning States
   var isConnected = false.obs;
@@ -34,13 +43,14 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
-    
+
     _initializeReader();
     _rfidService.registerPhysicalTriggerCallback(_handlePhysicalTrigger);
   }
 
   bool setFromLocation(LocationModel location) {
-    if (selectedToLocation.value != null && selectedToLocation.value!.id == location.id) {
+    if (selectedToLocation.value != null &&
+        selectedToLocation.value!.id == location.id) {
       Get.snackbar(
         'Validation Error',
         'From Location cannot be the same as To Location.',
@@ -55,7 +65,8 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
   }
 
   bool setToLocation(LocationModel location) {
-    if (selectedFromLocation.value != null && selectedFromLocation.value!.id == location.id) {
+    if (selectedFromLocation.value != null &&
+        selectedFromLocation.value!.id == location.id) {
       Get.snackbar(
         'Validation Error',
         'To Location cannot be the same as From Location.',
@@ -193,7 +204,8 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
       if (isScanning.value) {
         stopScan();
         _showResumeWarning = true;
@@ -229,6 +241,91 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
           ),
         );
       }
+    }
+  }
+
+  Future<void> checkStatus() async {
+    if (selectedBus.value == null) {
+      Get.snackbar(
+        'Selection Required',
+        'Please select a Bus first.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+    if (scannedTags.isEmpty) {
+      Get.snackbar(
+        'No Scans Found',
+        'Please scan at least one RFID tag before checking status.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    Get.dialog(
+      const Center(child: CircularProgressIndicator(color: Color(0xFF213AEC))),
+      barrierDismissible: false,
+    );
+
+    try {
+      final String vehicleId = selectedBus.value!.id;
+      final List<Map<String, String>> payload = scannedTags.map((tag) {
+        return {"vehicle_id": vehicleId, "uniq_id": tag.epc, "day": "1"};
+      }).toList();
+
+      final String baseUrl = await ApiConfig.getBaseUrl();
+      final String fullUrl = '$baseUrl${ApiUrls.checkStatus}';
+      debugPrint('BusScanController POST Request: $fullUrl');
+      debugPrint('Payload: ${json.encode(payload)}');
+
+      final response = await http
+          .post(
+            Uri.parse(fullUrl),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode(payload),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+
+        Get.to(
+          () => ScanDetailsScreen(
+            scanDetails: data,
+            fromLocation: selectedFromLocation.value?.name ?? 'Airport',
+            toLocation: selectedToLocation.value?.name ?? 'Hotel',
+            busName: selectedBus.value?.name ?? '03',
+          ),
+        );
+      } else {
+        Get.snackbar(
+          'API Error',
+          'Failed to check status. Server responded with code ${response.statusCode}.',
+          backgroundColor: const Color(0xFFEF4444),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      debugPrint('Error checking status: $e');
+      Get.snackbar(
+        'Network Error',
+        'Could not connect to the server. Please check your network connection and try again.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 

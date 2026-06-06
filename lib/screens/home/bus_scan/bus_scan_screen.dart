@@ -41,9 +41,7 @@ class BusScanScreen extends StatelessWidget {
               ),
             ),
             centerTitle: true,
-            actions: [
-              _buildRangeSettingsButton(context),
-            ],
+            actions: [_buildRangeSettingsButton(context)],
           ),
           body: SafeArea(
             child: Column(
@@ -129,19 +127,22 @@ class BusScanScreen extends StatelessWidget {
   Widget _buildConnectionCard(BuildContext context) {
     return Obx(() {
       final isConnected = controller.isConnected.value;
-      final Color cardBorderColor = isConnected ? const Color(0xFF22C55E) : const Color(0xFFEF4444);
-      final Color cardBgColor = isConnected ? const Color(0xFFF0FDF4) : const Color(0xFFFEF2F2);
-      final Color textColor = isConnected ? const Color(0xFF16A34A) : const Color(0xFFDC2626);
+      final Color cardBorderColor = isConnected
+          ? const Color(0xFF22C55E)
+          : const Color(0xFFEF4444);
+      final Color cardBgColor = isConnected
+          ? const Color(0xFFF0FDF4)
+          : const Color(0xFFFEF2F2);
+      final Color textColor = isConnected
+          ? const Color(0xFF16A34A)
+          : const Color(0xFFDC2626);
 
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 16.0),
         decoration: BoxDecoration(
           color: cardBgColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: cardBorderColor,
-            width: 1.5,
-          ),
+          border: Border.all(color: cardBorderColor, width: 1.5),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
@@ -152,7 +153,9 @@ class BusScanScreen extends StatelessWidget {
                 height: 24,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isConnected ? const Color(0xFF22C55E).withOpacity(0.15) : const Color(0xFFEF4444).withOpacity(0.15),
+                  color: isConnected
+                      ? const Color(0xFF22C55E).withOpacity(0.15)
+                      : const Color(0xFFEF4444).withOpacity(0.15),
                 ),
                 child: Center(
                   child: Container(
@@ -160,7 +163,9 @@ class BusScanScreen extends StatelessWidget {
                     height: 10,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: isConnected ? const Color(0xFF22C55E) : const Color(0xFFEF4444),
+                      color: isConnected
+                          ? const Color(0xFF22C55E)
+                          : const Color(0xFFEF4444),
                     ),
                   ),
                 ),
@@ -179,7 +184,9 @@ class BusScanScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      isConnected ? 'Real RFID Hardware Active' : 'Tap retry to check connection',
+                      isConnected
+                          ? 'Real RFID Hardware Active'
+                          : 'Tap retry to check connection',
                       style: const TextStyle(
                         fontSize: 12,
                         color: Color(0xFF64748B),
@@ -242,7 +249,10 @@ class BusScanScreen extends StatelessWidget {
                     onTap: () => _showLocationPicker(context, true),
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
@@ -261,11 +271,17 @@ class BusScanScreen extends StatelessWidget {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              fromLoc != null ? fromLoc.name : 'Select From Location',
+                              fromLoc != null
+                                  ? fromLoc.name
+                                  : 'Select From Location',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: fromLoc != null ? const Color(0xFF0F172A) : const Color(0xFF94A3B8),
-                                fontWeight: fromLoc != null ? FontWeight.w500 : FontWeight.normal,
+                                color: fromLoc != null
+                                    ? const Color(0xFF0F172A)
+                                    : const Color(0xFF94A3B8),
+                                fontWeight: fromLoc != null
+                                    ? FontWeight.w500
+                                    : FontWeight.normal,
                                 fontFamily: 'Inter',
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -286,7 +302,10 @@ class BusScanScreen extends StatelessWidget {
                     onTap: () => _showLocationPicker(context, false),
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
@@ -308,8 +327,12 @@ class BusScanScreen extends StatelessWidget {
                               toLoc != null ? toLoc.name : 'Select To Location',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: toLoc != null ? const Color(0xFF0F172A) : const Color(0xFF94A3B8),
-                                fontWeight: toLoc != null ? FontWeight.w500 : FontWeight.normal,
+                                color: toLoc != null
+                                    ? const Color(0xFF0F172A)
+                                    : const Color(0xFF94A3B8),
+                                fontWeight: toLoc != null
+                                    ? FontWeight.w500
+                                    : FontWeight.normal,
                                 fontFamily: 'Inter',
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -350,7 +373,10 @@ class BusScanScreen extends StatelessWidget {
               onTap: () => _showBusPicker(context),
               borderRadius: BorderRadius.circular(12),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
@@ -372,8 +398,12 @@ class BusScanScreen extends StatelessWidget {
                         bus != null ? bus.name : 'Select Bus',
                         style: TextStyle(
                           fontSize: 15,
-                          color: bus != null ? const Color(0xFF0F172A) : const Color(0xFF94A3B8),
-                          fontWeight: bus != null ? FontWeight.bold : FontWeight.normal,
+                          color: bus != null
+                              ? const Color(0xFF0F172A)
+                              : const Color(0xFF94A3B8),
+                          fontWeight: bus != null
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                           fontFamily: 'Inter',
                         ),
                       ),
@@ -415,7 +445,9 @@ class BusScanScreen extends StatelessWidget {
                   ),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    backgroundColor: isEnabled ? const Color(0xFF22C55E) : const Color(0xFFBBF7D0),
+                    backgroundColor: isEnabled
+                        ? const Color(0xFF22C55E)
+                        : const Color(0xFFBBF7D0),
                     foregroundColor: Colors.white,
                     disabledBackgroundColor: const Color(0xFFBBF7D0),
                     disabledForegroundColor: Colors.white.withOpacity(0.8),
@@ -444,9 +476,13 @@ class BusScanScreen extends StatelessWidget {
                   ),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    backgroundColor: isEnabled ? const Color(0xFFEF4444) : const Color(0xFFFCA5A5).withOpacity(0.5),
+                    backgroundColor: isEnabled
+                        ? const Color(0xFFEF4444)
+                        : const Color(0xFFFCA5A5).withOpacity(0.5),
                     foregroundColor: Colors.white,
-                    disabledBackgroundColor: const Color(0xFFFCA5A5).withOpacity(0.5),
+                    disabledBackgroundColor: const Color(
+                      0xFFFCA5A5,
+                    ).withOpacity(0.5),
                     disabledForegroundColor: Colors.white.withOpacity(0.8),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -510,7 +546,9 @@ class BusScanScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: isScanning ? const Color(0xFF213AEC) : const Color(0xFF64748B),
+              color: isScanning
+                  ? const Color(0xFF213AEC)
+                  : const Color(0xFF64748B),
             ),
           ),
         ],
@@ -526,11 +564,19 @@ class BusScanScreen extends StatelessWidget {
         children: [
           Text(
             'EPC',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 15),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+              fontSize: 15,
+            ),
           ),
           Text(
             'Action',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 15),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+              fontSize: 15,
+            ),
           ),
         ],
       ),
@@ -579,7 +625,10 @@ class BusScanScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 14.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12.0,
+                vertical: 14.0,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -615,10 +664,7 @@ class BusScanScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFEEF2FF),
         border: Border(
-          top: BorderSide(
-            color: const Color(0xFFE2E8F0),
-            width: 1,
-          ),
+          top: BorderSide(color: const Color(0xFFE2E8F0), width: 1),
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -650,7 +696,7 @@ class BusScanScreen extends StatelessWidget {
             ],
           ),
           ElevatedButton(
-            onPressed: () => _showScanSummary(context),
+            onPressed: () => controller.checkStatus(),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF213AEC),
               foregroundColor: Colors.white,
@@ -662,10 +708,7 @@ class BusScanScreen extends StatelessWidget {
             ),
             child: const Text(
               'Check Status',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
           ),
         ],
@@ -692,7 +735,9 @@ class BusScanScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  isFromLocation ? 'Select From Location' : 'Select To Location',
+                  isFromLocation
+                      ? 'Select From Location'
+                      : 'Select To Location',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -720,7 +765,10 @@ class BusScanScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final loc = locs[index];
                       return ListTile(
-                        leading: const Icon(Icons.location_on_outlined, color: Color(0xFF213AEC)),
+                        leading: const Icon(
+                          Icons.location_on_outlined,
+                          color: Color(0xFF213AEC),
+                        ),
                         title: Text(
                           loc.name,
                           style: const TextStyle(fontWeight: FontWeight.w600),
@@ -795,7 +843,10 @@ class BusScanScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final vehicle = vehicles[index];
                       return ListTile(
-                        leading: const Icon(Icons.directions_bus, color: Color(0xFF213AEC)),
+                        leading: const Icon(
+                          Icons.directions_bus,
+                          color: Color(0xFF213AEC),
+                        ),
                         title: Text(
                           vehicle.name,
                           style: const TextStyle(fontWeight: FontWeight.w600),
@@ -843,22 +894,61 @@ class BusScanScreen extends StatelessWidget {
 
         final idx = getIndex(tag.epc);
         final names = [
-          'John Doe', 'Jane Smith', 'Alice Johnson', 'Bob Brown', 
-          'Charlie Green', 'David White', 'Eva Black', 'Frank Gray', 
-          'Grace Blue', 'Henry Red', 'Ivy Violet', 'Jack Orange', 'Kate Yellow'
+          'John Doe',
+          'Jane Smith',
+          'Alice Johnson',
+          'Bob Brown',
+          'Charlie Green',
+          'David White',
+          'Eva Black',
+          'Frank Gray',
+          'Grace Blue',
+          'Henry Red',
+          'Ivy Violet',
+          'Jack Orange',
+          'Kate Yellow',
         ];
         final name = names[idx % names.length];
 
-        final ids = [1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033];
+        final ids = [
+          1024,
+          1025,
+          1026,
+          1027,
+          1028,
+          1029,
+          1030,
+          1031,
+          1032,
+          1033,
+        ];
         final id = ids[idx % ids.length];
 
-        final codes = ['QR-8829-X', 'QR-5541-Y', 'QR-1234-A', 'QR-9876-B', 'QR-4567-C'];
+        final codes = [
+          'QR-8829-X',
+          'QR-5541-Y',
+          'QR-1234-A',
+          'QR-9876-B',
+          'QR-4567-C',
+        ];
         final code = codes[idx % codes.length];
 
-        final companies = ['Precision Logistics', 'Tech Innovations', 'Global Trade', 'Vanguard Services', 'Nexus Industries'];
+        final companies = [
+          'Precision Logistics',
+          'Tech Innovations',
+          'Global Trade',
+          'Vanguard Services',
+          'Nexus Industries',
+        ];
         final company = companies[idx % companies.length];
 
-        final awards = ['Gold Member', 'Silver Member', 'Bronze Member', 'VIP Member', 'Premium Member'];
+        final awards = [
+          'Gold Member',
+          'Silver Member',
+          'Bronze Member',
+          'VIP Member',
+          'Premium Member',
+        ];
         final award = awards[idx % awards.length];
 
         final buses = ['B-42', 'B-15', 'B-08', 'B-33', 'B-24'];
@@ -910,8 +1000,12 @@ class BusScanScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                const Divider(height: 24, thickness: 1, color: Color(0xFFE2E8F0)),
-                
+                const Divider(
+                  height: 24,
+                  thickness: 1,
+                  color: Color(0xFFE2E8F0),
+                ),
+
                 Center(
                   child: Column(
                     children: [
@@ -920,17 +1014,21 @@ class BusScanScreen extends StatelessWidget {
                         height: 80,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+                          border: Border.all(
+                            color: const Color(0xFFE2E8F0),
+                            width: 1.5,
+                          ),
                         ),
                         child: ClipOval(
                           child: Image.asset(
                             'assets/logo/avatar_john_doe.png',
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => const Icon(
-                              Icons.person,
-                              size: 48,
-                              color: Color(0xFF64748B),
-                            ),
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(
+                                  Icons.person,
+                                  size: 48,
+                                  color: Color(0xFF64748B),
+                                ),
                           ),
                         ),
                       ),
@@ -948,47 +1046,118 @@ class BusScanScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                _buildPopupRow('ID:', Text(id.toString(), style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A)))),
-                _buildPopupRow('Code:', Text(code, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A)))),
-                _buildPopupRow('Company Name:', Text(company, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A)))),
-                _buildPopupRow('Check-in Status:', Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEEF2FF),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Text(
-                    'Checked In',
-                    style: TextStyle(
-                      color: Color(0xFF213AEC),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                _buildPopupRow(
+                  'ID:',
+                  Text(
+                    id.toString(),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      color: Color(0xFF0F172A),
                     ),
                   ),
-                )),
-                _buildPopupRow('Check-in Time:', Text(
-                  DateFormat('hh:mm a').format(tag.readTime),
-                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A))
-                )),
-                _buildPopupRow('Award Status:', Text(
-                  award,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFFDC2626))
-                )),
-                _buildPopupRow('Photobooth Status:', Text(
-                  photoStatus,
-                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A))
-                )),
-                _buildPopupRow('Bus No:', Text(
-                  bus,
-                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A))
-                )),
-                _buildPopupRow('IFID:', Text(
-                  stringToHex(tag.epc),
-                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF0F172A))
-                )),
+                ),
+                _buildPopupRow(
+                  'Code:',
+                  Text(
+                    code,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ),
+                _buildPopupRow(
+                  'Company Name:',
+                  Text(
+                    company,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ),
+                _buildPopupRow(
+                  'Check-in Status:',
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEEF2FF),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'Checked In',
+                      style: TextStyle(
+                        color: Color(0xFF213AEC),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+                _buildPopupRow(
+                  'Check-in Time:',
+                  Text(
+                    DateFormat('hh:mm a').format(tag.readTime),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ),
+                _buildPopupRow(
+                  'Award Status:',
+                  Text(
+                    award,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Color(0xFFDC2626),
+                    ),
+                  ),
+                ),
+                _buildPopupRow(
+                  'Photobooth Status:',
+                  Text(
+                    photoStatus,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ),
+                _buildPopupRow(
+                  'Bus No:',
+                  Text(
+                    bus,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ),
+                _buildPopupRow(
+                  'IFID:',
+                  Text(
+                    stringToHex(tag.epc),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ),
 
                 const SizedBox(height: 24),
-                
+
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -1004,7 +1173,10 @@ class BusScanScreen extends StatelessWidget {
                     ),
                     child: const Text(
                       'Close',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
                     ),
                   ),
                 ),
@@ -1064,7 +1236,11 @@ class BusScanScreen extends StatelessWidget {
               _buildSummaryRow('To Location:', toLoc),
               _buildSummaryRow('Selected Bus:', busName),
               const Divider(height: 24),
-              _buildSummaryRow('Total Scanned Items:', count.toString(), isBold: true),
+              _buildSummaryRow(
+                'Total Scanned Items:',
+                count.toString(),
+                isBold: true,
+              ),
             ],
           ),
           actions: [
@@ -1137,7 +1313,10 @@ class BusScanScreen extends StatelessWidget {
                 onPressed: () => Navigator.of(context).pop(),
                 child: const Text(
                   'Cancel',
-                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               ElevatedButton(
