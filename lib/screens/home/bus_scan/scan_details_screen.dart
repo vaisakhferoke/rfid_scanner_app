@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../controllers/range_controller.dart';
 import '../../../../services/range_settings_popup.dart';
+import 'controller/bus_scan_controller.dart';
 
 class ScanDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> scanDetails;
@@ -18,6 +19,7 @@ class ScanDetailsScreen extends StatelessWidget {
   });
 
   final RangeController rangeController = Get.find<RangeController>();
+  final BusScanController controller = Get.find<BusScanController>();
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +51,7 @@ class ScanDetailsScreen extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-        actions: [
-          _buildRangeSettingsButton(context),
-        ],
+        actions: [_buildRangeSettingsButton(context)],
       ),
       body: SafeArea(
         child: Column(
@@ -59,7 +59,10 @@ class ScanDetailsScreen extends StatelessWidget {
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 16.0,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -372,11 +375,13 @@ class ScanDetailsScreen extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: count > 3 ? 3 : count, // Limit to 3 preview items
-              separatorBuilder: (context, index) => const Divider(height: 16, color: Color(0xFFF1F5F9)),
+              separatorBuilder: (context, index) =>
+                  const Divider(height: 16, color: Color(0xFFF1F5F9)),
               itemBuilder: (context, index) {
                 final passenger = list[index];
                 final String name = passenger['name'] ?? 'Unknown';
-                final String code = passenger['uniq_id'] ?? passenger['username'] ?? '';
+                final String code =
+                    passenger['uniq_id'] ?? passenger['username'] ?? '';
                 final String initials = _getInitials(name);
 
                 return Row(
@@ -454,7 +459,11 @@ class ScanDetailsScreen extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.warning_rounded, color: Color(0xFFF59E0B), size: 20),
+                  const Icon(
+                    Icons.warning_rounded,
+                    color: Color(0xFFF59E0B),
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Wrong Bus (${count.toString().padLeft(2, '0')})',
@@ -519,7 +528,11 @@ class ScanDetailsScreen extends StatelessWidget {
                           const CircleAvatar(
                             radius: 18,
                             backgroundColor: Color(0xFFE2E8F0),
-                            child: Icon(Icons.person, color: Color(0xFF64748B), size: 18),
+                            child: Icon(
+                              Icons.person,
+                              color: Color(0xFF64748B),
+                              size: 18,
+                            ),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
@@ -556,16 +569,28 @@ class ScanDetailsScreen extends StatelessWidget {
                                 // Scanned Bus Box
                                 Expanded(
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 6,
+                                      horizontal: 8,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFFEF3C7), // Light yellow
+                                      color: const Color(
+                                        0xFFFEF3C7,
+                                      ), // Light yellow
                                       borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: const Color(0xFFFDE68A)),
+                                      border: Border.all(
+                                        color: const Color(0xFFFDE68A),
+                                      ),
                                     ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        const Icon(Icons.directions_bus, color: Color(0xFFD97706), size: 14),
+                                        const Icon(
+                                          Icons.directions_bus,
+                                          color: Color(0xFFD97706),
+                                          size: 14,
+                                        ),
                                         const SizedBox(width: 4),
                                         Expanded(
                                           child: Text(
@@ -584,22 +609,40 @@ class ScanDetailsScreen extends StatelessWidget {
                                   ),
                                 ),
                                 const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 4.0),
-                                  child: Icon(Icons.arrow_forward_rounded, color: Color(0xFF213AEC), size: 14),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 4.0,
+                                  ),
+                                  child: Icon(
+                                    Icons.arrow_forward_rounded,
+                                    color: Color(0xFF213AEC),
+                                    size: 14,
+                                  ),
                                 ),
                                 // Assigned Bus Box
                                 Expanded(
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 6,
+                                      horizontal: 8,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFDCFCE7), // Light green
+                                      color: const Color(
+                                        0xFFDCFCE7,
+                                      ), // Light green
                                       borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: const Color(0xFFBBF7D0)),
+                                      border: Border.all(
+                                        color: const Color(0xFFBBF7D0),
+                                      ),
                                     ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        const Icon(Icons.directions_bus, color: Color(0xFF15803D), size: 14),
+                                        const Icon(
+                                          Icons.directions_bus,
+                                          color: Color(0xFF15803D),
+                                          size: 14,
+                                        ),
                                         const SizedBox(width: 4),
                                         Expanded(
                                           child: Text(
@@ -622,14 +665,18 @@ class ScanDetailsScreen extends StatelessWidget {
                           ),
                           const SizedBox(width: 12),
                           OutlinedButton(
-                            onPressed: () => _confirmUpdateBus(context, name, scannedBus),
+                            onPressed: () =>
+                                _confirmUpdateBus(context, name, scannedBus),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: const Color(0xFF213AEC),
                               side: const BorderSide(color: Color(0xFF213AEC)),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
                             ),
                             child: const Text(
                               'Update Bus',
@@ -658,39 +705,7 @@ class ScanDetailsScreen extends StatelessWidget {
       child: SizedBox(
         width: double.infinity,
         child: ElevatedButton.icon(
-          onPressed: () {
-            Get.dialog(
-              AlertDialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                title: const Row(
-                  children: [
-                    Icon(Icons.check_circle, color: Color(0xFF22C55E)),
-                    SizedBox(width: 8),
-                    Text('Success'),
-                  ],
-                ),
-                content: const Text(
-                  'Bus Scanning details submitted successfully.',
-                  style: TextStyle(fontSize: 15),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Get.back(); // Close dialog
-                      Get.back(); // Pop ScanDetailsScreen
-                      Get.back(); // Pop BusScanScreen to return to Home
-                    },
-                    child: const Text(
-                      'OK',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF213AEC)),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
+          onPressed: () => _showSubmitSummaryDialog(),
           icon: const Icon(Icons.save_outlined, color: Colors.white),
           label: const Text(
             'Submit',
@@ -710,7 +725,146 @@ class ScanDetailsScreen extends StatelessWidget {
     );
   }
 
-  void _confirmUpdateBus(BuildContext context, String passengerName, String busCode) {
+  void _showSubmitSummaryDialog() {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.assignment_outlined, color: Color(0xFF213AEC)),
+            SizedBox(width: 8),
+            Text('Submit Confirmation'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Please review the trip summary before submitting to the server:',
+              style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            _buildSummaryDetailRow('From Location:', fromLocation),
+            _buildSummaryDetailRow('To Location:', toLocation),
+            _buildSummaryDetailRow('Selected Bus:', busName),
+            const Divider(height: 24),
+            _buildSummaryDetailRow(
+              'Total Passengers:',
+              controller.scannedTags.length.toString(),
+              isBold: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Get.back(); // Close summary dialog
+              bool success = await controller.submitTrip();
+              if (success) {
+                _showSuccessDialog();
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF213AEC),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'OK',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSuccessDialog() {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.check_circle, color: Color(0xFF22C55E)),
+            SizedBox(width: 8),
+            Text('Success'),
+          ],
+        ),
+        content: const Text(
+          'Trip data submitted successfully!',
+          style: TextStyle(fontSize: 15),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Get.back(); // Close success dialog
+              Get.back(); // Pop ScanDetailsScreen
+              Get.back(); // Pop BusScanScreen
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF213AEC),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'OK',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  Widget _buildSummaryDetailRow(
+    String label,
+    String value, {
+    bool isBold = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFF64748B),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              color: const Color(0xFF0F172A),
+              fontSize: 14,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmUpdateBus(
+    BuildContext context,
+    String passengerName,
+    String busCode,
+  ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -719,13 +873,18 @@ class ScanDetailsScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
           title: const Text('Update Assignment'),
-          content: Text('Do you want to assign $passengerName to Bus $busCode?'),
+          content: Text(
+            'Do you want to assign $passengerName to Bus $busCode?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text(
                 'Cancel',
-                style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             ElevatedButton(

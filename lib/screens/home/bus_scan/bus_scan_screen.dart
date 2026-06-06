@@ -695,22 +695,32 @@ class BusScanScreen extends StatelessWidget {
               }),
             ],
           ),
-          ElevatedButton(
-            onPressed: () => controller.checkStatus(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF213AEC),
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
+          Obx(() {
+            final isScanning = controller.isScanning.value;
+            return ElevatedButton(
+              onPressed: isScanning ? null : () => controller.checkStatus(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isScanning
+                    ? const Color(0xFFCBD5E1)
+                    : const Color(0xFF213AEC),
+                foregroundColor: Colors.white,
+                disabledBackgroundColor: const Color(0xFFCBD5E1),
+                disabledForegroundColor: Colors.white.withOpacity(0.8),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-            child: const Text(
-              'Check Status',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-            ),
-          ),
+              child: const Text(
+                'Check Status',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+            );
+          }),
         ],
       ),
     );

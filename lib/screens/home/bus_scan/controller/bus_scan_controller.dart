@@ -329,6 +329,97 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
     }
   }
 
+  Future<bool> submitTrip() async {
+    if (selectedBus.value == null ||
+        selectedFromLocation.value == null ||
+        selectedToLocation.value == null) {
+      Get.snackbar(
+        'Validation Error',
+        'Incomplete route or bus selection.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+    if (scannedTags.isEmpty) {
+      Get.snackbar(
+        'No Scans Found',
+        'Please scan at least one RFID tag before submitting.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+
+    Get.dialog(
+      const Center(
+        child: CircularProgressIndicator(
+          color: Color(0xFF213AEC),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+
+    try {
+      final String vehicleId = selectedBus.value!.id;
+      final String fromLocId = selectedFromLocation.value!.id;
+      final String toLocId = selectedToLocation.value!.id;
+
+      final List<Map<String, String>> payload = scannedTags.map((tag) {
+        return {
+          "vehicle_id": vehicleId,
+          "uniq_id": tag.epc,
+          "from_location_id": fromLocId,
+          "to_location_id": toLocId,
+          "day": "1"
+        };
+      }).toList();
+
+      final String baseUrl = await ApiConfig.getBaseUrl();
+      final String fullUrl = '$baseUrl${ApiUrls.submitTrip}';
+      debugPrint('BusScanController submitTrip POST: $fullUrl');
+      debugPrint('Payload: ${json.encode(payload)}');
+
+      final response = await http.post(
+        Uri.parse(fullUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(payload),
+      ).timeout(const Duration(seconds: 15));
+
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        Get.snackbar(
+          'API Error',
+          'Failed to submit data. Server responded with code ${response.statusCode}.',
+          backgroundColor: const Color(0xFFEF4444),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return false;
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      debugPrint('Error submitting trip: $e');
+      Get.snackbar(
+        'Network Error',
+        'Could not connect to the server. Please check your network connection.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+  }
+
   @override
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
