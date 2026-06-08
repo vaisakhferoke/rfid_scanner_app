@@ -57,9 +57,9 @@ class EventEntryScannController extends GetxController
       // print('Printing Process Starting');
       final String baseUrl = await ApiConfig.getBaseUrl2();
 
-      // print(
-      //   'Printing URL: $baseUrl/event_entry?id=${tag.displayName}&type=$type',
-      // );
+      print(
+        'Printing URL: $baseUrl/event_entry?id=${tag.displayName}&type=$type',
+      );
       final response = await http
           .get(
             Uri.parse('$baseUrl/event_entry?id=${tag.displayName}&type=$type'),
@@ -270,7 +270,10 @@ class EventEntryScannController extends GetxController
     }
   }
 
-  Future<bool> manuallyUpdateTag(String tagCode, {bool showLoading = true}) async {
+  Future<bool> manuallyUpdateTag(
+    String tagCode, {
+    bool showLoading = true,
+  }) async {
     final String cleanCode = tagCode.trim();
     if (cleanCode.isEmpty) {
       if (showLoading) {
@@ -287,7 +290,9 @@ class EventEntryScannController extends GetxController
 
     if (showLoading) {
       Get.dialog(
-        const Center(child: CircularProgressIndicator(color: Color(0xFF213AEC))),
+        const Center(
+          child: CircularProgressIndicator(color: Color(0xFF213AEC)),
+        ),
         barrierDismissible: false,
       );
     }
@@ -295,9 +300,7 @@ class EventEntryScannController extends GetxController
     try {
       final String baseUrl = await ApiConfig.getBaseUrl2();
       final response = await http
-          .get(
-            Uri.parse('$baseUrl/event_entry?id=$cleanCode&type=$type'),
-          )
+          .get(Uri.parse('$baseUrl/event_entry?id=$cleanCode&type=$type'))
           .timeout(const Duration(seconds: 5));
 
       if (showLoading && (Get.isDialogOpen ?? false)) {
@@ -334,7 +337,7 @@ class EventEntryScannController extends GetxController
         // Keep tags list and total count synchronized for compatibility
         tags.assignAll(scannedTags);
         totalTagsCount.value = scannedTags.length;
-        
+
         return true;
       } else {
         if (showLoading) {
@@ -365,7 +368,6 @@ class EventEntryScannController extends GetxController
       return false;
     }
   }
-
 
   @override
   void onClose() {

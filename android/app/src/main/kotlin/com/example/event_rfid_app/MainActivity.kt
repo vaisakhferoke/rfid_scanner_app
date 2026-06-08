@@ -327,7 +327,15 @@ class MainActivity: FlutterActivity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (event?.repeatCount == 0 && (keyCode == 11 || keyCode == 293 || keyCode == 290 || keyCode == 287 || keyCode == 286)) {
+        Log.d(TAG, "onKeyDown: keyCode=$keyCode")
+        val isTrigger = keyCode == 11 || keyCode == 293 || keyCode == 290 || 
+                        keyCode == 287 || keyCode == 286 || keyCode == 139 || 
+                        keyCode == 280 || keyCode == 294 || keyCode == 134 || 
+                        keyCode == 135 || keyCode == 138 || keyCode == 136 ||
+                        keyCode == KeyEvent.KEYCODE_BUTTON_L1 || keyCode == KeyEvent.KEYCODE_BUTTON_R1 ||
+                        keyCode == KeyEvent.KEYCODE_F9 || keyCode == KeyEvent.KEYCODE_F10
+        
+        if (event?.repeatCount == 0 && isTrigger) {
             runOnUiThread {
                 methodChannel?.invokeMethod("physicalTriggerPressed", null)
             }
