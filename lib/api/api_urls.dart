@@ -9,4 +9,6 @@ class ApiUrls {
       'flutter/event_phuket/update_user_bus.aspx';
   static const String listUserDetails =
       'flutter/event_phuket/list_user_details.aspx';
+  static const String listUserDetailsExcel =
+      'flutter/event_phuket/list_user_details_excel.aspx';
 }

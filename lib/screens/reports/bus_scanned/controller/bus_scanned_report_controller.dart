@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../models/bus_scanned_report_model.dart';
 import '../../../../models/location_model.dart';
 import '../../../../models/vehicle_model.dart';
@@ -37,7 +38,7 @@ class BusScannedReportController extends GetxController {
     try {
       final String baseUrl = await ApiConfig.getBaseUrl();
       final String fullUrl = '$baseUrl${ApiUrls.listUserDetails}';
-      
+
       final Map<String, dynamic> payload = {
         "vehicle_id": selectedBus.value?.id ?? "",
         "from_location_id": selectedFromLocation.value?.id ?? "",
@@ -100,6 +101,43 @@ class BusScannedReportController extends GetxController {
     selectedToLocation.value = null;
     searchController.clear();
     fetchReport();
+  }
+
+  Future<void> downloadExcel() async {
+    try {
+      final String baseUrl = await ApiConfig.getBaseUrl();
+      final String vehicleId = selectedBus.value?.id ?? "";
+      final String fromLocId = selectedFromLocation.value?.id ?? "";
+      final String toLocId = selectedToLocation.value?.id ?? "";
+      final String keyword = searchController.text.trim();
+
+      final String queryParams =
+          '?vehicle_id=$vehicleId&from_location_id=$fromLocId&to_location_id=$toLocId&keyword=$keyword';
+      final String fullUrl =
+          '$baseUrl${ApiUrls.listUserDetailsExcel}$queryParams';
+
+      final Uri url = Uri.parse(fullUrl);
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        Get.snackbar(
+          'Error',
+          'Could not launch Excel download link.',
+          backgroundColor: const Color(0xFFEF4444),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error downloading excel: $e');
+      Get.snackbar(
+        'Error',
+        'Could not initiate download.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   @override

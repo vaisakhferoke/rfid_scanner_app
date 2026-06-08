@@ -115,6 +115,19 @@ class BusScannedReportScreen extends StatelessWidget {
                   foregroundColor: const Color(0xFF64748B),
                 ),
               ),
+              const SizedBox(width: 8),
+              ElevatedButton.icon(
+                onPressed: controller.downloadExcel,
+                icon: const Icon(Icons.download, size: 18),
+                label: const Text('Excel'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981), // Green color for excel
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
             ],
           ),
         ],
