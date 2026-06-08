@@ -336,23 +336,24 @@ class HomeScreen extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          subtitle,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: Color(0xFF64748B),
-                            fontFamily: 'Inter',
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
+
+                  // const SizedBox(height: 6),
+                  // Row(
+                  //   children: [
+                  //     Expanded(
+                  //       child: Text(
+                  //         subtitle,
+                  //         style: const TextStyle(
+                  //           fontSize: 10,
+                  //           color: Color(0xFF64748B),
+                  //           fontFamily: 'Inter',
+                  //         ),
+                  //         maxLines: 1,
+                  //         overflow: TextOverflow.ellipsis,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                 ],
               ),
             ),

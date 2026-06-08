@@ -1,6 +1,8 @@
 // Placeholder screen for Reports
 import 'package:event_rfid_app/widgets/appbar/home_appbar.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'bus_scanned/bus_scanned_report_screen.dart';
 
 class ReportsPlaceholderScreen extends StatelessWidget {
   const ReportsPlaceholderScreen({super.key});
@@ -24,23 +26,23 @@ class ReportsPlaceholderScreen extends StatelessWidget {
                   title: 'Scanned\nReport',
                   icon: Icons.qr_code_scanner,
                   onTap: () {
-                    // TODO: Navigate to Scanned Report
+                    Get.to(() => BusScannedReportScreen());
                   },
                 ),
-                _ReportCard(
-                  title: 'Missing\nReport',
-                  icon: Icons.assignment_late,
-                  onTap: () {
-                    // TODO: Navigate to Missing Report
-                  },
-                ),
-                _ReportCard(
-                  title: 'Baggage\nReport',
-                  icon: Icons.luggage,
-                  onTap: () {
-                    // TODO: Navigate to Baggage Report
-                  },
-                ),
+                // _ReportCard(
+                //   title: 'Missing\nReport',
+                //   icon: Icons.assignment_late,
+                //   onTap: () {
+                //     // TODO: Navigate to Missing Report
+                //   },
+                // ),
+                // _ReportCard(
+                //   title: 'Baggage\nReport',
+                //   icon: Icons.luggage,
+                //   onTap: () {
+                //     // TODO: Navigate to Baggage Report
+                //   },
+                // ),
               ],
             ),
             const SizedBox(height: 32),
