@@ -3,6 +3,7 @@ import 'package:event_rfid_app/widgets/appbar/home_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'bus_scanned/bus_scanned_report_screen.dart';
+import 'user_scan/user_scan_report_screen.dart';
 
 class ReportsPlaceholderScreen extends StatelessWidget {
   const ReportsPlaceholderScreen({super.key});
@@ -64,6 +65,13 @@ class ReportsPlaceholderScreen extends StatelessWidget {
                   icon: Icons.person_off,
                   onTap: () {
                     // TODO: Navigate to Not check in Report
+                  },
+                ),
+                _ReportCard(
+                  title: 'User Scan\nReport',
+                  icon: Icons.document_scanner,
+                  onTap: () {
+                    Get.to(() => UserScanReportScreen());
                   },
                 ),
               ],

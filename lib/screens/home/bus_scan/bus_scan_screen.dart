@@ -1,14 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import '../../../../models/rfid_tag.dart';
 import '../../../../controllers/range_controller.dart';
 import '../../../../services/range_settings_popup.dart';
 import '../../../../config/api_config.dart';
 import 'controller/bus_scan_controller.dart';
-
 
 class BusScanScreen extends StatelessWidget {
   final BusScanController controller = Get.put(BusScanController());
@@ -1004,47 +1002,68 @@ class BusScanScreen extends StatelessWidget {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return const Center(
-          child: CircularProgressIndicator(
-            color: Color(0xFF213AEC),
-          ),
+          child: CircularProgressIndicator(color: Color(0xFF213AEC)),
         );
       },
     );
 
     // Call API to fetch user profile
-    ApiConfig.getBaseUrl().then((baseUrl) {
-      final String cleanEpc = tag.epc.trim();
-      final String urlString = '$baseUrl/flutter/event_phuket/list_users.aspx?id=$cleanEpc&unique_id=$cleanEpc';
-      
-      http.get(Uri.parse(urlString)).timeout(const Duration(seconds: 8)).then((response) {
-        Navigator.of(context).pop(); // Close loading dialog
+    ApiConfig.getBaseUrl()
+        .then((baseUrl) {
+          final String cleanEpc = tag.epc.trim();
+          final String urlString =
+              '$baseUrl/flutter/event_phuket/list_users.aspx?id=$cleanEpc&unique_id=$cleanEpc';
 
-        if (response.statusCode == 200) {
-          try {
-            final Map<String, dynamic> data = json.decode(response.body);
-            if (data['status'] == true && data['data'] != null && (data['data'] as List).isNotEmpty) {
-              final Map<String, dynamic> userMap = data['data'][0];
-              _showUserProfileDialog(context, userMap);
-            } else {
-              _showErrorDialog(context, data['Message'] ?? 'User details not found.');
-            }
-          } catch (e) {
-            _showErrorDialog(context, 'Failed to parse user details.');
-          }
-        } else {
-          _showErrorDialog(context, 'Server responded with status code: ${response.statusCode}');
-        }
-      }).catchError((error) {
-        Navigator.of(context).pop(); // Close loading dialog
-        _showErrorDialog(context, 'Failed to connect to server: $error');
-      });
-    }).catchError((error) {
-      Navigator.of(context).pop(); // Close loading dialog
-      _showErrorDialog(context, 'Failed to load configuration: $error');
-    });
+          http
+              .get(Uri.parse(urlString))
+              .timeout(const Duration(seconds: 8))
+              .then((response) {
+                Navigator.of(context).pop(); // Close loading dialog
+
+                if (response.statusCode == 200) {
+                  try {
+                    final Map<String, dynamic> data = json.decode(
+                      response.body,
+                    );
+                    if (data['status'] == true &&
+                        data['data'] != null &&
+                        (data['data'] as List).isNotEmpty) {
+                      final Map<String, dynamic> userMap = data['data'][0];
+                      _showUserProfileDialog(context, userMap);
+                    } else {
+                      _showErrorDialog(
+                        context,
+                        data['Message'] ?? 'User details not found.',
+                      );
+                    }
+                  } catch (e) {
+                    _showErrorDialog(context, 'Failed to parse user details.');
+                  }
+                } else {
+                  _showErrorDialog(
+                    context,
+                    'Server responded with status code: ${response.statusCode}',
+                  );
+                }
+              })
+              .catchError((error) {
+                Navigator.of(context).pop(); // Close loading dialog
+                _showErrorDialog(
+                  context,
+                  'Failed to connect to server: $error',
+                );
+              });
+        })
+        .catchError((error) {
+          Navigator.of(context).pop(); // Close loading dialog
+          _showErrorDialog(context, 'Failed to load configuration: $error');
+        });
   }
 
-  void _showUserProfileDialog(BuildContext context, Map<String, dynamic> userMap) {
+  void _showUserProfileDialog(
+    BuildContext context,
+    Map<String, dynamic> userMap,
+  ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1076,10 +1095,17 @@ class BusScanScreen extends StatelessWidget {
         }
         if (initials.isEmpty) initials = '?';
 
-        Widget buildStatusRow(String label, String status, String time, IconData icon, Color color) {
-          final bool isActive = status.toLowerCase() == 'checked in' || 
-                               status.toLowerCase() == 'awarded' || 
-                               status.toLowerCase() == 'completed';
+        Widget buildStatusRow(
+          String label,
+          String status,
+          String time,
+          IconData icon,
+          Color color,
+        ) {
+          final bool isActive =
+              status.toLowerCase() == 'checked in' ||
+              status.toLowerCase() == 'awarded' ||
+              status.toLowerCase() == 'completed';
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(12),
@@ -1093,7 +1119,11 @@ class BusScanScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(icon, color: isActive ? color : Colors.grey[400], size: 24),
+                Icon(
+                  icon,
+                  color: isActive ? color : Colors.grey[400],
+                  size: 24,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -1196,7 +1226,10 @@ class BusScanScreen extends StatelessWidget {
                   // Header
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 24,
+                      horizontal: 16,
+                    ),
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [Color(0xFF213AEC), Color(0xFF5D71F4)],
@@ -1234,7 +1267,10 @@ class BusScanScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(12),
@@ -1252,7 +1288,7 @@ class BusScanScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   // Info Details Section
                   Padding(
                     padding: const EdgeInsets.all(20),
@@ -1269,11 +1305,28 @@ class BusScanScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        buildInfoField('Employee Code', code, Icons.badge_outlined),
-                        buildInfoField('Unique ID', uniqueId, Icons.fingerprint),
-                        buildInfoField('State / Location', state, Icons.location_on_outlined),
-                        if (bus.isNotEmpty) buildInfoField('Assigned Bus', bus, Icons.directions_bus_outlined),
-                        
+                        buildInfoField(
+                          'Employee Code',
+                          code,
+                          Icons.badge_outlined,
+                        ),
+                        buildInfoField(
+                          'Unique ID',
+                          uniqueId,
+                          Icons.fingerprint,
+                        ),
+                        buildInfoField(
+                          'State / Location',
+                          state,
+                          Icons.location_on_outlined,
+                        ),
+                        if (bus.isNotEmpty)
+                          buildInfoField(
+                            'Assigned Bus',
+                            bus,
+                            Icons.directions_bus_outlined,
+                          ),
+
                         const SizedBox(height: 16),
                         const Text(
                           'EVENT CHECKLIST & STATUS',
@@ -1285,16 +1338,38 @@ class BusScanScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        buildStatusRow('BUS CHECK-IN', checkinStatus, checkinTime, Icons.directions_bus, const Color(0xFF10B981)),
-                        buildStatusRow('AWARDS STAGE', awardStatus, awardTime, Icons.emoji_events, const Color(0xFFF59E0B)),
-                        buildStatusRow('PHOTOBOOTH', photoStatus, photoTime, Icons.camera_alt, const Color(0xFF06B6D4)),
+                        buildStatusRow(
+                          'BUS CHECK-IN',
+                          checkinStatus,
+                          checkinTime,
+                          Icons.directions_bus,
+                          const Color(0xFF10B981),
+                        ),
+                        buildStatusRow(
+                          'AWARDS STAGE',
+                          awardStatus,
+                          awardTime,
+                          Icons.emoji_events,
+                          const Color(0xFFF59E0B),
+                        ),
+                        buildStatusRow(
+                          'PHOTOBOOTH',
+                          photoStatus,
+                          photoTime,
+                          Icons.camera_alt,
+                          const Color(0xFF06B6D4),
+                        ),
                       ],
                     ),
                   ),
 
                   // Actions
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+                    padding: const EdgeInsets.only(
+                      bottom: 20,
+                      left: 20,
+                      right: 20,
+                    ),
                     child: SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -1310,7 +1385,10 @@ class BusScanScreen extends StatelessWidget {
                         ),
                         child: const Text(
                           'Close Profile',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
                         ),
                       ),
                     ),
@@ -1334,7 +1412,11 @@ class BusScanScreen extends StatelessWidget {
           ),
           title: const Row(
             children: [
-              Icon(Icons.error_outline_rounded, color: Color(0xFFEF4444), size: 28),
+              Icon(
+                Icons.error_outline_rounded,
+                color: Color(0xFFEF4444),
+                size: 28,
+              ),
               SizedBox(width: 8),
               Text(
                 'Fetch Error',
@@ -1351,7 +1433,10 @@ class BusScanScreen extends StatelessWidget {
               onPressed: () => Navigator.of(context).pop(),
               child: const Text(
                 'OK',
-                style: TextStyle(color: Color(0xFF213AEC), fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Color(0xFF213AEC),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -1359,7 +1444,6 @@ class BusScanScreen extends StatelessWidget {
       },
     );
   }
-
 
   void _showScanSummary(BuildContext context) {
     final fromLoc = controller.selectedFromLocation.value?.name ?? 'Not Set';
