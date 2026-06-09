@@ -13,5 +13,7 @@ class ApiUrls {
       'flutter/event_phuket/list_user_details.aspx';
   static const String listUserDetailsExcel =
       'flutter/event_phuket/list_user_details_excel.aspx';
+  static const String userCountBasedLocation = 
+      'flutter/event_phuket/user_count_based_location.aspx';
   // static const String usersList = 'flutter/event_phuket/users_list.aspx';
 }

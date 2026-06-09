@@ -1,6 +1,8 @@
 import 'package:event_rfid_app/screens/home/event_entry/add_event_entry_screen.dart';
 import 'package:event_rfid_app/screens/home/bus_scan/bus_scan_screen.dart';
 import 'package:event_rfid_app/widgets/appbar/home_appbar.dart';
+import 'package:event_rfid_app/controllers/home_controller.dart';
+import 'package:event_rfid_app/screens/settings/location_master_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -9,6 +11,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final HomeController controller = Get.put(HomeController());
     return Scaffold(
       // backgroundColor: const Color(0xFF0043A4),
       appBar: HomeAppbar(title: 'Home'),
@@ -96,6 +99,10 @@ class HomeScreen extends StatelessWidget {
                         _buildSectionTitle('Quick Actions'),
                         const SizedBox(height: 14),
                         _buildQuickActions(context),
+                        const SizedBox(height: 28),
+                        _buildSectionTitle('Dashboard'),
+                        const SizedBox(height: 14),
+                        _buildDashboardCard(controller),
                         const SizedBox(height: 28),
                         // _buildSectionTitle('Overview'),
                         // const SizedBox(height: 14),
@@ -396,6 +403,116 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDashboardCard(HomeController controller) {
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0F172A).withOpacity(0.04),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.location_on,
+                  color: Color(0xFF64748B),
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    controller.currentLocationName.value,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0F172A),
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: () async {
+                    // Location picker from HomeController location List
+                  },
+                  child: const Icon(
+                    Icons.edit_location_alt,
+                    color: Color(0xFF0043A4),
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                InkWell(
+                  onTap: () {
+                    controller.fetchDashboardData();
+                  },
+                  child: const Icon(
+                    Icons.refresh,
+                    color: Color(0xFF0043A4),
+                    size: 22,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildStatRow('Total passengers', controller.totalPassengers.value),
+            const SizedBox(height: 12),
+            _buildStatRow('boarded count', controller.boardedCount.value),
+            const SizedBox(height: 12),
+            _buildStatRow('missing count', controller.missingCount.value),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _buildStatRow(String label, int value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Color(0xFF475569),
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Inter',
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: const Color(0xFFCBD5E1)),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Text(
+            value.toString(),
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF0F172A),
+              fontFamily: 'Inter',
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
