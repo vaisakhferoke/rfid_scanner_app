@@ -6,8 +6,9 @@ import '../../../../models/location_model.dart';
 import '../../../../models/vehicle_model.dart';
 
 class BusScannedReportScreen extends StatelessWidget {
-  final BusScannedReportController controller =
-      Get.put(BusScannedReportController());
+  final BusScannedReportController controller = Get.put(
+    BusScannedReportController(),
+  );
 
   BusScannedReportScreen({super.key});
 
@@ -29,9 +30,7 @@ class BusScannedReportScreen extends StatelessWidget {
           children: [
             _buildFiltersSection(context),
             const Divider(height: 1),
-            Expanded(
-              child: _buildReportList(),
-            ),
+            Expanded(child: _buildReportList()),
           ],
         ),
       ),
@@ -47,9 +46,7 @@ class BusScannedReportScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(
-                child: _buildBusDropdown(context),
-              ),
+              Expanded(child: _buildBusDropdown(context)),
               const SizedBox(width: 8),
               Expanded(
                 child: _buildLocationDropdown(
@@ -77,7 +74,9 @@ class BusScannedReportScreen extends StatelessWidget {
                   decoration: InputDecoration(
                     hintText: 'Keyword',
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 14),
+                      horizontal: 12,
+                      vertical: 14,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -121,7 +120,9 @@ class BusScannedReportScreen extends StatelessWidget {
                 icon: const Icon(Icons.download, size: 18),
                 label: const Text('Excel'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF10B981), // Green color for excel
+                  backgroundColor: const Color(
+                    0xFF10B981,
+                  ), // Green color for excel
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -169,9 +170,11 @@ class BusScannedReportScreen extends StatelessWidget {
     });
   }
 
-  Widget _buildLocationDropdown(BuildContext context,
-      {required String title,
-      required Rxn<LocationModel> selectedLocation}) {
+  Widget _buildLocationDropdown(
+    BuildContext context, {
+    required String title,
+    required Rxn<LocationModel> selectedLocation,
+  }) {
     return Obx(() {
       final location = selectedLocation.value;
       return InkWell(
@@ -235,7 +238,9 @@ class BusScannedReportScreen extends StatelessWidget {
   }
 
   void _showLocationPicker(
-      BuildContext context, Rxn<LocationModel> selectedLocation) {
+    BuildContext context,
+    Rxn<LocationModel> selectedLocation,
+  ) {
     final locations = controller.locationMasterController.locations;
     if (locations.isEmpty) {
       Get.snackbar('Notice', 'No locations available');
@@ -305,7 +310,9 @@ class BusScannedReportScreen extends StatelessWidget {
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFEEF2FF),
                           borderRadius: BorderRadius.circular(4),
@@ -322,48 +329,73 @@ class BusScannedReportScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Text('Unique ID: ${item.uniqueId}',
-                      style: const TextStyle(color: Color(0xFF64748B))),
+                  Text(
+                    'Unique ID: ${item.uniqueId}',
+                    style: const TextStyle(color: Color(0xFF64748B)),
+                  ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.directions_bus,
-                          size: 16, color: Color(0xFF94A3B8)),
+                      const Icon(
+                        Icons.directions_bus,
+                        size: 16,
+                        color: Color(0xFF94A3B8),
+                      ),
                       const SizedBox(width: 4),
-                      Text('${item.vehicleName} (${item.busNo})',
-                          style: const TextStyle(color: Color(0xFF64748B))),
+                      Text(
+                        '${item.vehicleName} (${item.busNo})',
+                        style: const TextStyle(color: Color(0xFF64748B)),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.calendar_today,
-                          size: 16, color: Color(0xFF94A3B8)),
+                      const Icon(
+                        Icons.calendar_today,
+                        size: 16,
+                        color: Color(0xFF94A3B8),
+                      ),
                       const SizedBox(width: 4),
-                      Text('${item.day} | ${item.date}',
-                          style: const TextStyle(color: Color(0xFF64748B))),
+                      Text(
+                        '${item.day} | ${item.date}',
+                        style: const TextStyle(color: Color(0xFF64748B)),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      const Icon(Icons.location_on,
-                          size: 16, color: Colors.green),
+                      const Icon(
+                        Icons.location_on,
+                        size: 16,
+                        color: Colors.green,
+                      ),
                       const SizedBox(width: 4),
                       Expanded(
-                          child: Text(item.fromLocation,
-                              style:
-                                  const TextStyle(color: Color(0xFF0F172A)))),
-                      const Icon(Icons.arrow_forward,
-                          size: 16, color: Color(0xFF94A3B8)),
+                        child: Text(
+                          item.fromLocation,
+                          style: const TextStyle(color: Color(0xFF0F172A)),
+                        ),
+                      ),
+                      const Icon(
+                        Icons.arrow_forward,
+                        size: 16,
+                        color: Color(0xFF94A3B8),
+                      ),
                       const SizedBox(width: 4),
-                      const Icon(Icons.location_on,
-                          size: 16, color: Colors.red),
+                      const Icon(
+                        Icons.location_on,
+                        size: 16,
+                        color: Colors.red,
+                      ),
                       const SizedBox(width: 4),
                       Expanded(
-                          child: Text(item.toLocation,
-                              style:
-                                  const TextStyle(color: Color(0xFF0F172A)))),
+                        child: Text(
+                          item.toLocation,
+                          style: const TextStyle(color: Color(0xFF0F172A)),
+                        ),
+                      ),
                     ],
                   ),
                 ],
