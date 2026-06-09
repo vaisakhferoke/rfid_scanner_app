@@ -3,7 +3,6 @@ import 'package:event_rfid_app/screens/home/bus_scan/bus_scan_screen.dart';
 import 'package:event_rfid_app/widgets/appbar/home_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../controllers/battery_controller.dart';
 import '../../controllers/navigation_controller.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -11,7 +10,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final BatteryController batteryController = Get.find<BatteryController>();
     return Scaffold(
       // backgroundColor: const Color(0xFF0043A4),
       appBar: HomeAppbar(title: 'Home'),
@@ -81,54 +79,6 @@ class HomeScreen extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Obx(() {
-                              final batteryLevel =
-                                  batteryController.batteryLevel.value;
-                              final batteryColor =
-                                  batteryController.batteryColor;
-                              final batteryIcon = batteryController.batteryIcon;
-
-                              return Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: batteryColor.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: batteryColor.withOpacity(0.3),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      batteryIcon,
-                                      color: batteryColor,
-                                      size: 16,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      '$batteryLevel%',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: batteryColor,
-                                        fontFamily: 'Inter',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }),
-                          ],
-                        ),
                       ],
                     ),
                   ),
@@ -144,17 +94,6 @@ class HomeScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Obx(() {
-                          if (batteryController.isLowBattery) {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 14.0),
-                              child: _buildBatteryWarningBanner(
-                                batteryController,
-                              ),
-                            );
-                          }
-                          return const SizedBox.shrink();
-                        }),
                         _buildSectionTitle('Quick Actions'),
                         const SizedBox(height: 14),
                         _buildQuickActions(context),
@@ -616,72 +555,6 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBatteryWarningBanner(BatteryController batteryController) {
-    final batteryLevel = batteryController.batteryLevel.value;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFEF2F2), Color(0xFFFEE2E2)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFFCA5A5), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFEF4444).withOpacity(0.06),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              color: Color(0xFFFEE2E2),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.warning_amber_rounded,
-              color: Color(0xFFDC2626),
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Low Battery ($batteryLevel%) Alert',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF991B1B),
-                    fontFamily: 'Inter',
-                  ),
-                ),
-                const SizedBox(height: 2),
-                const Text(
-                  'Please connect a charger to avoid interruptions during RFID scanning.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFFB91C1C),
-                    fontFamily: 'Inter',
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),

@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'controllers/battery_controller.dart';
 import 'controllers/range_controller.dart';
 import 'screens/splash_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  Get.put(BatteryController());
   Get.put(RangeController());
   runApp(const MyApp());
 }
