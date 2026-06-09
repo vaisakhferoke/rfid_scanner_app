@@ -437,25 +437,92 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    controller.currentLocationName.value,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF0F172A),
-                      fontFamily: 'Inter',
+                  child: InkWell(
+                    onTap: () {
+                      Get.bottomSheet(
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20),
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                'Select Location',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF0F172A),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              if (controller.locations.isEmpty)
+                                const Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: Text('No locations available'),
+                                )
+                              else
+                                Flexible(
+                                  child: ListView.separated(
+                                    shrinkWrap: true,
+                                    itemCount: controller.locations.length,
+                                    separatorBuilder: (context, index) =>
+                                        const Divider(),
+                                    itemBuilder: (context, index) {
+                                      final location =
+                                          controller.locations[index];
+                                      return ListTile(
+                                        title: Text(
+                                          location.name,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                            fontFamily: 'Inter',
+                                          ),
+                                        ),
+                                        trailing:
+                                            controller
+                                                    .currentLocationName
+                                                    .value ==
+                                                location.name
+                                            ? const Icon(
+                                                Icons.check_circle,
+                                                color: Color(0xFF10B981),
+                                              )
+                                            : null,
+                                        onTap: () {
+                                          controller.setLocation(location);
+                                          Get.back();
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        isScrollControlled: true,
+                      );
+                    },
+                    child: Text(
+                      controller.currentLocationName.value,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0F172A),
+                        fontFamily: 'Inter',
+                      ),
                     ),
                   ),
                 ),
-                InkWell(
-                  onTap: () async {
-                    // Location picker from HomeController location List
-                  },
-                  child: const Icon(
-                    Icons.edit_location_alt,
-                    color: Color(0xFF0043A4),
-                    size: 22,
-                  ),
+                const Icon(
+                  Icons.keyboard_arrow_down,
+                  color: Color(0xFF0043A4),
+                  size: 22,
                 ),
                 const SizedBox(width: 12),
                 InkWell(
@@ -474,8 +541,11 @@ class HomeScreen extends StatelessWidget {
             _buildStatRow('Total passengers', controller.totalPassengers.value),
             const SizedBox(height: 12),
             _buildStatRow('boarded count', controller.boardedCount.value),
-            const SizedBox(height: 12),
-            _buildStatRow('missing count', controller.missingCount.value),
+
+            if (controller.missingCount.value > 0) ...[
+              const SizedBox(height: 12),
+              _buildStatRow('missing count', controller.missingCount.value),
+            ],
           ],
         ),
       );
@@ -489,7 +559,7 @@ class HomeScreen extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            fontSize: 14,
+            fontSize: 16,
             color: Color(0xFF475569),
             fontWeight: FontWeight.w500,
             fontFamily: 'Inter',
@@ -504,10 +574,10 @@ class HomeScreen extends StatelessWidget {
           ),
           child: Text(
             value.toString(),
-            style: const TextStyle(
-              fontSize: 14,
+            style: TextStyle(
+              fontSize: label == 'missing count' ? 18 : 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF0F172A),
+              color: label == 'missing count' ? Colors.red : Color(0xFF0F172A),
               fontFamily: 'Inter',
             ),
           ),
