@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:event_rfid_app/models/rfid_tag.dart';
 import 'package:event_rfid_app/widgets/common_widgets/range_settings_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,6 +19,8 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
   final RfidService _rfidService = RfidService();
   bool _isConnected = false;
   bool _isConnecting = false;
+  StreamSubscription? _tagStreamSubscription;
+  bool _isFinding = false;
 
   @override
   void initState() {
@@ -52,6 +56,7 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
 
   @override
   void dispose() {
+    _stopFinding();
     _epcController.dispose();
     super.dispose();
   }
@@ -67,6 +72,267 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
       sb.write(value.codeUnitAt(i).toRadixString(16).padLeft(2, '0'));
     }
     return sb.toString().toUpperCase();
+  }
+
+  Future<void> _stopFinding() async {
+    await _tagStreamSubscription?.cancel();
+    _tagStreamSubscription = null;
+    await _rfidService.stopInventory();
+    if (mounted) {
+      setState(() {
+        _isFinding = false;
+      });
+    }
+  }
+
+  void _findSingleTag() async {
+    if (_isFinding) return;
+
+    setState(() {
+      _isFinding = true;
+    });
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Finding Tag...',
+          style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold),
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0043A4)),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Bring a tag near the scanner.',
+              style: TextStyle(fontFamily: 'Inter', color: Color(0xFF64748B)),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              _stopFinding();
+              Navigator.pop(context);
+            },
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Color(0xFF0043A4)),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    await _rfidService.startInventory();
+
+    _tagStreamSubscription = _rfidService.tagStream.listen((event) async {
+      final epc = event['epc'] as String?;
+      final rssi = event['rssi'] as int?;
+      final rfidTag = RfidTag(
+        epc: epc!,
+        rssi: rssi!,
+        readTime: DateTime.now(),
+        count: 1,
+      );
+      debugPrint('Tag Found: ${rfidTag.displayName}');
+      if (rfidTag.epc.isNotEmpty) {
+        await _stopFinding();
+        if (mounted && Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+        setState(() {
+          _epcController.text = rfidTag.displayName; // hex to convet string
+        });
+        Get.snackbar(
+          'Tag Found',
+          'Successfully read tag data.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFF10B981),
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12,
+        );
+      }
+    });
+  }
+
+  void _verifyWrittenTag(String writtenEpc) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Verifying...',
+          style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold),
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0043A4)),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Reading tag to verify details...',
+              style: TextStyle(fontFamily: 'Inter', color: Color(0xFF64748B)),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await _rfidService.startInventory();
+    StreamSubscription? verifySub;
+    bool isVerified = false;
+
+    verifySub = _rfidService.tagStream.listen((event) async {
+      final epc = event['epc'] as String?;
+      final rssi = event['rssi'] as int?;
+      final rfidTag = RfidTag(
+        epc: epc!,
+        rssi: rssi!,
+        readTime: DateTime.now(),
+        count: 1,
+      );
+      debugPrint('Tag Found: ${rfidTag.epc}');
+      if (rfidTag.epc.isNotEmpty) {
+        isVerified = true;
+        await verifySub?.cancel();
+        await _rfidService.stopInventory();
+
+        if (mounted && Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+        _showSuccessPopup(rfidTag.displayName);
+      }
+    });
+
+    Future.delayed(const Duration(seconds: 3), () async {
+      if (!isVerified) {
+        await verifySub?.cancel();
+        await _rfidService.stopInventory();
+        if (mounted && Navigator.canPop(context)) {
+          Navigator.pop(context);
+          _showSuccessPopup(writtenEpc, timeout: true);
+        }
+      }
+    });
+  }
+
+  void _showSuccessPopup(String foundEpc, {bool timeout = false}) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(
+              timeout
+                  ? Icons.warning_amber_rounded
+                  : Icons.check_circle_rounded,
+              color: timeout ? Colors.amber : const Color(0xFF10B981),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              timeout ? 'Write Success' : 'Success',
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              timeout
+                  ? 'Tag was successfully written, but couldn\'t be read back.'
+                  : 'Tag was successfully written and read back.',
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                color: Color(0xFF475569),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Tag Details:',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    foundEpc,
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0043A4),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                _resetAll();
+              },
+              child: const Text(
+                'Close',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _resetAll() {
+    _epcController.clear();
+    FocusScope.of(context).unfocus();
   }
 
   void _executeWrite() {
@@ -190,68 +456,75 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
     final String textData = _epcController.text.trim();
     final String hexData = _stringToHex(textData);
     final navigator = Navigator.of(context);
+    print('Writing Tag: ${hexData}');
 
     // Apply the saved power setting right before writing to make sure reader is configured correctly
     _rfidService.setPower(power).then((_) {
-      _rfidService
-          .writeTag(
-            hexData: hexData,
-            password: "00000000",
-            membank: 1,
-            address: 2,
-            wordCount: 3,
-          )
-          .then((success) {
-            if (!mounted) return;
-            // Dismiss writing dialog
-            navigator.pop();
+      try {
+        _rfidService
+            .writeTag(
+              hexData: hexData,
+              password: "00000000",
+              membank: 1,
+              address: 2,
+              wordCount: 3,
+            )
+            .then((success) {
+              if (!mounted) return;
+              // Dismiss writing dialog
+              navigator.pop();
 
-            if (success) {
-              setState(() {
-                _isConnected = true;
-              });
-              Get.snackbar(
-                'Success',
-                'EPC successfully written to tag memory!',
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: const Color(0xFF10B981),
-                colorText: Colors.white,
-                margin: const EdgeInsets.all(16),
-                borderRadius: 12,
-                icon: const Icon(
-                  Icons.check_circle_rounded,
-                  color: Colors.white,
-                ),
-                duration: const Duration(seconds: 3),
-              );
-              // clear epc controller
-              _epcController.clear();
-              // closs keyboared
-              FocusScope.of(context).unfocus();
-            } else {
-              _rfidService.checkConnectionStatus().then((connected) {
-                if (mounted) {
-                  setState(() {
-                    _isConnected = connected;
+              if (success) {
+                setState(() {
+                  _isConnected = true;
+                });
+                _verifyWrittenTag(hexData);
+              } else {
+                try {
+                  _rfidService.checkConnectionStatus().then((connected) {
+                    if (mounted) {
+                      setState(() {
+                        _isConnected = connected;
+                      });
+                    }
                   });
+                } catch (e, stackTrace) {
+                  print('Error: $e');
+                  print('Stack Trace: $stackTrace');
+                  Get.snackbar(
+                    'Error',
+                    '$e , $stackTrace',
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: const Color(0xFFEF4444),
+                    colorText: Colors.white,
+                    margin: const EdgeInsets.all(16),
+                    borderRadius: 12,
+                    icon: const Icon(
+                      Icons.error_outline_rounded,
+                      color: Colors.white,
+                    ),
+                    duration: const Duration(seconds: 3),
+                  );
                 }
-              });
-              Get.snackbar(
-                'Error',
-                'Failed to write to tag. Make sure tag is close and reader is connected.',
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: const Color(0xFFEF4444),
-                colorText: Colors.white,
-                margin: const EdgeInsets.all(16),
-                borderRadius: 12,
-                icon: const Icon(
-                  Icons.error_outline_rounded,
-                  color: Colors.white,
-                ),
-                duration: const Duration(seconds: 3),
-              );
-            }
-          });
+
+                // show exact error
+              }
+            });
+      } catch (e, stackTrace) {
+        print('Error: $e');
+        print('Stack Trace First Section: $stackTrace');
+        Get.snackbar(
+          'Error',
+          '$e , $stackTrace',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color.fromARGB(255, 238, 161, 7),
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12,
+          icon: const Icon(Icons.error_outline_rounded, color: Colors.white),
+          duration: const Duration(seconds: 3),
+        );
+      }
     });
   }
 
@@ -408,7 +681,40 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
 
                       const SizedBox(height: 36),
 
-                      // Write Action Button
+                      // Action Buttons
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: OutlinedButton(
+                          onPressed: _findSingleTag,
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF0043A4),
+                            side: const BorderSide(
+                              color: Color(0xFF0043A4),
+                              width: 2,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.search_rounded, size: 24),
+                              SizedBox(width: 8),
+                              Text(
+                                'Find Tag',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
                         height: 56,
