@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../api/api_client.dart';
+import '../../../controllers/location_master_controller.dart';
 
 class UpdateUserTripController extends GetxController {
   final tagController = TextEditingController();
@@ -9,6 +10,22 @@ class UpdateUserTripController extends GetxController {
   final RxString selectedLocationId = ''.obs;
   final RxString selectedDay = 'day1'.obs; // Defaulting to day1 as per API spec
   final RxBool isLoading = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _setDefaultLocation();
+  }
+
+  void _setDefaultLocation() {
+    if (Get.isRegistered<LocationMasterController>()) {
+      final locCtrl = Get.find<LocationMasterController>();
+      final currentLoc = locCtrl.locations.firstWhereOrNull((l) => l.isCurrentLocation == '1');
+      if (currentLoc != null) {
+        selectedLocationId.value = currentLoc.id;
+      }
+    }
+  }
 
   @override
   void onClose() {

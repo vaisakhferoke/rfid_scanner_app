@@ -234,7 +234,7 @@ class HomeScreen extends StatelessWidget {
                 icon: Icons.add_road,
                 iconColor: const Color(0xFF10B981),
                 iconBgColor: const Color(0xFFECFDF5),
-                title: 'User Trip Add',
+                title: 'User Wise Trip Add',
                 subtitle: '',
                 onTap: () {
                   Get.to(() => UpdateUserTripScreen());

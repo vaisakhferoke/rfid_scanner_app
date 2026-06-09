@@ -104,6 +104,19 @@ class UpdateUserTripScreen extends StatelessWidget {
                   locationController.locations.isEmpty) {
                 return const Center(child: CircularProgressIndicator());
               }
+
+              // Auto-select the default current location
+              if (controller.selectedLocationId.value.isEmpty &&
+                  locationController.locations.isNotEmpty) {
+                final currentLoc = locationController.locations
+                    .firstWhereOrNull((l) => l.isCurrentLocation == '1');
+                if (currentLoc != null) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    controller.selectedLocationId.value = currentLoc.id;
+                  });
+                }
+              }
+
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
