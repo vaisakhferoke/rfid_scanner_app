@@ -70,14 +70,25 @@ class LocationMasterController extends GetxController {
     required String type, // 'add' or 'edit'
     String? id,
     required String name,
+    required String isCurrentLocation,
   }) async {
+    if (isCurrentLocation == '1') {
+      final existingCurrent = locations.firstWhereOrNull(
+        (l) => l.isCurrentLocation == '1' && l.id != id,
+      );
+      if (existingCurrent != null) {
+        _showErrorSnackbar('Only one location can be set as current.');
+        return;
+      }
+    }
+
     isLoading.value = true;
     try {
       bool success = false;
       if (type == 'add') {
-        success = await _locationRepository.addLocation(name: name);
+        success = await _locationRepository.addLocation(name: name, isCurrentLocation: isCurrentLocation);
       } else if (type == 'edit' && id != null) {
-        success = await _locationRepository.editLocation(id: id, name: name);
+        success = await _locationRepository.editLocation(id: id, name: name, isCurrentLocation: isCurrentLocation);
       }
 
       if (success) {

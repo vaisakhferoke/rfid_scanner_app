@@ -19,19 +19,21 @@ class LocationRepository {
     }
   }
 
-  Future<bool> addLocation({required String name}) async {
+  Future<bool> addLocation({required String name, required String isCurrentLocation}) async {
     final response = await ApiClient.post(ApiUrls.location, {
       'type': 'add',
       'name': name,
+      'is_current_location': isCurrentLocation,
     });
     return _parseStatusResponse(response);
   }
 
-  Future<bool> editLocation({required String id, required String name}) async {
+  Future<bool> editLocation({required String id, required String name, required String isCurrentLocation}) async {
     final response = await ApiClient.post(ApiUrls.location, {
       'type': 'edit',
       'id': id,
       'name': name,
+      'is_current_location': isCurrentLocation,
     });
     return _parseStatusResponse(response);
   }

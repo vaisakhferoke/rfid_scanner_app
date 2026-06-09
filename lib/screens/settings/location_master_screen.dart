@@ -6,10 +6,10 @@ import '../../controllers/location_master_controller.dart';
 class LocationMasterScreen extends GetView<LocationMasterController> {
   const LocationMasterScreen({super.key});
 
-
   void _showFormDialog(BuildContext context, {LocationModel? location}) {
     final formKey = GlobalKey<FormState>();
     final nameController = TextEditingController(text: location?.name ?? '');
+    bool isCurrentLocation = location?.isCurrentLocation == '1';
 
     showDialog(
       context: context,
@@ -70,6 +70,34 @@ class LocationMasterScreen extends GetView<LocationMasterController> {
                       ? 'Please enter location name'
                       : null,
                 ),
+                const SizedBox(height: 16),
+                StatefulBuilder(
+                  builder: (context, setStateSB) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Is Current Location',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF475569),
+                          ),
+                        ),
+                        Switch(
+                          value: isCurrentLocation,
+                          activeColor: const Color(0xFF0043A4),
+                          onChanged: (val) {
+                            setStateSB(() {
+                              isCurrentLocation = val;
+                            });
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ],
             ),
           ),
@@ -89,6 +117,7 @@ class LocationMasterScreen extends GetView<LocationMasterController> {
                     type: location == null ? 'add' : 'edit',
                     id: location?.id,
                     name: nameController.text.trim(),
+                    isCurrentLocation: isCurrentLocation ? '1' : '0',
                   );
                 }
               },
@@ -198,7 +227,6 @@ class LocationMasterScreen extends GetView<LocationMasterController> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Get.back(),
         ),
-
       ),
       body: Container(
         width: double.infinity,
@@ -380,14 +408,47 @@ class LocationMasterScreen extends GetView<LocationMasterController> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          location.name,
-                                          style: const TextStyle(
-                                            fontFamily: 'Inter',
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xFF0F172A),
-                                          ),
+                                        Row(
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                location.name,
+                                                style: const TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Color(0xFF0F172A),
+                                                ),
+                                              ),
+                                            ),
+                                            if (location.isCurrentLocation ==
+                                                '1') ...[
+                                              const SizedBox(width: 8),
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 2,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(
+                                                    0xFFEFF6FF,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                child: const Text(
+                                                  'Current',
+                                                  style: TextStyle(
+                                                    fontFamily: 'Inter',
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Color(0xFF0043A4),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ],
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
