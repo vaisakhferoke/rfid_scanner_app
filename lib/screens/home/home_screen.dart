@@ -3,7 +3,6 @@ import 'package:event_rfid_app/screens/home/bus_scan/bus_scan_screen.dart';
 import 'package:event_rfid_app/widgets/appbar/home_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../controllers/navigation_controller.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -130,7 +129,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildQuickActions(BuildContext context) {
-    final NavigationController navController = Get.find<NavigationController>();
+    // final NavigationController navController = Get.find<NavigationController>();
     return Column(
       children: [
         Row(

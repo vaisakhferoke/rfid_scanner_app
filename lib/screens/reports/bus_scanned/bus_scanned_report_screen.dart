@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'controller/bus_scanned_report_controller.dart';
 import '../../../../models/location_model.dart';
-import '../../../../models/vehicle_model.dart';
 
 class BusScannedReportScreen extends StatelessWidget {
   final BusScannedReportController controller = Get.put(

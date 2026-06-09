@@ -41,7 +41,7 @@ class AddEventEntryScreen extends StatelessWidget {
               onPressed: () => _handleBackPress(context),
             ),
             title: Text(
-              "${controller.type.capitalize}" + " Scan",
+              "${controller.type.capitalize}" " Scan",
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,

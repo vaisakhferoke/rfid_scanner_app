@@ -456,7 +456,7 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
     final String textData = _epcController.text.trim();
     final String hexData = _stringToHex(textData);
     final navigator = Navigator.of(context);
-    print('Writing Tag: ${hexData}');
+    print('Writing Tag: $hexData');
 
     // Apply the saved power setting right before writing to make sure reader is configured correctly
     _rfidService.setPower(power).then((_) {
