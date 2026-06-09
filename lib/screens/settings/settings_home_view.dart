@@ -9,6 +9,8 @@ import 'event_settings_screen.dart';
 import '../../controllers/vehicle_master_controller.dart';
 import '../../controllers/location_master_controller.dart';
 import '../../controllers/event_settings_controller.dart';
+import '../../controllers/vehicle_type_controller.dart';
+import 'vehicle_type_screen.dart';
 import '../../config/api_config.dart';
 
 class SettingsPlaceholderScreen extends StatelessWidget {
@@ -142,7 +144,8 @@ class SettingsPlaceholderScreen extends StatelessWidget {
                             onTap: () {
                               showDialog(
                                 context: context,
-                                builder: (context) => const BaseUrlConfigDialog(),
+                                builder: (context) =>
+                                    const BaseUrlConfigDialog(),
                               );
                             },
                           ),
@@ -169,6 +172,20 @@ class SettingsPlaceholderScreen extends StatelessWidget {
                             onTap: () {
                               Get.put(VehicleMasterController());
                               Get.to(() => const VehicleMasterScreen());
+                            },
+                          ),
+                          const SizedBox(height: 14),
+
+                          // Vehicle Type Master Card
+                          _buildMenuCard(
+                            icon: Icons.category_rounded,
+                            iconColor: const Color(0xFF0043A4),
+                            iconBgColor: const Color(0xFFEFF6FF),
+                            title: 'Vehicle Type Master',
+                            subtitle: 'Manage vehicle types',
+                            onTap: () {
+                              Get.put(VehicleTypeController());
+                              Get.to(() => const VehicleTypeScreen());
                             },
                           ),
                           const SizedBox(height: 14),
@@ -407,9 +424,7 @@ class _BaseUrlConfigDialogState extends State<BaseUrlConfigDialog> {
     }
 
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: const Row(
         children: [
           Icon(
@@ -525,6 +540,12 @@ class _BaseUrlConfigDialogState extends State<BaseUrlConfigDialog> {
                 vehController.baseUrl2.value = inputUrl2;
                 vehController.fetchVehicles();
               }
+              if (Get.isRegistered<VehicleTypeController>()) {
+                final vehTypeController = Get.find<VehicleTypeController>();
+                vehTypeController.baseUrl.value = inputUrl;
+                vehTypeController.baseUrl2.value = inputUrl2;
+                vehTypeController.fetchVehicleTypes();
+              }
               navigator.pop();
               Get.snackbar(
                 'Success',
@@ -533,7 +554,10 @@ class _BaseUrlConfigDialogState extends State<BaseUrlConfigDialog> {
                 colorText: Colors.white,
                 borderRadius: 12,
                 margin: const EdgeInsets.all(16),
-                icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white),
+                icon: const Icon(
+                  Icons.check_circle_outline_rounded,
+                  color: Colors.white,
+                ),
                 snackPosition: SnackPosition.BOTTOM,
               );
             }
@@ -547,10 +571,7 @@ class _BaseUrlConfigDialogState extends State<BaseUrlConfigDialog> {
           ),
           child: const Text(
             'Save & Reconnect',
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold),
           ),
         ),
       ],
