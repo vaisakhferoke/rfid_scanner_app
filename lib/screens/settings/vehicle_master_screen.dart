@@ -6,22 +6,20 @@ import '../../controllers/vehicle_master_controller.dart';
 class VehicleMasterScreen extends GetView<VehicleMasterController> {
   const VehicleMasterScreen({super.key});
 
-
   void _showFormDialog(BuildContext context, {VehicleModel? vehicle}) {
     final formKey = GlobalKey<FormState>();
     final nameController = TextEditingController(text: vehicle?.name ?? '');
     final remarkController = TextEditingController(text: vehicle?.remark ?? '');
-    String selectedType =
-        (vehicle != null &&
-            [
-              'Bus',
-              'Van',
-              'Mini Bus',
-              'Truck',
-              'Car',
-            ].contains(vehicle.vehicleType))
-        ? vehicle.vehicleType
-        : 'Bus';
+    String? selectedTypeId = vehicle?.vehicleTypeId.isNotEmpty == true
+        ? vehicle?.vehicleTypeId
+        : null;
+    if (selectedTypeId == null && controller.vehicleTypes.isNotEmpty) {
+      selectedTypeId = controller.vehicleTypes.first.id;
+    } else if (selectedTypeId != null &&
+        controller.vehicleTypes.isNotEmpty &&
+        !controller.vehicleTypes.any((t) => t.id == selectedTypeId)) {
+      selectedTypeId = controller.vehicleTypes.first.id;
+    }
 
     showDialog(
       context: context,
@@ -105,26 +103,25 @@ class VehicleMasterScreen extends GetView<VehicleMasterController> {
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
-                            value: selectedType,
+                            value: selectedTypeId,
                             isExpanded: true,
-                            items: ['Bus', 'Van', 'Mini Bus', 'Truck', 'Car']
-                                .map((String type) {
-                                  return DropdownMenuItem<String>(
-                                    value: type,
-                                    child: Text(
-                                      type,
-                                      style: const TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  );
-                                })
-                                .toList(),
+                            hint: const Text('Select Vehicle Type'),
+                            items: controller.vehicleTypes.map((type) {
+                              return DropdownMenuItem<String>(
+                                value: type.id,
+                                child: Text(
+                                  type.name,
+                                  style: const TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                             onChanged: (value) {
                               if (value != null) {
                                 setDialogState(() {
-                                  selectedType = value;
+                                  selectedTypeId = value;
                                 });
                               }
                             },
@@ -179,7 +176,7 @@ class VehicleMasterScreen extends GetView<VehicleMasterController> {
                         type: vehicle == null ? 'add' : 'edit',
                         id: vehicle?.id,
                         name: nameController.text.trim(),
-                        vehicleType: selectedType,
+                        vehicleTypeId: selectedTypeId ?? '',
                         remark: remarkController.text.trim(),
                       );
                     }
@@ -309,7 +306,6 @@ class VehicleMasterScreen extends GetView<VehicleMasterController> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Get.back(),
         ),
-
       ),
       body: Container(
         width: double.infinity,
@@ -329,6 +325,44 @@ class VehicleMasterScreen extends GetView<VehicleMasterController> {
             color: const Color(0xFFF8FAFC),
             child: Column(
               children: [
+                // Search Bar
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF0F172A).withOpacity(0.04),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: controller.searchController,
+                      onChanged: controller.filterVehicles,
+                      decoration: const InputDecoration(
+                        hintText: 'Search by name, type, or remark...',
+                        hintStyle: TextStyle(
+                          color: Color(0xFF94A3B8),
+                          fontFamily: 'Inter',
+                          fontSize: 14,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: Color(0xFF64748B),
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
                 // Vehicle List area
                 Expanded(
                   child: RefreshIndicator(

@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/vehicle_model.dart';
+import '../models/vehicle_type_model.dart';
 import '../config/api_config.dart';
 import '../repository/vehicle_repository.dart';
+import '../repository/vehicle_type_repository.dart';
 
 class VehicleMasterController extends GetxController {
   final VehicleRepository _vehicleRepository = VehicleRepository();
+  final VehicleTypeRepository _vehicleTypeRepository = VehicleTypeRepository();
+
+  final RxList<VehicleTypeModel> vehicleTypes = <VehicleTypeModel>[].obs;
 
   final RxString baseUrl = ''.obs;
   final RxString baseUrl2 = ''.obs;
@@ -35,7 +40,17 @@ class VehicleMasterController extends GetxController {
     final url2 = await ApiConfig.getBaseUrl2();
     baseUrl.value = url;
     baseUrl2.value = url2;
+    fetchVehicleTypes();
     fetchVehicles();
+  }
+
+  Future<void> fetchVehicleTypes() async {
+    try {
+      final list = await _vehicleTypeRepository.fetchVehicleTypes();
+      vehicleTypes.assignAll(list);
+    } catch (e) {
+      debugPrint('Error fetching vehicle types: $e');
+    }
   }
 
   Future<void> fetchVehicles() async {
@@ -72,7 +87,7 @@ class VehicleMasterController extends GetxController {
     required String type, // 'add' or 'edit'
     String? id,
     required String name,
-    required String vehicleType,
+    required String vehicleTypeId,
     required String remark,
   }) async {
     isLoading.value = true;
@@ -81,14 +96,14 @@ class VehicleMasterController extends GetxController {
       if (type == 'add') {
         success = await _vehicleRepository.addVehicle(
           name: name,
-          vehicleType: vehicleType,
+          vehicleTypeId: vehicleTypeId,
           remark: remark,
         );
       } else if (type == 'edit' && id != null) {
         success = await _vehicleRepository.editVehicle(
           id: id,
           name: name,
-          vehicleType: vehicleType,
+          vehicleTypeId: vehicleTypeId,
           remark: remark,
         );
       }

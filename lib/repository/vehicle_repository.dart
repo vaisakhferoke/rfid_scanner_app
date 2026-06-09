@@ -21,13 +21,13 @@ class VehicleRepository {
 
   Future<bool> addVehicle({
     required String name,
-    required String vehicleType,
+    required String vehicleTypeId,
     required String remark,
   }) async {
     final response = await ApiClient.post(ApiUrls.vehicle, {
       'type': 'add',
       'name': name,
-      'vehicle_type': vehicleType,
+      'vehicle_type_id': vehicleTypeId,
       'remark': remark,
     });
     return _parseStatusResponse(response);
@@ -36,14 +36,14 @@ class VehicleRepository {
   Future<bool> editVehicle({
     required String id,
     required String name,
-    required String vehicleType,
+    required String vehicleTypeId,
     required String remark,
   }) async {
     final response = await ApiClient.post(ApiUrls.vehicle, {
       'type': 'edit',
       'id': id,
       'name': name,
-      'vehicle_type': vehicleType,
+      'vehicle_type_id': vehicleTypeId,
       'remark': remark,
     });
     return _parseStatusResponse(response);
