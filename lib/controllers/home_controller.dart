@@ -11,6 +11,7 @@ class HomeController extends GetxController {
 
   RxBool isLoading = false.obs;
   RxString currentLocationName = 'No Location Set'.obs;
+  String? selectedLocationId;
 
   RxInt totalPassengers = 0.obs;
   RxInt boardedCount = 0.obs;
@@ -37,6 +38,7 @@ class HomeController extends GetxController {
 
       if (currentLocation != null) {
         currentLocationName.value = currentLocation.name;
+        selectedLocationId = currentLocation.id;
 
         // 3. Call the API
         final response = await ApiClient.post(ApiUrls.userCountBasedLocation, {
@@ -55,6 +57,7 @@ class HomeController extends GetxController {
         }
       } else {
         currentLocationName.value = 'No Location Set';
+        selectedLocationId = null;
         totalPassengers.value = 0;
         boardedCount.value = 0;
         missingCount.value = 0;
@@ -70,6 +73,7 @@ class HomeController extends GetxController {
     isLoading.value = true;
     try {
       currentLocationName.value = location.name;
+      selectedLocationId = location.id;
 
       final response = await ApiClient.post(ApiUrls.userCountBasedLocation, {
         "location_id": location.id,

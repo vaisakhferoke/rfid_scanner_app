@@ -4,6 +4,7 @@ import 'package:event_rfid_app/widgets/appbar/home_appbar.dart';
 import 'package:event_rfid_app/controllers/home_controller.dart';
 import 'package:event_rfid_app/screens/settings/location_master_screen.dart';
 import 'package:event_rfid_app/screens/home/update_user_trip/update_user_trip_screen.dart';
+import 'package:event_rfid_app/screens/home/user_list/user_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -557,13 +558,28 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _buildStatRow('Total passengers', controller.totalPassengers.value),
+            _buildStatRow(
+              'Total passengers',
+              controller.totalPassengers.value,
+              'total_passengers',
+              controller,
+            ),
             const SizedBox(height: 12),
-            _buildStatRow('boarded count', controller.boardedCount.value),
+            _buildStatRow(
+              'boarded count',
+              controller.boardedCount.value,
+              'boarded',
+              controller,
+            ),
 
             if (controller.missingCount.value > 0) ...[
               const SizedBox(height: 12),
-              _buildStatRow('missing count', controller.missingCount.value),
+              _buildStatRow(
+                'missing count',
+                controller.missingCount.value,
+                'missing',
+                controller,
+              ),
             ],
           ],
         ),
@@ -571,37 +587,68 @@ class HomeScreen extends StatelessWidget {
     });
   }
 
-  Widget _buildStatRow(String label, int value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Color(0xFF475569),
-            fontWeight: FontWeight.w500,
-            fontFamily: 'Inter',
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: const Color(0xFFCBD5E1)),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Text(
-            value.toString(),
-            style: TextStyle(
-              fontSize: label == 'missing count' ? 18 : 16,
-              fontWeight: FontWeight.w600,
-              color: label == 'missing count' ? Colors.red : Color(0xFF0F172A),
-              fontFamily: 'Inter',
+  Widget _buildStatRow(
+    String label,
+    int value,
+    String type,
+    HomeController controller,
+  ) {
+    return InkWell(
+      onTap: () {
+        if (controller.selectedLocationId == null ||
+            controller.selectedLocationId!.isEmpty) {
+          Get.snackbar(
+            'Notice',
+            'Please select a location first',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+          return;
+        }
+        Get.to(
+          () => UserListScreen(),
+          arguments: {
+            'title': label.capitalizeFirst ?? label,
+            'type': type,
+            'location_id': controller.selectedLocationId,
+          },
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Color(0xFF475569),
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Inter',
+              ),
             ),
-          ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: const Color(0xFFCBD5E1)),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                value.toString(),
+                style: TextStyle(
+                  fontSize: label == 'missing count' ? 18 : 16,
+                  fontWeight: FontWeight.w600,
+                  color: label == 'missing count'
+                      ? Colors.red
+                      : const Color(0xFF0F172A),
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
