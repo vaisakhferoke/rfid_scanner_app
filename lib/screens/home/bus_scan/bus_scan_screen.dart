@@ -259,113 +259,52 @@ class BusScanScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          Row(
-            children: [
-              // From Location
-              Expanded(
-                child: Obx(() {
-                  final fromLoc = controller.selectedFromLocation.value;
-                  return InkWell(
-                    onTap: () => _showLocationPicker(context, true),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: const Color(0xFFE2E8F0),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.location_on_outlined,
-                            color: Color(0xFF94A3B8),
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              fromLoc != null
-                                  ? fromLoc.name
-                                  : 'Select From Location',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: fromLoc != null
-                                    ? const Color(0xFF0F172A)
-                                    : const Color(0xFF94A3B8),
-                                fontWeight: fromLoc != null
-                                    ? FontWeight.w500
-                                    : FontWeight.normal,
-                                fontFamily: 'Inter',
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
+          Obx(() {
+            final fromLoc = controller.selectedFromLocation.value;
+            return InkWell(
+              onTap: () => _showLocationPicker(context, true),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFFE2E8F0),
+                    width: 1.5,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.location_on_outlined,
+                      color: Color(0xFF94A3B8),
+                      size: 20,
                     ),
-                  );
-                }),
-              ),
-              const SizedBox(width: 12),
-              // To Location
-              Expanded(
-                child: Obx(() {
-                  final toLoc = controller.selectedToLocation.value;
-                  return InkWell(
-                    onTap: () => _showLocationPicker(context, false),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 14,
+                    const SizedBox(width: 8),
+                    Text(
+                      fromLoc != null ? fromLoc.name : 'Select From Location',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: fromLoc != null
+                            ? const Color(0xFF0F172A)
+                            : const Color(0xFF94A3B8),
+                        fontWeight: fromLoc != null
+                            ? FontWeight.w500
+                            : FontWeight.normal,
+                        fontFamily: 'Inter',
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: const Color(0xFFE2E8F0),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.location_on_outlined,
-                            color: Color(0xFF94A3B8),
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              toLoc != null ? toLoc.name : 'Select To Location',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: toLoc != null
-                                    ? const Color(0xFF0F172A)
-                                    : const Color(0xFF94A3B8),
-                                fontWeight: toLoc != null
-                                    ? FontWeight.w500
-                                    : FontWeight.normal,
-                                fontFamily: 'Inter',
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  );
-                }),
+                  ],
+                ),
               ),
-            ],
-          ),
+            );
+          }),
         ],
       ),
     );
@@ -378,7 +317,7 @@ class BusScanScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Choose Bus',
+            'Choose Vehicle',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -415,7 +354,7 @@ class BusScanScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        bus != null ? bus.name : 'Select Bus',
+                        bus != null ? bus.name : 'Select Vehicle',
                         style: TextStyle(
                           fontSize: 15,
                           color: bus != null
@@ -875,12 +814,13 @@ class BusScanScreen extends StatelessWidget {
               const Divider(height: 1),
               Obx(() {
                 final locs = controller.locationMasterController.locations;
+
                 if (locs.isEmpty) {
                   return const Padding(
                     padding: EdgeInsets.all(24.0),
                     child: Center(
                       child: Text(
-                        'No locations available. Add them in settings.',
+                        'No current locations available.',
                         style: TextStyle(color: Colors.grey),
                       ),
                     ),
@@ -891,6 +831,7 @@ class BusScanScreen extends StatelessWidget {
                     itemCount: locs.length,
                     itemBuilder: (context, index) {
                       final loc = locs[index];
+                      final isCurentLocation = loc.isCurrentLocation == '1';
                       return ListTile(
                         leading: const Icon(
                           Icons.location_on_outlined,
@@ -904,13 +845,12 @@ class BusScanScreen extends StatelessWidget {
                           bool success = false;
                           if (isFromLocation) {
                             success = controller.setFromLocation(loc);
-                          } else {
-                            success = controller.setToLocation(loc);
                           }
                           if (success) {
                             Navigator.pop(context);
                           }
                         },
+                        trailing: isCurentLocation ? Text('Current') : null,
                       );
                     },
                   ),
@@ -942,7 +882,7 @@ class BusScanScreen extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Text(
-                  'Select Bus',
+                  'Select Vehicle',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -971,7 +911,7 @@ class BusScanScreen extends StatelessWidget {
                       final vehicle = vehicles[index];
                       return ListTile(
                         leading: const Icon(
-                          Icons.directions_bus,
+                          Icons.add_circle,
                           color: Color(0xFF213AEC),
                         ),
                         title: Text(
@@ -1447,7 +1387,7 @@ class BusScanScreen extends StatelessWidget {
 
   void _showScanSummary(BuildContext context) {
     final fromLoc = controller.selectedFromLocation.value?.name ?? 'Not Set';
-    final toLoc = controller.selectedToLocation.value?.name ?? 'Not Set';
+
     final busName = controller.selectedBus.value?.name ?? 'Not Selected';
     final count = controller.scannedTags.length;
 
@@ -1470,7 +1410,7 @@ class BusScanScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildSummaryRow('From Location:', fromLoc),
-              _buildSummaryRow('To Location:', toLoc),
+
               _buildSummaryRow('Selected Bus:', busName),
               const Divider(height: 24),
               _buildSummaryRow(

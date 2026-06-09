@@ -31,7 +31,7 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
 
   // Selected Locations & Bus
   var selectedFromLocation = Rxn<LocationModel>();
-  var selectedToLocation = Rxn<LocationModel>();
+
   var selectedBus = Rxn<VehicleModel>();
 
   // Scanned Tags
@@ -52,38 +52,26 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
     _initializeReader();
     _rfidService.registerPhysicalTriggerCallback(_handlePhysicalTrigger);
     fetchEventDay();
-  }
 
-  bool setFromLocation(LocationModel location) {
-    if (selectedToLocation.value != null &&
-        selectedToLocation.value!.id == location.id) {
-      Get.snackbar(
-        'Validation Error',
-        'From Location cannot be the same as To Location.',
-        backgroundColor: const Color(0xFFEF4444),
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return false;
-    }
-    selectedFromLocation.value = location;
-    return true;
-  }
+    ever(locationMasterController.locations, (List<LocationModel> locs) {
+      if (selectedFromLocation.value == null && locs.isNotEmpty) {
+        final currentLoc = locs.firstWhereOrNull(
+          (l) => l.isCurrentLocation == '1',
+        );
+        if (currentLoc != null) {
+          selectedFromLocation.value = currentLoc;
+        }
+      }
+    });
 
-  bool setToLocation(LocationModel location) {
-    if (selectedFromLocation.value != null &&
-        selectedFromLocation.value!.id == location.id) {
-      Get.snackbar(
-        'Validation Error',
-        'To Location cannot be the same as From Location.',
-        backgroundColor: const Color(0xFFEF4444),
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
+    if (locationMasterController.locations.isNotEmpty) {
+      final currentLoc = locationMasterController.locations.firstWhereOrNull(
+        (l) => l.isCurrentLocation == '1',
       );
-      return false;
+      if (currentLoc != null) {
+        selectedFromLocation.value = currentLoc;
+      }
     }
-    selectedToLocation.value = location;
-    return true;
   }
 
   Future<void> _initializeReader() async {
@@ -115,30 +103,11 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
       );
       return;
     }
-    if (selectedToLocation.value == null) {
-      Get.snackbar(
-        'Selection Required',
-        'Please select a To Location.',
-        backgroundColor: const Color(0xFFEF4444),
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
+
     if (selectedBus.value == null) {
       Get.snackbar(
         'Selection Required',
-        'Please select a Bus.',
-        backgroundColor: const Color(0xFFEF4444),
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
-    if (selectedFromLocation.value!.id == selectedToLocation.value!.id) {
-      Get.snackbar(
-        'Validation Error',
-        'From Location and To Location cannot be the same.',
+        'Please select a Vehicle.',
         backgroundColor: const Color(0xFFEF4444),
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
@@ -254,7 +223,7 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
     if (selectedBus.value == null) {
       Get.snackbar(
         'Selection Required',
-        'Please select a Bus first.',
+        'Please select a Vehicle first.',
         backgroundColor: const Color(0xFFEF4444),
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
@@ -315,7 +284,7 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
             () => ScanDetailsScreen(
               scanDetails: data,
               fromLocation: selectedFromLocation.value?.name ?? '',
-              toLocation: selectedToLocation.value?.name ?? '',
+
               busName: selectedBus.value?.name ?? '0',
             ),
           );
@@ -347,8 +316,9 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
   void _showStatusTrueConfirmDialog(Map<String, dynamic> data) {
     final String busName = selectedBus.value?.name ?? 'Unknown';
     final String fromLocation = selectedFromLocation.value?.name ?? 'Unknown';
-    final String toLocation = selectedToLocation.value?.name ?? 'Unknown';
+
     final int passengerCount = data['totalpassengers'] ?? scannedTags.length;
+    final unknownCount = data['invalidusercount'] ?? 0;
 
     Get.dialog(
       AlertDialog(
@@ -369,8 +339,8 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
               style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
             ),
             const SizedBox(height: 16),
-            _buildSummaryRow('From Location:', fromLocation),
-            _buildSummaryRow('To Location:', toLocation),
+            _buildSummaryRow('Location:', fromLocation),
+
             _buildSummaryRow('Selected Bus:', busName),
             const Divider(height: 24),
             _buildSummaryRow(
@@ -378,6 +348,11 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
               passengerCount.toString(),
               isBold: true,
             ),
+
+            if (unknownCount > 0) ...[
+              const SizedBox(height: 8),
+              _buildSummaryRow('Unknown Tags:', unknownCount.toString()),
+            ],
           ],
         ),
         actions: [
@@ -551,9 +526,7 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
   }
 
   Future<bool> submitTrip() async {
-    if (selectedBus.value == null ||
-        selectedFromLocation.value == null ||
-        selectedToLocation.value == null) {
+    if (selectedBus.value == null || selectedFromLocation.value == null) {
       Get.snackbar(
         'Validation Error',
         'Incomplete route or bus selection.',
@@ -582,14 +555,12 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
     try {
       final String vehicleId = selectedBus.value!.id;
       final String fromLocId = selectedFromLocation.value!.id;
-      final String toLocId = selectedToLocation.value!.id;
 
       final List<Map<String, String>> payload = scannedTags.map((tag) {
         return {
           "vehicle_id": vehicleId,
           "uniq_id": tag.displayName,
-          "from_location_id": fromLocId,
-          "to_location_id": toLocId,
+          "location_id": fromLocId,
           "day": day.value,
         };
       }).toList();
@@ -712,9 +683,10 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
   }
 
   void removeTag(String epc) {
-    scannedTags.removeWhere((t) => t.epc.trim().toLowerCase() == epc.trim().toLowerCase());
+    scannedTags.removeWhere(
+      (t) => t.epc.trim().toLowerCase() == epc.trim().toLowerCase(),
+    );
   }
-
 
   @override
   void onClose() {
@@ -722,5 +694,14 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
     _tagSubscription?.cancel();
     _rfidService.stopInventory();
     super.onClose();
+  }
+
+  bool setFromLocation(LocationModel location) {
+    if (selectedFromLocation.value == null) {
+      selectedFromLocation.value = location;
+      return true;
+    }
+
+    return false;
   }
 }

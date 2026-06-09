@@ -7,14 +7,14 @@ import 'controller/bus_scan_controller.dart';
 class ScanDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> scanDetails;
   final String fromLocation;
-  final String toLocation;
+
   final String busName;
 
   ScanDetailsScreen({
     super.key,
     required this.scanDetails,
     required this.fromLocation,
-    required this.toLocation,
+
     required this.busName,
   });
 
@@ -165,32 +165,14 @@ class ScanDetailsScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Text(
-                      fromLocation,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0F172A),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const Icon(
-                      Icons.arrow_forward_rounded,
-                      color: Color(0xFF213AEC),
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      toLocation,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0F172A),
-                      ),
-                    ),
-                  ],
+
+                Text(
+                  fromLocation,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0F172A),
+                  ),
                 ),
               ],
             ),
@@ -777,7 +759,7 @@ class ScanDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _buildSummaryDetailRow('From Location:', fromLocation),
-            _buildSummaryDetailRow('To Location:', toLocation),
+
             _buildSummaryDetailRow('Selected Bus:', busName),
             const Divider(height: 24),
             _buildSummaryDetailRow(
