@@ -317,7 +317,7 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
     final String busName = selectedBus.value?.name ?? 'Unknown';
     final String fromLocation = selectedFromLocation.value?.name ?? 'Unknown';
 
-    final int passengerCount = data['totalpassengers'] ?? scannedTags.length;
+    final int passengerCount = data['boardedCount'] ?? scannedTags.length;
     final unknownCount = data['invalidusercount'] ?? 0;
 
     Get.dialog(
@@ -343,15 +343,26 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
 
             _buildSummaryRow('Selected Bus:', busName),
             const Divider(height: 24),
-            _buildSummaryRow(
+            _buildClickableSummaryRow(
               'Total Passengers:',
               passengerCount.toString(),
+              () {
+                final list = data['boardedlist'] ?? [];
+                showDetailsScreen('Boarded Passengers', list);
+              },
               isBold: true,
             ),
 
             if (unknownCount > 0) ...[
               const SizedBox(height: 8),
-              _buildSummaryRow('Unknown Tags:', unknownCount.toString()),
+              _buildClickableSummaryRow(
+                'Unknown Tags:',
+                unknownCount.toString(),
+                () {
+                  final list = data['invaliduserlist'] ?? [];
+                  showDetailsScreen('Unknown Tags', list);
+                },
+              ),
             ],
           ],
         ),
@@ -451,6 +462,147 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildClickableSummaryRow(
+    String label,
+    String value,
+    VoidCallback onTap, {
+    bool isBold = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFF64748B),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(4),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEFF6FF),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: const Color(0xFF213AEC).withOpacity(0.3),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    value,
+                    style: TextStyle(
+                      color: const Color(0xFF213AEC),
+                      fontSize: 14,
+                      fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.open_in_new,
+                    size: 14,
+                    color: Color(0xFF213AEC),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void showDetailsScreen(String title, List<dynamic> list) {
+    Get.to(
+      () => Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC),
+        appBar: AppBar(
+          title: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+          backgroundColor: const Color(0xFF213AEC),
+          foregroundColor: Colors.white,
+          centerTitle: true,
+          elevation: 0,
+        ),
+        body: list.isEmpty
+            ? const Center(
+                child: Text(
+                  'No data found.',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+              )
+            : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: list.length,
+                itemBuilder: (context, index) {
+                  final item = list[index];
+                  final name = item['name'] ?? 'Unknown';
+                  final uniqId = item['uniq_id'] ?? '';
+                  final state = item['state'] ?? '';
+
+                  String initials = '?';
+                  if (name != 'Unknown' && name.isNotEmpty) {
+                    initials = name[0].toUpperCase();
+                  }
+
+                  return Card(
+                    elevation: 0,
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: const Color(0xFFE2E8F0)),
+                    ),
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      leading: CircleAvatar(
+                        backgroundColor: const Color(0xFFEFF6FF),
+                        child: Text(
+                          initials,
+                          style: const TextStyle(
+                            color: Color(0xFF213AEC),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 4.0),
+                        child: Text(
+                          '$uniqId${state.isNotEmpty ? ' • $state' : ''}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
       ),
     );
   }
@@ -697,11 +849,7 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
   }
 
   bool setFromLocation(LocationModel location) {
-    if (selectedFromLocation.value == null) {
-      selectedFromLocation.value = location;
-      return true;
-    }
-
-    return false;
+    selectedFromLocation.value = location;
+    return true;
   }
 }
