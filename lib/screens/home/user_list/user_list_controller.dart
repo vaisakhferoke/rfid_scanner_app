@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:event_rfid_app/api/api_client.dart';
 import 'package:event_rfid_app/api/api_urls.dart';
@@ -47,10 +46,16 @@ class UserListController extends GetxController {
         final data = json.decode(response.body);
         if (data['status'] == true || data['status'] == 'true') {
           final List<dynamic> list = data['data'] ?? [];
-          users.assignAll(list.map((e) => UserDetailModel.fromJson(e)).toList());
+          users.assignAll(
+            list.map((e) => UserDetailModel.fromJson(e)).toList(),
+          );
         } else {
           users.clear();
-          Get.snackbar('Notice', data['Message'] ?? 'No data found', snackPosition: SnackPosition.BOTTOM);
+          Get.snackbar(
+            'Notice',
+            data['Message'] ?? 'No data found',
+            snackPosition: SnackPosition.BOTTOM,
+          );
         }
       } else {
         Get.snackbar('Error', 'Server error: ${response.statusCode}');

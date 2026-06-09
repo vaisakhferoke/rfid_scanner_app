@@ -1,3 +1,4 @@
+import 'package:event_rfid_app/widgets/common_widgets/attendee_details_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'user_list_controller.dart';
@@ -138,51 +139,56 @@ class UserListScreen extends StatelessWidget {
                 separatorBuilder: (context, index) => const Divider(height: 1),
                 itemBuilder: (context, index) {
                   final user = controller.users[index];
-                  return Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundColor: const Color(0xFFEFF6FF),
-                          radius: 24,
-                          child: Text(
-                            user.user.isNotEmpty
-                                ? user.user[0].toUpperCase()
-                                : '?',
-                            style: const TextStyle(
-                              color: Color(0xFF0043A4),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
+                  return InkWell(
+                    onTap: () {
+                      showAttendeeDetails(context, user.uniqueId);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: const Color(0xFFEFF6FF),
+                            radius: 24,
+                            child: Text(
+                              user.user.isNotEmpty
+                                  ? user.user[0].toUpperCase()
+                                  : '?',
+                              style: const TextStyle(
+                                color: Color(0xFF0043A4),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user.user,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Inter',
-                                  fontSize: 16,
-                                  color: Color(0xFF0F172A),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user.user,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Inter',
+                                    fontSize: 16,
+                                    color: Color(0xFF0F172A),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${user.uniqueId} • ${user.state}',
-                                style: const TextStyle(
-                                  fontFamily: 'Inter',
-                                  color: Color(0xFF64748B),
-                                  fontSize: 14,
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${user.uniqueId} • ${user.state}',
+                                  style: const TextStyle(
+                                    fontFamily: 'Inter',
+                                    color: Color(0xFF64748B),
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },
