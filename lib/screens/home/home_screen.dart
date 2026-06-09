@@ -3,6 +3,7 @@ import 'package:event_rfid_app/screens/home/bus_scan/bus_scan_screen.dart';
 import 'package:event_rfid_app/widgets/appbar/home_appbar.dart';
 import 'package:event_rfid_app/controllers/home_controller.dart';
 import 'package:event_rfid_app/screens/settings/location_master_screen.dart';
+import 'package:event_rfid_app/screens/home/update_user_trip/update_user_trip_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -213,16 +214,34 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 14),
-        _buildQuickActionCard(
-          icon: Icons.directions_bus,
-          iconColor: const Color(0xFF0043A4),
-          iconBgColor: const Color(0xFFEFF6FF),
-          title: 'Bus Scan',
-          subtitle: '200/120',
-          onTap: () {
-            Get.to(() => BusScanScreen());
-          },
-          isFullWidth: true,
+        Row(
+          children: [
+            Expanded(
+              child: _buildQuickActionCard(
+                icon: Icons.directions_bus,
+                iconColor: const Color(0xFF0043A4),
+                iconBgColor: const Color(0xFFEFF6FF),
+                title: 'Bus Scan',
+                subtitle: '200/120',
+                onTap: () {
+                  Get.to(() => BusScanScreen());
+                },
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: _buildQuickActionCard(
+                icon: Icons.add_road,
+                iconColor: const Color(0xFF10B981),
+                iconBgColor: const Color(0xFFECFDF5),
+                title: 'User Trip Add',
+                subtitle: '',
+                onTap: () {
+                  Get.to(() => UpdateUserTripScreen());
+                },
+              ),
+            ),
+          ],
         ),
       ],
     );
