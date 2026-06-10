@@ -607,6 +607,41 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
                               ),
                             ),
                             const SizedBox(height: 16),
+                            // Action Buttons
+                            SizedBox(
+                              width: double.infinity,
+                              height: 40,
+                              child: OutlinedButton(
+                                onPressed: _findSingleTag,
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: const Color(0xFF0043A4),
+                                  side: const BorderSide(
+                                    color: Color(0xFF0043A4),
+                                    width: 2,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.search_rounded, size: 24),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Find Tag',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Inter',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 25),
                             TextFormField(
                               controller: _epcController,
                               style: const TextStyle(
@@ -681,40 +716,6 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
 
                       const SizedBox(height: 36),
 
-                      // Action Buttons
-                      SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: OutlinedButton(
-                          onPressed: _findSingleTag,
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF0043A4),
-                            side: const BorderSide(
-                              color: Color(0xFF0043A4),
-                              width: 2,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.search_rounded, size: 24),
-                              SizedBox(width: 8),
-                              Text(
-                                'Find Tag',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Inter',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
                         height: 56,
