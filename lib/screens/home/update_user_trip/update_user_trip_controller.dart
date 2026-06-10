@@ -10,12 +10,20 @@ class UpdateUserTripController extends GetxController {
   final RxString selectedLocationId = ''.obs;
   final RxString selectedDay = ''.obs; // Defaulting to day1 as per API spec
   final RxBool isLoading = false.obs;
+  final RxBool isUpdateMode = false.obs;
+  final RxString warningMessage = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
     _setDefaultLocation();
     fetchEventDay();
+    tagController.addListener(() {
+      if (isUpdateMode.value) {
+        isUpdateMode.value = false;
+        warningMessage.value = '';
+      }
+    });
   }
 
   Future<void> fetchEventDay() async {
@@ -112,14 +120,23 @@ class UpdateUserTripController extends GetxController {
     }
 
     isLoading.value = true;
+    warningMessage.value = '';
     try {
-      final response =
-          await ApiClient.post('flutter/event_phuket/update_user_trip.aspx', {
-            "unique_id": tagController.text,
-            "vehicle_id": selectedVehicleId.value,
-            "location_id": selectedLocationId.value,
-            "day": selectedDay.value,
-          });
+      final Map<String, dynamic> payload = {
+        "unique_id": tagController.text,
+        "vehicle_id": selectedVehicleId.value,
+        "location_id": selectedLocationId.value,
+        "day": selectedDay.value,
+      };
+
+      if (isUpdateMode.value) {
+        payload["type"] = "update";
+      }
+
+      final response = await ApiClient.post(
+        'flutter/event_phuket/update_user_trip.aspx',
+        payload,
+      );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -127,6 +144,7 @@ class UpdateUserTripController extends GetxController {
           tagController.clear();
           selectedVehicleId.value = '';
           selectedLocationId.value = '';
+          isUpdateMode.value = false;
           Get.snackbar(
             'Success',
             data['Message'] ?? 'Trip updated successfully',
@@ -134,12 +152,20 @@ class UpdateUserTripController extends GetxController {
             colorText: Colors.white,
           );
         } else {
-          Get.snackbar(
-            'Error',
-            data['Message'] ?? 'Failed to update trip',
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-          );
+          if (data['Message'] == 'Passenger already added.' &&
+              !isUpdateMode.value) {
+            String vehicleName = data['vehicle'] ?? '';
+            warningMessage.value =
+                'Passenger already added${vehicleName.isNotEmpty ? ' in $vehicleName' : ''}.';
+            isUpdateMode.value = true;
+          } else {
+            Get.snackbar(
+              'Error',
+              data['Message'] ?? 'Failed to update trip',
+              backgroundColor: Colors.red,
+              colorText: Colors.white,
+            );
+          }
         }
       } else {
         Get.snackbar(

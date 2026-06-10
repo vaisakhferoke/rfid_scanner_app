@@ -177,7 +177,38 @@ class UpdateUserTripScreen extends StatelessWidget {
                 ),
               );
             }),
-            const SizedBox(height: 48),
+            Obx(() {
+              if (controller.warningMessage.value.isNotEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 24.0, bottom: 24.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.red.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.warning_amber_rounded, color: Colors.red.shade700),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            controller.warningMessage.value,
+                            style: TextStyle(
+                              color: Colors.red.shade700,
+                              fontFamily: 'Inter',
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              return const SizedBox(height: 48);
+            }),
 
             SizedBox(
               width: double.infinity,
@@ -188,7 +219,9 @@ class UpdateUserTripScreen extends StatelessWidget {
                       ? null
                       : () => controller.submitTrip(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0043A4),
+                    backgroundColor: controller.isUpdateMode.value
+                        ? Colors.orange.shade700
+                        : const Color(0xFF0043A4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -203,9 +236,9 @@ class UpdateUserTripScreen extends StatelessWidget {
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text(
-                          'Submit',
-                          style: TextStyle(
+                      : Text(
+                          controller.isUpdateMode.value ? 'Update' : 'Submit',
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
