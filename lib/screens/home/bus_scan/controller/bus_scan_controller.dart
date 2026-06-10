@@ -220,7 +220,8 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  final checkStatusResponse = Rxn<CheckStatusResponseModel>();
+  var checkStatusResponse = Rxn<CheckStatusResponseModel>();
+
   Future<void> checkStatus() async {
     if (selectedBus.value == null) {
       Get.snackbar(
@@ -278,7 +279,7 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         final model = CheckStatusResponseModel.fromJson(data);
-        checkStatusResponse.value = model;
+        checkStatusResponse(model);
         final bool status = model.status;
 
         if (status) {
@@ -350,8 +351,7 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
               'Total Passengers:',
               passengerCount.toString(),
               () {
-                final list = data['boardedlist'] ?? [];
-                showDetailsScreen('Boarded Passengers', list);
+                showDetailsScreen('Boarded Passengers');
               },
               isBold: true,
             ),
@@ -362,8 +362,7 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
                 'Unknown Tags:',
                 unknownCount.toString(),
                 () {
-                  final list = data['invaliduserlist'] ?? [];
-                  showDetailsScreen('Unknown Tags', list);
+                  showDetailsScreen('Unknown Tags');
                 },
               ),
             ],
@@ -528,11 +527,23 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
 
   void showDetailsScreen(String title) {
     final BusScanController controller = Get.find<BusScanController>();
-    RxList<dynamic> unknownList =
+    RxList<dynamic> displayList = <dynamic>[].obs;
+
+    if (title == 'Boarded Passengers') {
+      displayList.assignAll(
+        controller.checkStatusResponse.value?.boardedList
+                .map((e) => e.toJson())
+                .toList() ??
+            [],
+      );
+    } else if (title == 'Unknown Tags') {
+      displayList.assignAll(
         controller.checkStatusResponse.value?.invalidUserList
-            .map((e) => e.toJson())
-            .toList() ??
-        [];
+                .map((e) => e.toJson())
+                .toList() ??
+            [],
+      );
+    }
 
     Get.to(
       () => Scaffold(
@@ -547,209 +558,255 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
           centerTitle: true,
           elevation: 0,
         ),
-        body: list.isEmpty
-            ? const Center(
-                child: Text(
-                  'No data found.',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
-              )
-            : Obx(
-                () => ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: unknownList.length,
-                  itemBuilder: (context, index) {
-                    final item = unknownList[index];
-                    final name = item['name'] ?? 'Unknown';
-                    final uniqId = item['uniq_id'] ?? '';
-                    final state = item['state'] ?? '';
-
-                    String initials = '?';
-                    if (name != 'Unknown' && name.isNotEmpty) {
-                      initials = name[0].toUpperCase();
-                    }
-
-                    return Card(
-                      elevation: 0,
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: const Color(0xFFE2E8F0)),
-                      ),
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        leading: CircleAvatar(
-                          backgroundColor: const Color(0xFFEFF6FF),
-                          child: Text(
-                            initials,
-                            style: const TextStyle(
-                              color: Color(0xFF213AEC),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        title: Text(
-                          name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: Color(0xFF0F172A),
-                          ),
-                        ),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 4.0),
-                          child: Text(
-                            '$uniqId${state.isNotEmpty ? ' • $state' : ''}',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Color(0xFF64748B),
-                            ),
-                          ),
-                        ),
-
-                        trailing: title == 'Boarded Passengers'
-                            ? IconButton(
-                                onPressed: () async {
-                                  final String userId = uniqId;
-                                  if (selectedBus.value == null ||
-                                      selectedFromLocation.value == null) {
-                                    Get.snackbar(
-                                      'Error',
-                                      'Missing bus or location selection',
-                                    );
-                                    return;
-                                  }
-
-                                  Get.dialog(
-                                    const Center(
-                                      child: CircularProgressIndicator(
-                                        color: Color(0xFF213AEC),
-                                      ),
-                                    ),
-                                    barrierDismissible: false,
-                                  );
-
-                                  try {
-                                    final String vehicleId =
-                                        selectedBus.value!.id;
-                                    final String locationId =
-                                        selectedFromLocation.value!.id;
-
-                                    final Map<String, String> payload = {
-                                      "vehicle_id": vehicleId,
-                                      "location_id": locationId,
-                                      "user_id": userId,
-                                    };
-
-                                    final String baseUrl =
-                                        await ApiConfig.getBaseUrl();
-                                    final String fullUrl =
-                                        '$baseUrl${ApiUrls.deleteTrip}';
-
-                                    final response = await http
-                                        .post(
-                                          Uri.parse(fullUrl),
-                                          headers: {
-                                            'Content-Type': 'application/json',
-                                          },
-                                          body: json.encode(payload),
-                                        )
-                                        .timeout(const Duration(seconds: 15));
-
-                                    if (Get.isDialogOpen ?? false) {
-                                      Get.back();
-                                    }
-
-                                    if (response.statusCode == 200) {
-                                      final Map<String, dynamic> data = json
-                                          .decode(response.body);
-                                      if (data['status'] == true) {
-                                        removeTag(userId);
-                                        //  remove unknown list
-                                        unknownList.remove(userId);
-
-                                        Get.back(); // Close the details screen
-                                        Get.snackbar(
-                                          'Success',
-                                          'User removed successfully.',
-                                          backgroundColor: const Color(
-                                            0xFF22C55E,
-                                          ),
-                                          colorText: Colors.white,
-                                          snackPosition: SnackPosition.BOTTOM,
-                                        );
-                                        // Re-check status to get the updated lists
-                                        checkStatus();
-                                      } else {
-                                        Get.snackbar(
-                                          'Error',
-                                          data['message']?.toString() ??
-                                              'Failed to remove user',
-                                          backgroundColor: const Color(
-                                            0xFFEF4444,
-                                          ),
-                                          colorText: Colors.white,
-                                        );
-                                      }
-                                    } else {
-                                      Get.snackbar(
-                                        'API Error',
-                                        'Failed to remove user',
-                                        backgroundColor: const Color(
-                                          0xFFEF4444,
-                                        ),
-                                        colorText: Colors.white,
-                                      );
-                                    }
-                                  } catch (e) {
-                                    if (Get.isDialogOpen ?? false) {
-                                      Get.back();
-                                    }
-                                    Get.snackbar(
-                                      'Network Error',
-                                      'Could not connect to server.',
-                                      backgroundColor: const Color(0xFFEF4444),
-                                      colorText: Colors.white,
-                                    );
-                                  }
-                                },
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.deepOrange,
-                                ),
-                              )
-                            : title == 'Unknown Tags'
-                            ? IconButton(
-                                onPressed: () {
-                                  removeTag(uniqId);
-                                  // Remove from list
-                                  if (unknownList.contains(uniqId)) {
-                                    unknownList.remove(uniqId);
-                                  }
-
-                                  Get.snackbar(
-                                    'Success',
-                                    'Unknown tag removed.',
-                                    backgroundColor: const Color(0xFF22C55E),
-                                    colorText: Colors.white,
-                                    snackPosition: SnackPosition.BOTTOM,
-                                  );
-                                },
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.deepOrange,
-                                ),
-                              )
-                            : null,
-                      ),
-                    );
-                  },
-                ),
+        body: Obx(() {
+          if (displayList.isEmpty) {
+            return const Center(
+              child: Text(
+                'No data found.',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
+            );
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: displayList.length,
+            itemBuilder: (context, index) {
+              final item = displayList[index];
+              final name = item['name'] ?? 'Unknown';
+              final uniqId = item['uniq_id'] ?? '';
+              final state = item['state'] ?? '';
+
+              String initials = '?';
+              if (name != 'Unknown' && name.isNotEmpty) {
+                initials = name[0].toUpperCase();
+              }
+
+              return Card(
+                elevation: 0,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: const Color(0xFFE2E8F0)),
+                ),
+                margin: const EdgeInsets.only(bottom: 12),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  leading: CircleAvatar(
+                    backgroundColor: const Color(0xFFEFF6FF),
+                    child: Text(
+                      initials,
+                      style: const TextStyle(
+                        color: Color(0xFF213AEC),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  title: Text(
+                    name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      '$uniqId${state.isNotEmpty ? ' • $state' : ''}',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+                  ),
+
+                  trailing: title == 'Boarded Passengers'
+                      ? IconButton(
+                          onPressed: () async {
+                            final String userId = uniqId;
+                            if (selectedBus.value == null ||
+                                selectedFromLocation.value == null) {
+                              Get.snackbar(
+                                'Error',
+                                'Missing bus or location selection',
+                              );
+                              return;
+                            }
+                            removeTag(userId);
+                            //  remove from display list
+                            displayList.removeWhere(
+                              (e) => e['uniq_id'] == userId,
+                            );
+
+                            // Update the main observable model correctly using copyWith
+                            final currentModel =
+                                controller.checkStatusResponse.value;
+                            if (currentModel != null) {
+                              final newBoardedList = currentModel.boardedList
+                                  .where((e) => e.uniqId != userId)
+                                  .toList();
+                              controller.checkStatusResponse.value =
+                                  currentModel.copyWith(
+                                    boardedList: newBoardedList,
+                                    boardedCount: newBoardedList.length,
+                                    totalPassengers:
+                                        currentModel.totalPassengers > 0
+                                        ? currentModel.totalPassengers - 1
+                                        : 0,
+                                  );
+                            }
+
+                            // Get.dialog(
+                            //   const Center(
+                            //     child: CircularProgressIndicator(
+                            //       color: Color(0xFF213AEC),
+                            //     ),
+                            //   ),
+                            //   barrierDismissible: false,
+                            // );
+
+                            // try {
+                            //   final String vehicleId = selectedBus.value!.id;
+                            //   final String locationId =
+                            //       selectedFromLocation.value!.id;
+
+                            //   final Map<String, String> payload = {
+                            //     "vehicle_id": vehicleId,
+                            //     "location_id": locationId,
+                            //     "user_id": userId,
+                            //   };
+
+                            //   final String baseUrl =
+                            //       await ApiConfig.getBaseUrl();
+                            //   final String fullUrl =
+                            //       '$baseUrl${ApiUrls.deleteTrip}';
+
+                            //   final response = await http
+                            //       .post(
+                            //         Uri.parse(fullUrl),
+                            //         headers: {
+                            //           'Content-Type': 'application/json',
+                            //         },
+                            //         body: json.encode(payload),
+                            //       )
+                            //       .timeout(const Duration(seconds: 15));
+
+                            //   if (Get.isDialogOpen ?? false) {
+                            //     Get.back();
+                            //   }
+
+                            //   if (response.statusCode == 200) {
+                            //     final Map<String, dynamic> data = json.decode(
+                            //       response.body,
+                            //     );
+                            //     if (data['status'] == true) {
+                            //       removeTag(userId);
+                            //       //  remove from display list
+                            //       displayList.removeWhere(
+                            //         (e) => e['uniq_id'] == userId,
+                            //       );
+
+                            //       // Update the main observable model correctly using copyWith
+                            //       final currentModel = controller.checkStatusResponse.value;
+                            //       if (currentModel != null) {
+                            //         final newBoardedList = currentModel.boardedList.where((e) => e.uniqId != userId).toList();
+                            //         controller.checkStatusResponse.value = currentModel.copyWith(
+                            //           boardedList: newBoardedList,
+                            //           boardedCount: newBoardedList.length,
+                            //           totalPassengers: currentModel.totalPassengers > 0 ? currentModel.totalPassengers - 1 : 0,
+                            //         );
+                            //       }
+
+                            //       Get.back(); // Close the dialog
+                            //       Get.snackbar(
+                            //         'Success',
+                            //         'User removed successfully.',
+                            //         backgroundColor: const Color(0xFF22C55E),
+                            //         colorText: Colors.white,
+                            //         snackPosition: SnackPosition.BOTTOM,
+                            //       );
+                            //       // Re-check status to get the updated lists
+                            //       checkStatus();
+                            //     } else {
+                            //       Get.snackbar(
+                            //         'Error',
+                            //         data['message']?.toString() ??
+                            //             'Failed to remove user',
+                            //         backgroundColor: const Color(0xFFEF4444),
+                            //         colorText: Colors.white,
+                            //       );
+                            //     }
+                            //   } else {
+                            //     Get.snackbar(
+                            //       'API Error',
+                            //       'Failed to remove user',
+                            //       backgroundColor: const Color(0xFFEF4444),
+                            //       colorText: Colors.white,
+                            //     );
+                            //   }
+                            // } catch (e) {
+                            //   if (Get.isDialogOpen ?? false) {
+                            //     Get.back();
+                            //   }
+                            //   Get.snackbar(
+                            //     'Network Error',
+                            //     'Could not connect to server.',
+                            //     backgroundColor: const Color(0xFFEF4444),
+                            //     colorText: Colors.white,
+                            //   );
+                            // }
+                          },
+                          icon: const Icon(
+                            Icons.delete,
+                            color: Colors.deepOrange,
+                          ),
+                        )
+                      : title == 'Unknown Tags'
+                      ? IconButton(
+                          onPressed: () {
+                            removeTag(uniqId);
+                            // Remove from list
+                            displayList.removeWhere(
+                              (e) => e['uniq_id'] == uniqId,
+                            );
+
+                            // Update the main observable model correctly using copyWith
+                            final currentModel =
+                                controller.checkStatusResponse.value;
+                            if (currentModel != null) {
+                              final newInvalidList = currentModel
+                                  .invalidUserList
+                                  .where((e) => e.uniqId != uniqId)
+                                  .toList();
+                              controller.checkStatusResponse.value =
+                                  currentModel.copyWith(
+                                    invalidUserList: newInvalidList,
+                                    invalidUserCount: newInvalidList.length,
+                                  );
+                            }
+
+                            Get.snackbar(
+                              'Success',
+                              'Unknown tag removed.',
+                              backgroundColor: const Color(0xFF22C55E),
+                              colorText: Colors.white,
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.delete,
+                            color: Colors.deepOrange,
+                          ),
+                        )
+                      : null,
+                ),
+              );
+            },
+          );
+        }),
       ),
     );
   }

@@ -60,65 +60,86 @@ class ScanDetailsScreen extends StatelessWidget {
         actions: [_buildRangeSettingsButton(context)],
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 16.0,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildRouteCard(),
-                    const SizedBox(height: 16),
-                    Obx(
-                      () => _buildStatsRow(
-                        controller.checkStatusResponse.value?.totalPassengers ??
-                            0,
-                        controller.checkStatusResponse.value?.boardedCount ?? 0,
-                        controller.checkStatusResponse.value?.missingCount ?? 0,
-                        controller.checkStatusResponse.value?.wrongBusCount ??
-                            0,
-                        controller
-                                .checkStatusResponse
-                                .value
-                                ?.invalidUserCount ??
-                            0,
-                        controller.checkStatusResponse.value?.boardedList
-                                .map((e) => e.toJson())
-                                .toList() ??
-                            [],
-                        controller.checkStatusResponse.value?.invalidUserList
-                                .map((e) => e.toJson())
-                                .toList() ??
-                            [],
-                      ),
+        child: GetBuilder<BusScanController>(
+          builder: (c) {
+            return Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 16.0,
                     ),
-                    // const SizedBox(height: 20),
-                    // _buildMissingSection(
-                    //   controller.checkStatusResponse.value?.missingPassengers
-                    //           .map((e) => e.toJson())
-                    //           .toList() ??
-                    //       [],
-                    // ),
-                    // const SizedBox(height: 20),
-                    // _buildWrongBusSection(
-                    //   context,
-                    //   controller.checkStatusResponse.value?.wrongBus
-                    //           .map((e) => e.toJson())
-                    //           .toList() ??
-                    //       [],
-                    // ),
-                    // const SizedBox(height: 20),
-                  ],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildRouteCard(),
+                        const SizedBox(height: 16),
+                        Obx(
+                          () => _buildStatsRow(
+                            controller
+                                    .checkStatusResponse
+                                    .value
+                                    ?.totalPassengers ??
+                                0,
+                            controller
+                                    .checkStatusResponse
+                                    .value
+                                    ?.boardedCount ??
+                                0,
+                            controller
+                                    .checkStatusResponse
+                                    .value
+                                    ?.missingCount ??
+                                0,
+                            controller
+                                    .checkStatusResponse
+                                    .value
+                                    ?.wrongBusCount ??
+                                0,
+                            controller
+                                    .checkStatusResponse
+                                    .value
+                                    ?.invalidUserCount ??
+                                0,
+                            controller.checkStatusResponse.value?.boardedList
+                                    .map((e) => e.toJson())
+                                    .toList() ??
+                                [],
+                            controller
+                                    .checkStatusResponse
+                                    .value
+                                    ?.invalidUserList
+                                    .map((e) => e.toJson())
+                                    .toList() ??
+                                [],
+                          ),
+                        ),
+                        // const SizedBox(height: 20),
+                        // _buildMissingSection(
+                        //   controller.checkStatusResponse.value?.missingPassengers
+                        //           .map((e) => e.toJson())
+                        //           .toList() ??
+                        //       [],
+                        // ),
+                        // const SizedBox(height: 20),
+                        // _buildWrongBusSection(
+                        //   context,
+                        //   controller.checkStatusResponse.value?.wrongBus
+                        //           .map((e) => e.toJson())
+                        //           .toList() ??
+                        //       [],
+                        // ),
+                        // const SizedBox(height: 20),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            _buildSubmitButton(context),
-          ],
+                _buildSubmitButton(context),
+              ],
+            );
+          },
         ),
       ),
     );

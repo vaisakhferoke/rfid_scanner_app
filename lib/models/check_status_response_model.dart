@@ -23,27 +23,57 @@ class CheckStatusResponseModel {
     required this.wrongBus,
   });
 
+  CheckStatusResponseModel copyWith({
+    bool? status,
+    int? totalPassengers,
+    int? boardedCount,
+    List<BoardedUser>? boardedList,
+    int? invalidUserCount,
+    List<InvalidUser>? invalidUserList,
+    int? missingCount,
+    int? wrongBusCount,
+    List<MissingPassenger>? missingPassengers,
+    List<WrongBusUser>? wrongBus,
+  }) {
+    return CheckStatusResponseModel(
+      status: status ?? this.status,
+      totalPassengers: totalPassengers ?? this.totalPassengers,
+      boardedCount: boardedCount ?? this.boardedCount,
+      boardedList: boardedList ?? this.boardedList,
+      invalidUserCount: invalidUserCount ?? this.invalidUserCount,
+      invalidUserList: invalidUserList ?? this.invalidUserList,
+      missingCount: missingCount ?? this.missingCount,
+      wrongBusCount: wrongBusCount ?? this.wrongBusCount,
+      missingPassengers: missingPassengers ?? this.missingPassengers,
+      wrongBus: wrongBus ?? this.wrongBus,
+    );
+  }
+
   factory CheckStatusResponseModel.fromJson(Map<String, dynamic> json) {
     return CheckStatusResponseModel(
       status: json['status'] ?? false,
       totalPassengers: json['totalpassengers'] ?? 0,
       boardedCount: json['boardedCount'] ?? 0,
-      boardedList: (json['boardedlist'] as List<dynamic>?)
+      boardedList:
+          (json['boardedlist'] as List<dynamic>?)
               ?.map((e) => BoardedUser.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       invalidUserCount: json['invalidusercount'] ?? 0,
-      invalidUserList: (json['invaliduserlist'] as List<dynamic>?)
+      invalidUserList:
+          (json['invaliduserlist'] as List<dynamic>?)
               ?.map((e) => InvalidUser.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       missingCount: json['missing_count'] ?? 0,
       wrongBusCount: json['wrong_bus_count'] ?? 0,
-      missingPassengers: (json['missing_passengers'] as List<dynamic>?)
+      missingPassengers:
+          (json['missing_passengers'] as List<dynamic>?)
               ?.map((e) => MissingPassenger.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
-      wrongBus: (json['wrong_bus'] as List<dynamic>?)
+      wrongBus:
+          (json['wrong_bus'] as List<dynamic>?)
               ?.map((e) => WrongBusUser.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
@@ -71,11 +101,7 @@ class BoardedUser {
   final String name;
   final String state;
 
-  BoardedUser({
-    required this.uniqId,
-    required this.name,
-    required this.state,
-  });
+  BoardedUser({required this.uniqId, required this.name, required this.state});
 
   factory BoardedUser.fromJson(Map<String, dynamic> json) {
     return BoardedUser(
@@ -86,31 +112,21 @@ class BoardedUser {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'uniq_id': uniqId,
-      'name': name,
-      'state': state,
-    };
+    return {'uniq_id': uniqId, 'name': name, 'state': state};
   }
 }
 
 class InvalidUser {
   final String uniqId;
 
-  InvalidUser({
-    required this.uniqId,
-  });
+  InvalidUser({required this.uniqId});
 
   factory InvalidUser.fromJson(Map<String, dynamic> json) {
-    return InvalidUser(
-      uniqId: json['uniq_id']?.toString() ?? '',
-    );
+    return InvalidUser(uniqId: json['uniq_id']?.toString() ?? '');
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'uniq_id': uniqId,
-    };
+    return {'uniq_id': uniqId};
   }
 }
 
@@ -134,11 +150,7 @@ class MissingPassenger {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'uniq_id': uniqId,
-      'name': name,
-      'code': code,
-    };
+    return {'uniq_id': uniqId, 'name': name, 'code': code};
   }
 }
 
