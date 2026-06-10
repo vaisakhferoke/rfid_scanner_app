@@ -19,10 +19,11 @@ void showAttendeeDetails(BuildContext context, String uniqId) {
   ApiConfig.getBaseUrl()
       .then((baseUrl) {
         final String urlString =
-            '$baseUrl/flutter/event_phuket/list_users.aspx?&unique_id=$uniqId';
+            '$baseUrl/flutter/event_phuket/list_users.aspx';
         print(" url : ${urlString} ");
+        print(" user_id : ${uniqId} ");
         http
-            .get(Uri.parse(urlString))
+            .post(Uri.parse(urlString), body: {'user_id': uniqId})
             .timeout(const Duration(seconds: 8))
             .then((response) {
               Navigator.of(context).pop(); // Close loading dialog
@@ -69,6 +70,7 @@ void _showUserProfileDialog(
   showDialog(
     context: context,
     builder: (BuildContext context) {
+      print('Name  : ${userMap['name']}');
       final String title = userMap['title'] ?? '';
       final String name = userMap['name'] ?? 'Unknown Name';
       final String fullName = title.isNotEmpty ? '$title $name' : name;
@@ -76,7 +78,6 @@ void _showUserProfileDialog(
       final String code = userMap['code'] ?? '';
       final String state = userMap['state'] ?? '';
       final String type = userMap['type'] ?? 'Attendee';
-
       final String bus = userMap['bus'] ?? '';
 
       // Initials for avatar
@@ -91,68 +92,6 @@ void _showUserProfileDialog(
         }
       }
       if (initials.isEmpty) initials = '?';
-
-      Widget buildStatusRow(
-        String label,
-        String status,
-        String time,
-        IconData icon,
-        Color color,
-      ) {
-        final bool isActive =
-            status.toLowerCase() == 'checked in' ||
-            status.toLowerCase() == 'awarded' ||
-            status.toLowerCase() == 'completed';
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: isActive ? color.withOpacity(0.06) : Colors.grey[50],
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isActive ? color.withOpacity(0.15) : Colors.grey[200]!,
-              width: 1,
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: isActive ? color : Colors.grey[400], size: 24),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[500],
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      status,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: isActive ? color : Colors.grey[600],
-                      ),
-                    ),
-                    if (isActive && time.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        time,
-                        style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      }
 
       Widget buildInfoField(String label, String value, IconData icon) {
         return Padding(
@@ -317,13 +256,19 @@ void _showUserProfileDialog(
 
                       const SizedBox(height: 16),
                       const Text(
-                        'EVENT CHECKLIST & STATUS',
+                        'Last Vehicle Scan Details',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF64748B),
                           letterSpacing: 0.5,
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      buildInfoField(
+                        'Vehicle',
+                        bus,
+                        Icons.directions_bus_outlined,
                       ),
                     ],
                   ),

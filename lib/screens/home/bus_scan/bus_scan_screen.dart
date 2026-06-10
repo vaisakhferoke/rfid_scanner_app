@@ -38,7 +38,7 @@ class BusScanScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text(
-                  'Bus Scanning',
+                  'Vehicle Scanning',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,

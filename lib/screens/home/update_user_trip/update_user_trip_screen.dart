@@ -27,9 +27,30 @@ class UpdateUserTripScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          'Update User Trip',
-          style: TextStyle(color: Colors.white, fontFamily: 'Inter'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Text(
+              'Update User Trip',
+              style: TextStyle(color: Colors.white, fontFamily: 'Inter'),
+            ),
+            const SizedBox(width: 8),
+            Obx(() {
+              final day = controller.selectedDay.value.toUpperCase();
+              if (day.isEmpty) return const SizedBox.shrink();
+              return Text(
+                day,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Inter',
+                ),
+              );
+            }),
+          ],
         ),
         backgroundColor: const Color(0xFF0043A4),
         iconTheme: const IconThemeData(color: Colors.white),
