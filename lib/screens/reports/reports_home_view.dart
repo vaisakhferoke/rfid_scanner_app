@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'bus_scanned/bus_scanned_report_screen.dart';
 import 'user_scan/user_scan_report_screen.dart';
+import 'location_wise/location_wise_report_screen.dart';
 
 class ReportsPlaceholderScreen extends StatelessWidget {
   const ReportsPlaceholderScreen({super.key});
@@ -34,7 +35,7 @@ class ReportsPlaceholderScreen extends StatelessWidget {
                   title: 'Location \nWise Report',
                   icon: Icons.location_city,
                   onTap: () {
-                    // TODO: Navigate to Missing Report
+                    Get.to(() => LocationWiseReportScreen());
                   },
                 ),
                 // _ReportCard(
