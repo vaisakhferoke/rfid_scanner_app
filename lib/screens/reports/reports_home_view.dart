@@ -24,13 +24,13 @@ class ReportsPlaceholderScreen extends StatelessWidget {
               spacing: 16,
               runSpacing: 16,
               children: [
-                _ReportCard(
-                  title: 'Scanned\nReport',
-                  icon: Icons.qr_code_scanner,
-                  onTap: () {
-                    Get.to(() => BusScannedReportScreen());
-                  },
-                ),
+                // _ReportCard(
+                //   title: 'Scanned\nReport',
+                //   icon: Icons.qr_code_scanner,
+                //   onTap: () {
+                //     Get.to(() => BusScannedReportScreen());
+                //   },
+                // ),
                 _ReportCard(
                   title: 'Location \nWise Report',
                   icon: Icons.location_city,

@@ -39,7 +39,10 @@ class UserScanReportController extends GetxController {
       filteredData.value = reportData.where((item) {
         return item.name.toLowerCase().contains(keyword) ||
             item.uniqueId.toLowerCase().contains(keyword) ||
-            item.state.toLowerCase().contains(keyword);
+            item.state.toLowerCase().contains(keyword) ||
+            item.code.toLowerCase().contains(keyword) ||
+            item.givenname.toLowerCase().contains(keyword) ||
+            item.surname.toLowerCase().contains(keyword);
       }).toList();
     }
   }
@@ -58,8 +61,10 @@ class UserScanReportController extends GetxController {
   Future<void> fetchCounts() async {
     try {
       final String baseUrl = await ApiConfig.getBaseUrl2();
-      final scannedUrl = '${baseUrl}users_list.aspx?type=${selectedType.value}&scan_type=scanned';
-      final notScannedUrl = '${baseUrl}users_list.aspx?type=${selectedType.value}&scan_type=notscanned';
+      final scannedUrl =
+          '${baseUrl}users_list.aspx?type=${selectedType.value}&scan_type=scanned';
+      final notScannedUrl =
+          '${baseUrl}users_list.aspx?type=${selectedType.value}&scan_type=notscanned';
 
       final responses = await Future.wait([
         http.get(Uri.parse(scannedUrl)),
@@ -121,7 +126,7 @@ class UserScanReportController extends GetxController {
 
         reportData.value = list.map((e) => UserScanModel.fromJson(e)).toList();
         _filterData();
-        
+
         // Also update the respective count
         if (selectedScanType.value == 'scanned') {
           scannedCount.value = reportData.length;
