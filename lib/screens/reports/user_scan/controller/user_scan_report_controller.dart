@@ -111,12 +111,14 @@ class UserScanReportController extends GetxController {
     try {
       final String baseUrl = await ApiConfig.getBaseUrl2();
       final String fullUrl =
-          '$baseUrl/event_entry?id=$uniqueId&type=${selectedType.value}';
+          '${baseUrl}event_entry?id=$uniqueId&type=${selectedType.value}';
 
       debugPrint('UserScanReportController UPDATE: $fullUrl');
 
       Get.dialog(
-        const Center(child: CircularProgressIndicator(color: Color(0xFF213AEC))),
+        const Center(
+          child: CircularProgressIndicator(color: Color(0xFF213AEC)),
+        ),
         barrierDismissible: false,
       );
 

@@ -214,9 +214,17 @@ class UserScanReportScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          item.name,
+                          item.givenname,
                           style: const TextStyle(
                             fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                        Text(
+                          item.name,
+                          style: const TextStyle(
+                            fontSize: 13,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF0F172A),
                           ),

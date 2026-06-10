@@ -2,7 +2,6 @@ import 'package:event_rfid_app/screens/home/event_entry/add_event_entry_screen.d
 import 'package:event_rfid_app/screens/home/bus_scan/bus_scan_screen.dart';
 import 'package:event_rfid_app/widgets/appbar/home_appbar.dart';
 import 'package:event_rfid_app/controllers/home_controller.dart';
-import 'package:event_rfid_app/screens/settings/location_master_screen.dart';
 import 'package:event_rfid_app/screens/home/update_user_trip/update_user_trip_screen.dart';
 import 'package:event_rfid_app/screens/home/user_list/user_list_screen.dart';
 import 'package:flutter/material.dart';
