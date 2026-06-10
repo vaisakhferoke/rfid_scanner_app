@@ -280,19 +280,19 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
         final Map<String, dynamic> data = json.decode(response.body);
         final model = CheckStatusResponseModel.fromJson(data);
         checkStatusResponse(model);
-        final bool status = model.status;
+        //  final bool status = model.status;
+        Get.to(
+          () => ScanDetailsScreen(
+            fromLocation: selectedFromLocation.value?.name ?? '',
 
-        if (status) {
-          //_showStatusTrueConfirmDialog();
-        } else {
-          Get.to(
-            () => ScanDetailsScreen(
-              fromLocation: selectedFromLocation.value?.name ?? '',
+            busName: selectedBus.value?.name ?? '0',
+          ),
+        );
+        // if (status) {
+        //   //_showStatusTrueConfirmDialog();
+        // } else {
 
-              busName: selectedBus.value?.name ?? '0',
-            ),
-          );
-        }
+        // }
       } else {
         Get.snackbar(
           'API Error',
@@ -615,10 +615,10 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 4.0),
                     child: Text(
-                      '$uniqId${state.isNotEmpty ? ' • $state' : ''}',
+                      'Code : $uniqId${state.isNotEmpty ? ' • $state' : ''}',
                       style: const TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF64748B),
+                        fontSize: 16,
+                        color: Color.fromARGB(255, 0, 2, 4),
                       ),
                     ),
                   ),

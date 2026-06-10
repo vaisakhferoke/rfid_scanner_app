@@ -242,7 +242,7 @@ class ScanDetailsScreen extends StatelessWidget {
             child: Row(
               children: [
                 const Text(
-                  'Bus',
+                  'Vehicle ',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -841,6 +841,18 @@ class ScanDetailsScreen extends StatelessWidget {
   }
 
   void _showSubmitSummaryDialog() {
+    if (controller.checkStatusResponse.value!.invalidUserList.isNotEmpty) {
+      Get.snackbar(
+        'Invalid Users',
+        'Some users are invalid. Please remove them before submitting.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+      );
+      return;
+    }
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -882,6 +894,7 @@ class ScanDetailsScreen extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               Get.back(); // Close summary dialog
+
               bool success = await controller.submitTrip();
               if (success) {
                 _showSuccessDialog();
