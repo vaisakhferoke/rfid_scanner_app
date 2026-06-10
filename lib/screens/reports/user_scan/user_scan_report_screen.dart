@@ -134,7 +134,7 @@ class UserScanReportScreen extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'Scanned',
+                    'Scanned (${controller.scannedCount.value})',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: scanType == 'scanned'
@@ -163,7 +163,7 @@ class UserScanReportScreen extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'Not Scanned',
+                    'Not Scanned (${controller.notScannedCount.value})',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: scanType == 'notscanned'

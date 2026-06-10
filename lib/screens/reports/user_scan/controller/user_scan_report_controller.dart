@@ -12,6 +12,8 @@ class UserScanReportController extends GetxController {
 
   var selectedType = 'evententry'.obs;
   var selectedScanType = 'scanned'.obs;
+  var scannedCount = 0.obs;
+  var notScannedCount = 0.obs;
   final TextEditingController searchController = TextEditingController();
 
   final List<String> types = [
@@ -26,6 +28,7 @@ class UserScanReportController extends GetxController {
     super.onInit();
     searchController.addListener(_filterData);
     fetchReport();
+    fetchCounts();
   }
 
   void _filterData() {
@@ -44,11 +47,45 @@ class UserScanReportController extends GetxController {
   void setType(String type) {
     selectedType.value = type;
     fetchReport();
+    fetchCounts();
   }
 
   void setScanType(String scanType) {
     selectedScanType.value = scanType;
     fetchReport();
+  }
+
+  Future<void> fetchCounts() async {
+    try {
+      final String baseUrl = await ApiConfig.getBaseUrl2();
+      final scannedUrl = '${baseUrl}users_list.aspx?type=${selectedType.value}&scan_type=scanned';
+      final notScannedUrl = '${baseUrl}users_list.aspx?type=${selectedType.value}&scan_type=notscanned';
+
+      final responses = await Future.wait([
+        http.get(Uri.parse(scannedUrl)),
+        http.get(Uri.parse(notScannedUrl)),
+      ]);
+
+      if (responses[0].statusCode == 200) {
+        final decoded = json.decode(responses[0].body);
+        if (decoded is List) {
+          scannedCount.value = decoded.length;
+        } else if (decoded is Map && decoded['status'] == true) {
+          scannedCount.value = (decoded['data'] as List?)?.length ?? 0;
+        }
+      }
+
+      if (responses[1].statusCode == 200) {
+        final decoded = json.decode(responses[1].body);
+        if (decoded is List) {
+          notScannedCount.value = decoded.length;
+        } else if (decoded is Map && decoded['status'] == true) {
+          notScannedCount.value = (decoded['data'] as List?)?.length ?? 0;
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching counts: $e');
+    }
   }
 
   Future<void> fetchReport() async {
@@ -84,6 +121,13 @@ class UserScanReportController extends GetxController {
 
         reportData.value = list.map((e) => UserScanModel.fromJson(e)).toList();
         _filterData();
+        
+        // Also update the respective count
+        if (selectedScanType.value == 'scanned') {
+          scannedCount.value = reportData.length;
+        } else {
+          notScannedCount.value = reportData.length;
+        }
       } else {
         Get.snackbar(
           'API Error',
@@ -137,6 +181,7 @@ class UserScanReportController extends GetxController {
           snackPosition: SnackPosition.BOTTOM,
         );
         fetchReport(); // refresh the list
+        fetchCounts(); // refresh the counts
       } else {
         Get.snackbar(
           'Error',

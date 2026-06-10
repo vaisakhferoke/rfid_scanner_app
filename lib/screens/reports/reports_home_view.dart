@@ -30,13 +30,13 @@ class ReportsPlaceholderScreen extends StatelessWidget {
                     Get.to(() => BusScannedReportScreen());
                   },
                 ),
-                // _ReportCard(
-                //   title: 'Missing\nReport',
-                //   icon: Icons.assignment_late,
-                //   onTap: () {
-                //     // TODO: Navigate to Missing Report
-                //   },
-                // ),
+                _ReportCard(
+                  title: 'Location \nWise Report',
+                  icon: Icons.location_city,
+                  onTap: () {
+                    // TODO: Navigate to Missing Report
+                  },
+                ),
                 // _ReportCard(
                 //   title: 'Baggage\nReport',
                 //   icon: Icons.luggage,
@@ -53,20 +53,20 @@ class ReportsPlaceholderScreen extends StatelessWidget {
               spacing: 16,
               runSpacing: 16,
               children: [
-                _ReportCard(
-                  title: 'Check in\nReport',
-                  icon: Icons.how_to_reg,
-                  onTap: () {
-                    // TODO: Navigate to Check in Report
-                  },
-                ),
-                _ReportCard(
-                  title: 'Not checkin\nReport',
-                  icon: Icons.person_off,
-                  onTap: () {
-                    // TODO: Navigate to Not check in Report
-                  },
-                ),
+                // _ReportCard(
+                //   title: 'Check in\nReport',
+                //   icon: Icons.how_to_reg,
+                //   onTap: () {
+                //     // TODO: Navigate to Check in Report
+                //   },
+                // ),
+                // _ReportCard(
+                //   title: 'Not checkin\nReport',
+                //   icon: Icons.person_off,
+                //   onTap: () {
+                //     // TODO: Navigate to Not check in Report
+                //   },
+                // ),
                 _ReportCard(
                   title: 'User Scan\nReport',
                   icon: Icons.document_scanner,
