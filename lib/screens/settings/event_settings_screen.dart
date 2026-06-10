@@ -5,7 +5,130 @@ import '../../controllers/event_settings_controller.dart';
 class EventSettingsScreen extends GetView<EventSettingsController> {
   const EventSettingsScreen({super.key});
 
-  void _showEditDialog(BuildContext context, EventSettingModel setting) {
+  void _showPasswordDialog(BuildContext context, var setting) {
+    final passwordController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    bool isObscure = true;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: const Row(
+                children: [
+                  Icon(
+                    Icons.security_rounded,
+                    color: Color(0xFF0043A4),
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'Authentication Required',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              content: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Enter Password',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF475569),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: passwordController,
+                      obscureText: isObscure,
+                      decoration: InputDecoration(
+                        hintText: 'Password',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            isObscure ? Icons.visibility_off : Icons.visibility,
+                            color: const Color(0xFF94A3B8),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              isObscure = !isObscure;
+                            });
+                          },
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter password';
+                        }
+                        if (value != 'git123') {
+                          return 'Incorrect password';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Color(0xFF64748B), fontFamily: 'Inter'),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (formKey.currentState!.validate()) {
+                      Navigator.pop(context);
+                      _showEditDialog(context, setting);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0043A4),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'Proceed',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showEditDialog(BuildContext context, var setting) {
     final formKey = GlobalKey<FormState>();
     final keyController = TextEditingController(text: setting.key);
     final valueController = TextEditingController(text: setting.value);
@@ -299,7 +422,7 @@ class EventSettingsScreen extends GetView<EventSettingsController> {
                                 color: Color(0xFF94A3B8),
                                 size: 20,
                               ),
-                              onPressed: () => _showEditDialog(context, setting),
+                              onPressed: () => _showPasswordDialog(context, setting),
                               constraints: const BoxConstraints(),
                               padding: const EdgeInsets.all(6),
                             ),

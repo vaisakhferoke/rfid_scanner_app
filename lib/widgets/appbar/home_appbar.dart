@@ -23,6 +23,21 @@ class HomeAppbar extends StatelessWidget implements PreferredSizeWidget {
           fontWeight: FontWeight.bold,
         ),
       ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 16.0),
+          child: Container(
+            height: 30,
+            width: 50,
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Image.asset('assets/logo/git_logo.png', fit: BoxFit.contain),
+          ),
+        ),
+      ],
     );
   }
 }
