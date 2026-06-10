@@ -43,7 +43,7 @@ class LocationWiseReportScreen extends StatelessWidget {
                     ),
                   );
                 }
-                return _buildResultsView();
+                return _buildResultsView(context);
               }),
             ),
           ],
@@ -155,7 +155,7 @@ class LocationWiseReportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildResultsView() {
+  Widget _buildResultsView(BuildContext context) {
     final loc = controller.selectedLocation.value;
     final int totalVehicles = controller.reportData.length;
 
@@ -195,7 +195,9 @@ class LocationWiseReportScreen extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        ...controller.reportData.map((item) => _buildVehicleCard(item)),
+        ...controller.reportData.map(
+          (item) => _buildVehicleCard(context, item),
+        ),
       ],
     );
   }
@@ -262,7 +264,7 @@ class LocationWiseReportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildVehicleCard(LocationWiseReportModel item) {
+  Widget _buildVehicleCard(BuildContext context, LocationWiseReportModel item) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -365,7 +367,7 @@ class LocationWiseReportScreen extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: () {
-                    // TODO: Implement delete functionality if needed
+                    _showDeleteDialog(context, item.vehicleId, item.locationId);
                   },
                   icon: const Icon(
                     Icons.delete_outline,
@@ -377,6 +379,62 @@ class LocationWiseReportScreen extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showDeleteDialog(
+    BuildContext context,
+    String vehicleId,
+    String locationId,
+  ) {
+    final TextEditingController passwordController = TextEditingController();
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Confirm Deletion'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Please type "git123" to confirm deletion of this trip.',
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: passwordController,
+              decoration: const InputDecoration(
+                hintText: 'Enter password',
+                border: OutlineInputBorder(),
+              ),
+              obscureText: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () {
+              if (passwordController.text == 'git123') {
+                Get.back(); // close dialog
+                controller.deleteVehicleData(vehicleId, locationId);
+              } else {
+                Get.snackbar(
+                  'Error',
+                  'Incorrect password.',
+                  backgroundColor: const Color(0xFFEF4444),
+                  colorText: Colors.white,
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }

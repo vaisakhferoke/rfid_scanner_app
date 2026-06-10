@@ -91,4 +91,76 @@ class LocationWiseReportController extends GetxController {
     selectedLocation.value = null;
     reportData.clear();
   }
+
+  Future<void> deleteVehicleData(String vehicleId, String locationId) async {
+    try {
+      final String baseUrl = await ApiConfig.getBaseUrl();
+      final String fullUrl = '$baseUrl${ApiUrls.deleteUserTrip}';
+
+      final Map<String, dynamic> payload = {
+        "vehicle_id": vehicleId,
+        "location_id": locationId,
+      };
+
+      debugPrint('LocationWiseReportController DELETE: $fullUrl');
+      debugPrint('Payload: ${json.encode(payload)}');
+
+      Get.dialog(
+        const Center(
+          child: CircularProgressIndicator(color: Color(0xFF213AEC)),
+        ),
+        barrierDismissible: false,
+      );
+
+      final response = await http
+          .post(
+            Uri.parse(fullUrl),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode(payload),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      Get.back(); // close loading dialog
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        if (data['status'] == true) {
+          Get.snackbar(
+            'Success',
+            data['Message'] ?? 'Successfully deleted.',
+            backgroundColor: const Color(0xFF10B981),
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+          );
+          fetchReport(); // Refresh list after delete
+        } else {
+          Get.snackbar(
+            'Notice',
+            data['Message'] ?? 'Failed to delete.',
+            backgroundColor: const Color(0xFFEF4444),
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        }
+      } else {
+        Get.snackbar(
+          'API Error',
+          'Server responded with code ${response.statusCode}.',
+          backgroundColor: const Color(0xFFEF4444),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back();
+      debugPrint('Error deleting vehicle data: $e');
+      Get.snackbar(
+        'Network Error',
+        'Could not connect to the server.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
 }
