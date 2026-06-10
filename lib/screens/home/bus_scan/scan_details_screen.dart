@@ -5,14 +5,12 @@ import '../../../../services/range_settings_popup.dart';
 import 'controller/bus_scan_controller.dart';
 
 class ScanDetailsScreen extends StatelessWidget {
-  final Map<String, dynamic> scanDetails;
   final String fromLocation;
 
   final String busName;
 
   ScanDetailsScreen({
     super.key,
-    required this.scanDetails,
     required this.fromLocation,
 
     required this.busName,
@@ -23,18 +21,22 @@ class ScanDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Extract stats from API response
-    final int totalPassengers = scanDetails['totalpassengers'] ?? 0;
-    final int boardedCount = scanDetails['boardedCount'] ?? 0;
-    final int missingCount = scanDetails['missing_count'] ?? 0;
-    final int wrongBusCount = scanDetails['wrong_bus_count'] ?? 0;
-    final int invalidUserCount = scanDetails['invalidusercount'] ?? 0;
+    // final response = controller.checkStatusResponse.value;
+    // final int totalPassengers = response?.totalPassengers ?? 0;
+    // final int boardedCount = response?.boardedCount ?? 0;
+    // final int missingCount = response?.missingCount ?? 0;
+    // final int wrongBusCount = response?.wrongBusCount ?? 0;
+    // final int invalidUserCount = response?.invalidUserCount ?? 0;
 
-    final List<dynamic> boardedList = scanDetails['boardedlist'] ?? [];
-    final List<dynamic> invalidUserList = scanDetails['invaliduserlist'] ?? [];
+    // final List<dynamic> boardedList =
+    //     response?.boardedList.map((e) => e.toJson()).toList() ?? [];
+    // final List<dynamic> invalidUserList =
+    //     response?.invalidUserList.map((e) => e.toJson()).toList() ?? [];
 
-    final List<dynamic> missingList = scanDetails['missing_passengers'] ?? [];
-    final List<dynamic> wrongBusList = scanDetails['wrong_bus'] ?? [];
+    // final List<dynamic> missingList =
+    //     response?.missingPassengers.map((e) => e.toJson()).toList() ?? [];
+    // final List<dynamic> wrongBusList =
+    //     response?.wrongBus.map((e) => e.toJson()).toList() ?? [];
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -72,19 +74,44 @@ class ScanDetailsScreen extends StatelessWidget {
                   children: [
                     _buildRouteCard(),
                     const SizedBox(height: 16),
-                    _buildStatsRow(
-                      totalPassengers,
-                      boardedCount,
-                      missingCount,
-                      wrongBusCount,
-                      invalidUserCount,
-                      boardedList,
-                      invalidUserList,
+                    Obx(
+                      () => _buildStatsRow(
+                        controller.checkStatusResponse.value?.totalPassengers ??
+                            0,
+                        controller.checkStatusResponse.value?.boardedCount ?? 0,
+                        controller.checkStatusResponse.value?.missingCount ?? 0,
+                        controller.checkStatusResponse.value?.wrongBusCount ??
+                            0,
+                        controller
+                                .checkStatusResponse
+                                .value
+                                ?.invalidUserCount ??
+                            0,
+                        controller.checkStatusResponse.value?.boardedList
+                                .map((e) => e.toJson())
+                                .toList() ??
+                            [],
+                        controller.checkStatusResponse.value?.invalidUserList
+                                .map((e) => e.toJson())
+                                .toList() ??
+                            [],
+                      ),
                     ),
                     // const SizedBox(height: 20),
-                    // _buildMissingSection(missingList),
+                    // _buildMissingSection(
+                    //   controller.checkStatusResponse.value?.missingPassengers
+                    //           .map((e) => e.toJson())
+                    //           .toList() ??
+                    //       [],
+                    // ),
                     // const SizedBox(height: 20),
-                    // _buildWrongBusSection(context, wrongBusList),
+                    // _buildWrongBusSection(
+                    //   context,
+                    //   controller.checkStatusResponse.value?.wrongBus
+                    //           .map((e) => e.toJson())
+                    //           .toList() ??
+                    //       [],
+                    // ),
                     // const SizedBox(height: 20),
                   ],
                 ),
@@ -254,10 +281,18 @@ class ScanDetailsScreen extends StatelessWidget {
                 icon: Icons.check_circle_outline_rounded,
                 bgColor: const Color(0xFFF0FDF4),
                 textColor: const Color(0xFF22C55E),
-                onTap: () => controller.showDetailsScreen(
-                  'Boarded Passengers',
-                  boardedList,
-                ),
+                onTap: () => controller.showDetailsScreen('Boarded Passengers'),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildStatCard(
+                label: 'Unknown Tags',
+                value: invalidUserCount.toString().padLeft(2, '0'),
+                icon: Icons.help_outline_rounded,
+                bgColor: const Color(0xFFF8FAFC),
+                textColor: const Color(0xFF64748B),
+                onTap: () => controller.showDetailsScreen('Unknown Tags'),
               ),
             ),
           ],
@@ -288,23 +323,23 @@ class ScanDetailsScreen extends StatelessWidget {
         //   ],
         // ),
         // const SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                label: 'Unknown Tags',
-                value: invalidUserCount.toString().padLeft(2, '0'),
-                icon: Icons.help_outline_rounded,
-                bgColor: const Color(0xFFF8FAFC),
-                textColor: const Color(0xFF64748B),
-                onTap: () => controller.showDetailsScreen(
-                  'Unknown Tags',
-                  invalidUserList,
-                ),
-              ),
-            ),
-          ],
-        ),
+        // Row(
+        //   children: [
+        //     Expanded(
+        //       child: _buildStatCard(
+        //         label: 'Unknown Tags',
+        //         value: invalidUserCount.toString().padLeft(2, '0'),
+        //         icon: Icons.help_outline_rounded,
+        //         bgColor: const Color(0xFFF8FAFC),
+        //         textColor: const Color(0xFF64748B),
+        //         onTap: () => controller.showDetailsScreen(
+        //           'Unknown Tags',
+        //           invalidUserList,
+        //         ),
+        //       ),
+        //     ),
+        //   ],
+        // ),
       ],
     );
   }

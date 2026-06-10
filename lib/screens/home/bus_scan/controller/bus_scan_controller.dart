@@ -12,6 +12,7 @@ import '../../../../controllers/vehicle_master_controller.dart';
 import '../../../../config/api_config.dart';
 import '../../../../api/api_urls.dart';
 import '../../../../api/api_client.dart';
+import '../../../../models/check_status_response_model.dart';
 import '../scan_details_screen.dart';
 
 class BusScanController extends GetxController with WidgetsBindingObserver {
@@ -42,7 +43,7 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
 
   // Event day info
 
-  var day = 'day1'.obs;
+  var day = ''.obs;
 
   @override
   void onInit() {
@@ -219,6 +220,7 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
     }
   }
 
+  final checkStatusResponse = Rxn<CheckStatusResponseModel>();
   Future<void> checkStatus() async {
     if (selectedBus.value == null) {
       Get.snackbar(
@@ -275,14 +277,15 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
-        final bool status = data['status'] ?? false;
+        final model = CheckStatusResponseModel.fromJson(data);
+        checkStatusResponse.value = model;
+        final bool status = model.status;
 
         if (status) {
-          _showStatusTrueConfirmDialog(data);
+          //_showStatusTrueConfirmDialog();
         } else {
           Get.to(
             () => ScanDetailsScreen(
-              scanDetails: data,
               fromLocation: selectedFromLocation.value?.name ?? '',
 
               busName: selectedBus.value?.name ?? '0',
@@ -523,7 +526,14 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
     );
   }
 
-  void showDetailsScreen(String title, List<dynamic> list) {
+  void showDetailsScreen(String title) {
+    final BusScanController controller = Get.find<BusScanController>();
+    RxList<dynamic> unknownList =
+        controller.checkStatusResponse.value?.invalidUserList
+            .map((e) => e.toJson())
+            .toList() ??
+        [];
+
     Get.to(
       () => Scaffold(
         backgroundColor: const Color(0xFFF8FAFC),
@@ -544,64 +554,201 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
                   style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
               )
-            : ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: list.length,
-                itemBuilder: (context, index) {
-                  final item = list[index];
-                  final name = item['name'] ?? 'Unknown';
-                  final uniqId = item['uniq_id'] ?? '';
-                  final state = item['state'] ?? '';
+            : Obx(
+                () => ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: unknownList.length,
+                  itemBuilder: (context, index) {
+                    final item = unknownList[index];
+                    final name = item['name'] ?? 'Unknown';
+                    final uniqId = item['uniq_id'] ?? '';
+                    final state = item['state'] ?? '';
 
-                  String initials = '?';
-                  if (name != 'Unknown' && name.isNotEmpty) {
-                    initials = name[0].toUpperCase();
-                  }
+                    String initials = '?';
+                    if (name != 'Unknown' && name.isNotEmpty) {
+                      initials = name[0].toUpperCase();
+                    }
 
-                  return Card(
-                    elevation: 0,
-                    color: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: const Color(0xFFE2E8F0)),
-                    ),
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
+                    return Card(
+                      elevation: 0,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(color: const Color(0xFFE2E8F0)),
                       ),
-                      leading: CircleAvatar(
-                        backgroundColor: const Color(0xFFEFF6FF),
-                        child: Text(
-                          initials,
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        leading: CircleAvatar(
+                          backgroundColor: const Color(0xFFEFF6FF),
+                          child: Text(
+                            initials,
+                            style: const TextStyle(
+                              color: Color(0xFF213AEC),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        title: Text(
+                          name,
                           style: const TextStyle(
-                            color: Color(0xFF213AEC),
                             fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: Color(0xFF0F172A),
                           ),
                         ),
-                      ),
-                      title: Text(
-                        name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: Color(0xFF0F172A),
-                        ),
-                      ),
-                      subtitle: Padding(
-                        padding: const EdgeInsets.only(top: 4.0),
-                        child: Text(
-                          '$uniqId${state.isNotEmpty ? ' • $state' : ''}',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFF64748B),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(top: 4.0),
+                          child: Text(
+                            '$uniqId${state.isNotEmpty ? ' • $state' : ''}',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF64748B),
+                            ),
                           ),
                         ),
+
+                        trailing: title == 'Boarded Passengers'
+                            ? IconButton(
+                                onPressed: () async {
+                                  final String userId = uniqId;
+                                  if (selectedBus.value == null ||
+                                      selectedFromLocation.value == null) {
+                                    Get.snackbar(
+                                      'Error',
+                                      'Missing bus or location selection',
+                                    );
+                                    return;
+                                  }
+
+                                  Get.dialog(
+                                    const Center(
+                                      child: CircularProgressIndicator(
+                                        color: Color(0xFF213AEC),
+                                      ),
+                                    ),
+                                    barrierDismissible: false,
+                                  );
+
+                                  try {
+                                    final String vehicleId =
+                                        selectedBus.value!.id;
+                                    final String locationId =
+                                        selectedFromLocation.value!.id;
+
+                                    final Map<String, String> payload = {
+                                      "vehicle_id": vehicleId,
+                                      "location_id": locationId,
+                                      "user_id": userId,
+                                    };
+
+                                    final String baseUrl =
+                                        await ApiConfig.getBaseUrl();
+                                    final String fullUrl =
+                                        '$baseUrl${ApiUrls.deleteTrip}';
+
+                                    final response = await http
+                                        .post(
+                                          Uri.parse(fullUrl),
+                                          headers: {
+                                            'Content-Type': 'application/json',
+                                          },
+                                          body: json.encode(payload),
+                                        )
+                                        .timeout(const Duration(seconds: 15));
+
+                                    if (Get.isDialogOpen ?? false) {
+                                      Get.back();
+                                    }
+
+                                    if (response.statusCode == 200) {
+                                      final Map<String, dynamic> data = json
+                                          .decode(response.body);
+                                      if (data['status'] == true) {
+                                        removeTag(userId);
+                                        //  remove unknown list
+                                        unknownList.remove(userId);
+
+                                        Get.back(); // Close the details screen
+                                        Get.snackbar(
+                                          'Success',
+                                          'User removed successfully.',
+                                          backgroundColor: const Color(
+                                            0xFF22C55E,
+                                          ),
+                                          colorText: Colors.white,
+                                          snackPosition: SnackPosition.BOTTOM,
+                                        );
+                                        // Re-check status to get the updated lists
+                                        checkStatus();
+                                      } else {
+                                        Get.snackbar(
+                                          'Error',
+                                          data['message']?.toString() ??
+                                              'Failed to remove user',
+                                          backgroundColor: const Color(
+                                            0xFFEF4444,
+                                          ),
+                                          colorText: Colors.white,
+                                        );
+                                      }
+                                    } else {
+                                      Get.snackbar(
+                                        'API Error',
+                                        'Failed to remove user',
+                                        backgroundColor: const Color(
+                                          0xFFEF4444,
+                                        ),
+                                        colorText: Colors.white,
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (Get.isDialogOpen ?? false) {
+                                      Get.back();
+                                    }
+                                    Get.snackbar(
+                                      'Network Error',
+                                      'Could not connect to server.',
+                                      backgroundColor: const Color(0xFFEF4444),
+                                      colorText: Colors.white,
+                                    );
+                                  }
+                                },
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.deepOrange,
+                                ),
+                              )
+                            : title == 'Unknown Tags'
+                            ? IconButton(
+                                onPressed: () {
+                                  removeTag(uniqId);
+                                  // Remove from list
+                                  if (unknownList.contains(uniqId)) {
+                                    unknownList.remove(uniqId);
+                                  }
+
+                                  Get.snackbar(
+                                    'Success',
+                                    'Unknown tag removed.',
+                                    backgroundColor: const Color(0xFF22C55E),
+                                    colorText: Colors.white,
+                                    snackPosition: SnackPosition.BOTTOM,
+                                  );
+                                },
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.deepOrange,
+                                ),
+                              )
+                            : null,
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
       ),
     );
