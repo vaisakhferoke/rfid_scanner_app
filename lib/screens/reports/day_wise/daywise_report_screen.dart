@@ -162,6 +162,8 @@ class DaywiseReportScreen extends StatelessWidget {
       children: [
         if (dayVal != null) ...[
           _buildDayCard(dayVal),
+          const SizedBox(height: 16),
+          _buildActionButtons(),
           const SizedBox(height: 24),
         ],
         Row(
@@ -195,6 +197,28 @@ class DaywiseReportScreen extends StatelessWidget {
         const SizedBox(height: 16),
         ...controller.reportData.map(
           (item) => _buildLocationCard(context, item),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        ElevatedButton.icon(
+          onPressed: () {
+            controller.downloadExcel();
+          },
+          icon: const Icon(Icons.download, size: 18),
+          label: const Text('Download & Share'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF10B981),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
         ),
       ],
     );

@@ -164,6 +164,8 @@ class LocationWiseReportScreen extends StatelessWidget {
       children: [
         if (loc != null) ...[
           _buildLocationCard(loc),
+          const SizedBox(height: 16),
+          _buildActionButtons(),
           const SizedBox(height: 24),
         ],
         Row(
@@ -197,6 +199,28 @@ class LocationWiseReportScreen extends StatelessWidget {
         const SizedBox(height: 16),
         ...controller.reportData.map(
           (item) => _buildVehicleCard(context, item),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        ElevatedButton.icon(
+          onPressed: () {
+            controller.downloadExcel();
+          },
+          icon: const Icon(Icons.download, size: 18),
+          label: const Text('Download & Share'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF10B981),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
         ),
       ],
     );

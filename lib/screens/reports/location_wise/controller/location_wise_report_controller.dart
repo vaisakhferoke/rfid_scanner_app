@@ -7,6 +7,10 @@ import '../../../../models/location_model.dart';
 import '../../../../controllers/location_master_controller.dart';
 import '../../../../config/api_config.dart';
 import '../../../../api/api_urls.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:excel/excel.dart';
 
 class LocationWiseReportController extends GetxController {
   // final LocationMasterController locationMasterController = Get.put(
@@ -166,6 +170,96 @@ class LocationWiseReportController extends GetxController {
       Get.snackbar(
         'Network Error',
         'Could not connect to the server.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  Future<List<int>?> _generateExcelBytes() async {
+    try {
+      var excel = Excel.createExcel();
+      Sheet sheetObject = excel['Sheet1'];
+
+      List<String> headers = [
+        '#',
+        'Location ID',
+        'Location',
+        'Vehicle ID',
+        'Vehicle Name',
+        'Scanned Count',
+      ];
+      sheetObject.appendRow(headers.map((e) => TextCellValue(e)).toList());
+
+      for (int i = 0; i < reportData.length; i++) {
+        var item = reportData[i];
+        List<CellValue> row = [
+          IntCellValue(i + 1),
+          TextCellValue(item.locationId),
+          TextCellValue(item.location),
+          TextCellValue(item.vehicleId),
+          TextCellValue(item.vehicleName),
+          TextCellValue(item.scannedCount),
+        ];
+        sheetObject.appendRow(row);
+      }
+
+      return excel.encode();
+    } catch (e) {
+      debugPrint('Error generating excel: $e');
+      return null;
+    }
+  }
+
+  Future<void> downloadExcel() async {
+    if (reportData.isEmpty) {
+      Get.snackbar(
+        'Notice',
+        'No data to export.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    try {
+      Get.dialog(
+        const Center(
+          child: CircularProgressIndicator(color: Color(0xFF213AEC)),
+        ),
+        barrierDismissible: false,
+      );
+
+      final bytes = await _generateExcelBytes();
+
+      Get.back(); // close loading dialog
+
+      if (bytes != null) {
+        final String locName = selectedLocation.value?.name ?? 'Location';
+        final tempDir = await getTemporaryDirectory();
+        final file = File(
+          '${tempDir.path}/location_wise_report _${locName.replaceAll(" ", "")}_${DateTime.now().millisecond}.xlsx',
+        );
+        await file.writeAsBytes(bytes);
+
+        await Share.shareXFiles([
+          XFile(file.path),
+        ], text: 'Location Wise Report');
+      } else {
+        Get.snackbar(
+          'Error',
+          'Failed to generate Excel file.',
+          backgroundColor: const Color(0xFFEF4444),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back();
+      debugPrint('Error sharing excel: $e');
+      Get.snackbar(
+        'Error',
+        'Could not share file.',
         backgroundColor: const Color(0xFFEF4444),
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,

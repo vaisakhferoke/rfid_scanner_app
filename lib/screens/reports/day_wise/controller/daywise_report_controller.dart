@@ -5,6 +5,10 @@ import 'package:http/http.dart' as http;
 import '../../../../models/daywise_report_model.dart';
 import '../../../../config/api_config.dart';
 import '../../../../api/api_urls.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:excel/excel.dart';
 
 class DaywiseReportController extends GetxController {
   var isDaysLoading = false.obs;
@@ -119,5 +123,91 @@ class DaywiseReportController extends GetxController {
   void clearFilters() {
     selectedDay.value = null;
     reportData.clear();
+  }
+
+  Future<List<int>?> _generateExcelBytes() async {
+    try {
+      var excel = Excel.createExcel();
+      Sheet sheetObject = excel['Sheet1'];
+
+      List<String> headers = [
+        '#',
+        'Location ID',
+        'Location',
+        'User Count',
+      ];
+      sheetObject.appendRow(headers.map((e) => TextCellValue(e)).toList());
+
+      for (int i = 0; i < reportData.length; i++) {
+        var item = reportData[i];
+        List<CellValue> row = [
+          IntCellValue(i + 1),
+          TextCellValue(item.locationId),
+          TextCellValue(item.location),
+          TextCellValue(item.userCount),
+        ];
+        sheetObject.appendRow(row);
+      }
+
+      return excel.encode();
+    } catch (e) {
+      debugPrint('Error generating excel: $e');
+      return null;
+    }
+  }
+
+  Future<void> downloadExcel() async {
+    if (reportData.isEmpty) {
+      Get.snackbar(
+        'Notice',
+        'No data to export.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    try {
+      Get.dialog(
+        const Center(
+          child: CircularProgressIndicator(color: Color(0xFF213AEC)),
+        ),
+        barrierDismissible: false,
+      );
+
+      final bytes = await _generateExcelBytes();
+
+      Get.back(); // close loading dialog
+
+      if (bytes != null) {
+        final String dayName = selectedDay.value?.day ?? 'Day';
+        final tempDir = await getTemporaryDirectory();
+        final file = File(
+          '${tempDir.path}/daywise_report_${dayName.replaceAll(" ", "")}_${DateTime.now().millisecond}.xlsx',
+        );
+        await file.writeAsBytes(bytes);
+
+        await Share.shareXFiles([
+          XFile(file.path),
+        ], text: 'Daywise Report');
+      } else {
+        Get.snackbar(
+          'Error',
+          'Failed to generate Excel file.',
+          backgroundColor: const Color(0xFFEF4444),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back();
+      debugPrint('Error sharing excel: $e');
+      Get.snackbar(
+        'Error',
+        'Could not share file.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 }

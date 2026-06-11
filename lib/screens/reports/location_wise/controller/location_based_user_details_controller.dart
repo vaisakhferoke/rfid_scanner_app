@@ -203,13 +203,14 @@ class LocationBasedUserDetailsController extends GetxController {
     }
   }
 
-  Future<void> downloadExcel(String locationName) async {
+  Future<void> downloadExcel(String locationName, String vehicleName) async {
     await shareExcel(
       locationName,
+      vehicleName,
     ); // On mobile, downloading typically involves sharing or saving to files app.
   }
 
-  Future<void> shareExcel(String locationName) async {
+  Future<void> shareExcel(String locationName, String vehicleName) async {
     if (userDetails.isEmpty) {
       Get.snackbar(
         'Notice',
@@ -234,7 +235,7 @@ class LocationBasedUserDetailsController extends GetxController {
       if (bytes != null) {
         final tempDir = await getTemporaryDirectory();
         final file = File(
-          '${tempDir.path}/location_report_${locationName.replaceAll(" ", "")}_${DateTime.now().millisecond}.xlsx',
+          '${tempDir.path}/Vehicle_wise_report_${locationName.replaceAll(" ", "")}_${vehicleName.replaceAll(" ", "")}_${DateTime.now().millisecond}.xlsx',
         );
         await file.writeAsBytes(bytes);
 

@@ -96,7 +96,7 @@ class LocationBasedUserDetailsScreen extends StatelessWidget {
       children: [
         ElevatedButton.icon(
           onPressed: () {
-            controller.downloadExcel(locationName);
+            controller.downloadExcel(locationName, vehicleName);
           },
           icon: const Icon(Icons.download, size: 18),
           label: const Text('Download & Share'),
