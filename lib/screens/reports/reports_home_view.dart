@@ -2,7 +2,6 @@
 import 'package:event_rfid_app/widgets/appbar/home_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'bus_scanned/bus_scanned_report_screen.dart';
 import 'user_scan/user_scan_report_screen.dart';
 import 'location_wise/location_wise_report_screen.dart';
 
@@ -18,7 +17,7 @@ class ReportsPlaceholderScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionHeader('Bus'),
+            _buildSectionHeader('Vehicle'),
             const SizedBox(height: 16),
             Wrap(
               spacing: 16,

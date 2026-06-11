@@ -21,6 +21,7 @@ class UserScanReportController extends GetxController {
     'award',
     'photobooth',
     'specialaward',
+    'specialphotobooth',
   ];
 
   @override

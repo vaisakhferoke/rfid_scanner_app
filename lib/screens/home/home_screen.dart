@@ -137,7 +137,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildQuickActions(BuildContext context) {
-    // final NavigationController navController = Get.find<NavigationController>();
+    final HomeController homeController = Get.find<HomeController>();
     return Column(
       children: [
         Row(
@@ -181,23 +181,6 @@ class HomeScreen extends StatelessWidget {
           children: [
             Expanded(
               child: _buildQuickActionCard(
-                icon: Icons.photo,
-                iconColor: const Color(0xFF0043A4),
-                iconBgColor: const Color(0xFFEFF6FF),
-                title: 'Photo Booth Scan',
-                subtitle: '0/80',
-                onTap: () {
-                  Get.to(
-                    () => AddEventEntryScreen(),
-                    arguments: {'type': 'photobooth'},
-                  );
-                },
-              ),
-            ),
-
-            const SizedBox(width: 14),
-            Expanded(
-              child: _buildQuickActionCard(
                 icon: Icons.verified_user,
                 iconColor: const Color(0xFF10B981),
                 iconBgColor: const Color(0xFFECFDF5),
@@ -211,7 +194,37 @@ class HomeScreen extends StatelessWidget {
                 },
               ),
             ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: _buildQuickActionCard(
+                icon: Icons.photo,
+                iconColor: const Color(0xFF0043A4),
+                iconBgColor: const Color(0xFFEFF6FF),
+                title: 'Photo Booth Scan',
+                subtitle: '0/80',
+                onTap: () {
+                  Get.to(
+                    () => AddEventEntryScreen(),
+                    arguments: {'type': 'photobooth'},
+                  );
+                },
+              ),
+            ),
           ],
+        ),
+        const SizedBox(height: 14),
+        _buildQuickActionCard(
+          icon: Icons.photo,
+          iconColor: const Color(0xFF0043A4),
+          iconBgColor: const Color(0xFFEFF6FF),
+          title: 'Special Award Photo Booth Scan',
+          subtitle: '0/80',
+          onTap: () {
+            Get.to(
+              () => AddEventEntryScreen(),
+              arguments: {'type': 'specialphotobooth'},
+            );
+          },
         ),
         const SizedBox(height: 14),
         Row(
@@ -223,8 +236,10 @@ class HomeScreen extends StatelessWidget {
                 iconBgColor: const Color(0xFFEFF6FF),
                 title: 'Bus Scan',
                 subtitle: '200/120',
-                onTap: () {
-                  Get.to(() => BusScanScreen());
+                onTap: () async {
+                  await Get.to(() => BusScanScreen());
+
+                  homeController.fetchDashboardData();
                 },
               ),
             ),
@@ -236,8 +251,9 @@ class HomeScreen extends StatelessWidget {
                 iconBgColor: const Color(0xFFECFDF5),
                 title: 'User Wise Trip Add',
                 subtitle: '',
-                onTap: () {
-                  Get.to(() => UpdateUserTripScreen());
+                onTap: () async {
+                  await Get.to(() => UpdateUserTripScreen());
+                  homeController.fetchDashboardData();
                 },
               ),
             ),
