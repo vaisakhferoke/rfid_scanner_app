@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'user_scan/user_scan_report_screen.dart';
 import 'location_wise/location_wise_report_screen.dart';
+import 'day_wise/daywise_report_screen.dart';
 
 class ReportsPlaceholderScreen extends StatelessWidget {
   const ReportsPlaceholderScreen({super.key});
@@ -30,20 +31,20 @@ class ReportsPlaceholderScreen extends StatelessWidget {
                 //     Get.to(() => BusScannedReportScreen());
                 //   },
                 // ),
-                _ReportCard(
-                  title: 'Location \nWise Report',
-                  icon: Icons.location_city,
-                  onTap: () {
-                    Get.to(() => LocationWiseReportScreen());
-                  },
-                ),
                 // _ReportCard(
-                //   title: 'Baggage\nReport',
-                //   icon: Icons.luggage,
+                //   title: 'Location \nWise Report',
+                //   icon: Icons.location_city,
                 //   onTap: () {
-                //     // TODO: Navigate to Baggage Report
+                //     Get.to(() => LocationWiseReportScreen());
                 //   },
                 // ),
+                _ReportCard(
+                  title: 'Daywise\nReport',
+                  icon: Icons.calendar_today,
+                  onTap: () {
+                    Get.to(() => DaywiseReportScreen());
+                  },
+                ),
               ],
             ),
             const SizedBox(height: 32),

@@ -59,101 +59,101 @@ class LocationWiseReportScreen extends StatelessWidget {
       color: Colors.white,
       child: Row(
         children: [
-          Expanded(child: _buildLocationDropdown(context)),
+          // Expanded(child: _buildLocationDropdown(context)),
           const SizedBox(width: 8),
-          _buildFilterActionButtons(),
+          //_buildFilterActionButtons(),
         ],
       ),
     );
   }
 
-  Widget _buildLocationDropdown(BuildContext context) {
-    return Obx(() {
-      final isLoading = controller.locationMasterController.isLoading.value;
-      if (isLoading) {
-        return const SizedBox(
-          height: 48,
-          child: Center(
-            child: SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-          ),
-        );
-      }
+  // Widget _buildLocationDropdown(BuildContext context) {
+  //   return Obx(() {
+  //     final isLoading = controller.locationMasterController.isLoading.value;
+  //     if (isLoading) {
+  //       return const SizedBox(
+  //         height: 48,
+  //         child: Center(
+  //           child: SizedBox(
+  //             width: 24,
+  //             height: 24,
+  //             child: CircularProgressIndicator(strokeWidth: 2),
+  //           ),
+  //         ),
+  //       );
+  //     }
 
-      final locations = controller.locationMasterController.locations;
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-        ),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<LocationModel>(
-            value: controller.selectedLocation.value,
-            hint: const Text(
-              'Select Location',
-              style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
-              overflow: TextOverflow.ellipsis,
-            ),
-            isExpanded: true,
-            icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF64748B)),
-            items: locations.map((LocationModel loc) {
-              return DropdownMenuItem<LocationModel>(
-                value: loc,
-                child: Text(
-                  loc.name,
-                  style: const TextStyle(
-                    color: Color(0xFF0F172A),
-                    fontSize: 14,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              );
-            }).toList(),
-            onChanged: (value) {
-              controller.selectedLocation.value = value;
-            },
-          ),
-        ),
-      );
-    });
-  }
+  //     final locations = controller.locationMasterController.locations;
+  //     return Container(
+  //       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+  //       decoration: BoxDecoration(
+  //         color: const Color(0xFFF8FAFC),
+  //         borderRadius: BorderRadius.circular(8),
+  //         border: Border.all(color: const Color(0xFFE2E8F0)),
+  //       ),
+  //       child: DropdownButtonHideUnderline(
+  //         child: DropdownButton<LocationModel>(
+  //           value: controller.selectedLocation.value,
+  //           hint: const Text(
+  //             'Select Location',
+  //             style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+  //             overflow: TextOverflow.ellipsis,
+  //           ),
+  //           isExpanded: true,
+  //           icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF64748B)),
+  //           items: locations.map((LocationModel loc) {
+  //             return DropdownMenuItem<LocationModel>(
+  //               value: loc,
+  //               child: Text(
+  //                 loc.name,
+  //                 style: const TextStyle(
+  //                   color: Color(0xFF0F172A),
+  //                   fontSize: 14,
+  //                 ),
+  //                 overflow: TextOverflow.ellipsis,
+  //               ),
+  //             );
+  //           }).toList(),
+  //           onChanged: (value) {
+  //             controller.selectedLocation.value = value;
+  //           },
+  //         ),
+  //       ),
+  //     );
+  //   });
+  // }
 
-  Widget _buildFilterActionButtons() {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: controller.clearFilters,
-          icon: const Icon(Icons.refresh, color: Color(0xFF64748B)),
-          tooltip: 'Clear Filters',
-          style: IconButton.styleFrom(
-            backgroundColor: const Color(0xFFF8FAFC),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: const BorderSide(color: Color(0xFFE2E8F0)),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        ElevatedButton(
-          onPressed: controller.fetchReport,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF213AEC),
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          ),
-          child: const Icon(Icons.search, size: 20),
-        ),
-      ],
-    );
-  }
+  // Widget _buildFilterActionButtons() {
+  //   return Row(
+  //     children: [
+  //       IconButton(
+  //         onPressed: controller.clearFilters,
+  //         icon: const Icon(Icons.refresh, color: Color(0xFF64748B)),
+  //         tooltip: 'Clear Filters',
+  //         style: IconButton.styleFrom(
+  //           backgroundColor: const Color(0xFFF8FAFC),
+  //           shape: RoundedRectangleBorder(
+  //             borderRadius: BorderRadius.circular(8),
+  //             side: const BorderSide(color: Color(0xFFE2E8F0)),
+  //           ),
+  //         ),
+  //       ),
+  //       const SizedBox(width: 8),
+  //       ElevatedButton(
+  //         onPressed: controller.fetchReport,
+  //         style: ElevatedButton.styleFrom(
+  //           backgroundColor: const Color(0xFF213AEC),
+  //           foregroundColor: Colors.white,
+  //           shape: RoundedRectangleBorder(
+  //             borderRadius: BorderRadius.circular(8),
+  //           ),
+  //           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+  //         ),
+  //         child: const Icon(Icons.search, size: 20),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _buildResultsView(BuildContext context) {
     final loc = controller.selectedLocation.value;

@@ -23,4 +23,6 @@ class ApiUrls {
   // static const String usersList = 'flutter/event_phuket/users_list.aspx';
   static const String deleteTrip = 'flutter/event_phuket/delete_trip.aspx';
   static const String deleteUserTrip = 'flutter/event_phuket/delete_user_trip.aspx';
+  static const String distinctDayCount = 'flutter/event_phuket/distinct_day_count.aspx';
+  static const String dayBasedUserList = 'flutter/event_phuket/day_based_user_list.aspx';
 }

@@ -9,14 +9,25 @@ import '../../../../config/api_config.dart';
 import '../../../../api/api_urls.dart';
 
 class LocationWiseReportController extends GetxController {
-  final LocationMasterController locationMasterController = Get.put(
-    LocationMasterController(),
-  );
+  // final LocationMasterController locationMasterController = Get.put(
+  //   LocationMasterController(),
+  // );
+
+  var arg = Get.arguments;
 
   var isLoading = false.obs;
   var reportData = <LocationWiseReportModel>[].obs;
 
   var selectedLocation = Rxn<LocationModel>();
+
+  @override
+  void onInit() {
+    super.onInit();
+    if (arg != null) {
+      selectedLocation.value = arg['location'];
+      fetchReport();
+    }
+  }
 
   Future<void> fetchReport() async {
     final String locId = selectedLocation.value?.id ?? "";
@@ -34,9 +45,7 @@ class LocationWiseReportController extends GetxController {
       final String baseUrl = await ApiConfig.getBaseUrl();
       final String fullUrl = '$baseUrl${ApiUrls.locationDetails}';
 
-      final Map<String, dynamic> payload = {
-        "location_id": locId,
-      };
+      final Map<String, dynamic> payload = {"location_id": locId};
 
       debugPrint('LocationWiseReportController POST: $fullUrl');
       debugPrint('Payload: ${json.encode(payload)}');
