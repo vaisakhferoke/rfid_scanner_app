@@ -853,6 +853,7 @@ class ScanDetailsScreen extends StatelessWidget {
       );
       return;
     }
+
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

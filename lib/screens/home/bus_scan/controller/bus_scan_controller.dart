@@ -1039,9 +1039,15 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
   }
 
   void removeTag(String epc) {
+    print("epc");
+    print(epc);
+    print("scannedTags");
+    print(scannedTags.length);
     scannedTags.removeWhere(
-      (t) => t.epc.trim().toLowerCase() == epc.trim().toLowerCase(),
+      (t) => t.displayName.trim().toLowerCase() == epc.trim().toLowerCase(),
     );
+    print("scannedTags.length");
+    print(scannedTags.length);
   }
 
   @override

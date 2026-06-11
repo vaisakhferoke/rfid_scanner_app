@@ -37,7 +37,7 @@ class DaywiseReportController extends GetxController {
           final List<dynamic> list = data['data'] ?? [];
           days.value = list.map((e) => DistinctDayModel.fromJson(e)).toList();
           if (days.isNotEmpty) {
-            selectedDay.value = days.first;
+            selectedDay.value = days.last;
             fetchReport();
           }
         }
