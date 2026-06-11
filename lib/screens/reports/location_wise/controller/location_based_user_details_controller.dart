@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:excel/excel.dart';
 
 class LocationBasedUserDetailsController extends GetxController {
   var isLoading = false.obs;
@@ -161,39 +162,63 @@ class LocationBasedUserDetailsController extends GetxController {
     }
   }
 
-  Future<void> downloadExcel() async {
+  Future<List<int>?> _generateExcelBytes() async {
     try {
-      final String baseUrl = await ApiConfig.getBaseUrl();
-      final String queryParams =
-          '?location_id=$locationId&vehicle_id=$vehicleId';
-      final String fullUrl =
-          '$baseUrl${ApiUrls.locationBasedUserDetailsExcel}$queryParams';
+      var excel = Excel.createExcel();
+      Sheet sheetObject = excel['Sheet1'];
 
-      final Uri url = Uri.parse(fullUrl);
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
-      } else {
-        Get.snackbar(
-          'Error',
-          'Could not launch Excel download link.',
-          backgroundColor: const Color(0xFFEF4444),
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-        );
+      List<String> headers = [
+        '#',
+        'Name',
+        'Code',
+        'Type',
+        'State',
+        'Given Name',
+        'Surname',
+        'UID',
+        'Date',
+      ];
+      sheetObject.appendRow(headers.map((e) => TextCellValue(e)).toList());
+
+      for (int i = 0; i < userDetails.length; i++) {
+        var user = userDetails[i];
+        List<CellValue> row = [
+          IntCellValue(i + 1),
+          TextCellValue(user.name),
+          TextCellValue(user.code),
+          TextCellValue(user.type),
+          TextCellValue(user.state),
+          TextCellValue(user.givenname),
+          TextCellValue(user.surname),
+          TextCellValue(user.uniqId),
+          TextCellValue(user.date),
+        ];
+        sheetObject.appendRow(row);
       }
+
+      return excel.encode();
     } catch (e) {
-      debugPrint('Error downloading excel: $e');
-      Get.snackbar(
-        'Error',
-        'Could not initiate download.',
-        backgroundColor: const Color(0xFFEF4444),
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      debugPrint('Error generating excel: $e');
+      return null;
     }
   }
 
-  Future<void> shareExcel() async {
+  Future<void> downloadExcel(String locationName) async {
+    await shareExcel(
+      locationName,
+    ); // On mobile, downloading typically involves sharing or saving to files app.
+  }
+
+  Future<void> shareExcel(String locationName) async {
+    if (userDetails.isEmpty) {
+      Get.snackbar(
+        'Notice',
+        'No data to export.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
     try {
       Get.dialog(
         const Center(
@@ -202,27 +227,24 @@ class LocationBasedUserDetailsController extends GetxController {
         barrierDismissible: false,
       );
 
-      final String baseUrl = await ApiConfig.getBaseUrl();
-      final String queryParams =
-          '?location_id=$locationId&vehicle_id=$vehicleId';
-      final String fullUrl =
-          '$baseUrl${ApiUrls.locationBasedUserDetailsExcel}$queryParams';
-
-      final response = await http.get(Uri.parse(fullUrl)).timeout(const Duration(seconds: 30));
+      final bytes = await _generateExcelBytes();
 
       Get.back(); // close loading dialog
 
-      if (response.statusCode == 200) {
-        final bytes = response.bodyBytes;
+      if (bytes != null) {
         final tempDir = await getTemporaryDirectory();
-        final file = File('${tempDir.path}/location_report_${DateTime.now().millisecondsSinceEpoch}.xlsx');
+        final file = File(
+          '${tempDir.path}/location_report_${locationName.replaceAll(" ", "")}_${DateTime.now().millisecond}.xlsx',
+        );
         await file.writeAsBytes(bytes);
 
-        await Share.shareXFiles([XFile(file.path)], text: 'Location Based User Report');
+        await Share.shareXFiles([
+          XFile(file.path),
+        ], text: 'Location Based User Report');
       } else {
         Get.snackbar(
           'Error',
-          'Failed to download file for sharing.',
+          'Failed to generate Excel file.',
           backgroundColor: const Color(0xFFEF4444),
           colorText: Colors.white,
           snackPosition: SnackPosition.BOTTOM,

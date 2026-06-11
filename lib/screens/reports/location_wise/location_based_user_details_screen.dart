@@ -95,24 +95,13 @@ class LocationBasedUserDetailsScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         ElevatedButton.icon(
-          onPressed: controller.downloadExcel,
+          onPressed: () {
+            controller.downloadExcel(locationName);
+          },
           icon: const Icon(Icons.download, size: 18),
-          label: const Text('Download'),
+          label: const Text('Download & Share'),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF10B981),
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        ElevatedButton.icon(
-          onPressed: controller.shareExcel,
-          icon: const Icon(Icons.share, size: 18),
-          label: const Text('Share'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF3B82F6),
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
