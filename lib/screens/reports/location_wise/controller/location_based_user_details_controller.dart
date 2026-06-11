@@ -5,6 +5,10 @@ import 'package:http/http.dart' as http;
 import '../../../../../models/location_based_user_details_model.dart';
 import '../../../../../config/api_config.dart';
 import '../../../../../api/api_urls.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 class LocationBasedUserDetailsController extends GetxController {
   var isLoading = false.obs;
@@ -150,6 +154,86 @@ class LocationBasedUserDetailsController extends GetxController {
       Get.snackbar(
         'Network Error',
         'Could not connect to the server.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  Future<void> downloadExcel() async {
+    try {
+      final String baseUrl = await ApiConfig.getBaseUrl();
+      final String queryParams =
+          '?location_id=$locationId&vehicle_id=$vehicleId';
+      final String fullUrl =
+          '$baseUrl${ApiUrls.locationBasedUserDetailsExcel}$queryParams';
+
+      final Uri url = Uri.parse(fullUrl);
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        Get.snackbar(
+          'Error',
+          'Could not launch Excel download link.',
+          backgroundColor: const Color(0xFFEF4444),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error downloading excel: $e');
+      Get.snackbar(
+        'Error',
+        'Could not initiate download.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  Future<void> shareExcel() async {
+    try {
+      Get.dialog(
+        const Center(
+          child: CircularProgressIndicator(color: Color(0xFF213AEC)),
+        ),
+        barrierDismissible: false,
+      );
+
+      final String baseUrl = await ApiConfig.getBaseUrl();
+      final String queryParams =
+          '?location_id=$locationId&vehicle_id=$vehicleId';
+      final String fullUrl =
+          '$baseUrl${ApiUrls.locationBasedUserDetailsExcel}$queryParams';
+
+      final response = await http.get(Uri.parse(fullUrl)).timeout(const Duration(seconds: 30));
+
+      Get.back(); // close loading dialog
+
+      if (response.statusCode == 200) {
+        final bytes = response.bodyBytes;
+        final tempDir = await getTemporaryDirectory();
+        final file = File('${tempDir.path}/location_report_${DateTime.now().millisecondsSinceEpoch}.xlsx');
+        await file.writeAsBytes(bytes);
+
+        await Share.shareXFiles([XFile(file.path)], text: 'Location Based User Report');
+      } else {
+        Get.snackbar(
+          'Error',
+          'Failed to download file for sharing.',
+          backgroundColor: const Color(0xFFEF4444),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back();
+      debugPrint('Error sharing excel: $e');
+      Get.snackbar(
+        'Error',
+        'Could not share file.',
         backgroundColor: const Color(0xFFEF4444),
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
