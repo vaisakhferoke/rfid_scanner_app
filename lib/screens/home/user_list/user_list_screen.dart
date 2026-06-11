@@ -30,15 +30,20 @@ class UserListScreen extends StatelessWidget {
         ),
         backgroundColor: const Color(0xFF0043A4),
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.file_download_outlined),
+            tooltip: 'Download & Share Excel',
+            onPressed: () => controller.downloadExcel(title),
+          ),
+        ],
       ),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
-              onChanged: (val) {
-                // optionally debounce
-              },
+              onChanged: controller.search,
               onSubmitted: controller.search,
               decoration: InputDecoration(
                 hintText: 'Search user...',
@@ -178,6 +183,15 @@ class UserListScreen extends StatelessWidget {
                                 const SizedBox(height: 4),
                                 Text(
                                   '${user.uniqueId} • ${user.state}',
+                                  style: const TextStyle(
+                                    fontFamily: 'Inter',
+                                    color: Color(0xFF64748B),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                // Vehicle name
+                                Text(
+                                  'Vehicle: ${user.vehicleName}',
                                   style: const TextStyle(
                                     fontFamily: 'Inter',
                                     color: Color(0xFF64748B),
