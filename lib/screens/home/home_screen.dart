@@ -5,6 +5,7 @@ import 'package:event_rfid_app/controllers/home_controller.dart';
 import 'package:event_rfid_app/screens/home/update_user_trip/update_user_trip_screen.dart';
 import 'package:event_rfid_app/screens/home/user_list/user_list_screen.dart';
 import 'package:event_rfid_app/screens/home/id_card_issue/id_card_issue_screen.dart';
+import 'package:event_rfid_app/screens/home/activity_tracker/activity_tracker_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -293,6 +294,27 @@ class HomeScreen extends StatelessWidget {
                   homeController.fetchDashboardData();
                 },
               ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            Expanded(
+              child: _buildQuickActionCard(
+                icon: Icons.explore,
+                iconColor: const Color(0xFF8B5CF6),
+                iconBgColor: const Color(0xFFF5F3FF),
+                title: 'Activity Tracker',
+                subtitle: 'Search & Track',
+                onTap: () {
+                  Get.to(() => ActivityTrackerScreen());
+                },
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Container(), // Empty space for balance
             ),
           ],
         ),

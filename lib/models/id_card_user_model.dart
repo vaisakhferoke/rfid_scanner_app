@@ -21,6 +21,9 @@ class IdCardUser {
   String? day;
   String? eventIdCard;
   String? travelIdCard;
+  String? parasailing;
+  String? snorkeling;
+  String? bananaBoat;
 
   IdCardUser(
       {this.id,
@@ -44,7 +47,10 @@ class IdCardUser {
       this.lastBusScan,
       this.day,
       this.eventIdCard,
-      this.travelIdCard});
+      this.travelIdCard,
+      this.parasailing,
+      this.snorkeling,
+      this.bananaBoat});
 
   IdCardUser.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -69,6 +75,9 @@ class IdCardUser {
     day = json['day'];
     eventIdCard = json['event_id_card'];
     travelIdCard = json['travel_id_card'];
+    parasailing = json['parasailing'];
+    snorkeling = json['snorkeling'];
+    bananaBoat = json['banana_boat'];
   }
 
   Map<String, dynamic> toJson() {
@@ -95,6 +104,9 @@ class IdCardUser {
     data['day'] = day;
     data['event_id_card'] = eventIdCard;
     data['travel_id_card'] = travelIdCard;
+    data['parasailing'] = parasailing;
+    data['snorkeling'] = snorkeling;
+    data['banana_boat'] = bananaBoat;
     return data;
   }
 }
