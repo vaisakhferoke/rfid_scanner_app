@@ -4,6 +4,7 @@ import 'package:event_rfid_app/widgets/appbar/home_appbar.dart';
 import 'package:event_rfid_app/controllers/home_controller.dart';
 import 'package:event_rfid_app/screens/home/update_user_trip/update_user_trip_screen.dart';
 import 'package:event_rfid_app/screens/home/user_list/user_list_screen.dart';
+import 'package:event_rfid_app/screens/home/id_card_issue/id_card_issue_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -140,6 +141,42 @@ class HomeScreen extends StatelessWidget {
     final HomeController homeController = Get.find<HomeController>();
     return Column(
       children: [
+        Row(
+          children: [
+            Expanded(
+              child: _buildQuickActionCard(
+                icon: Icons.card_membership,
+                iconColor: const Color(0xFF8B5CF6),
+                iconBgColor: const Color(0xFFF5F3FF),
+                title: 'Travel ID Card Issue',
+                subtitle: '',
+                onTap: () {
+                  Get.to(
+                    () => IdCardIssueScreen(),
+                    arguments: {'type': 'travel_id_card'},
+                  );
+                },
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: _buildQuickActionCard(
+                icon: Icons.badge,
+                iconColor: const Color(0xFFF59E0B),
+                iconBgColor: const Color(0xFFFFFBEB),
+                title: 'Event ID Card Issue',
+                subtitle: '',
+                onTap: () {
+                  Get.to(
+                    () => IdCardIssueScreen(),
+                    arguments: {'type': 'event_id_card'},
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
         Row(
           children: [
             Expanded(
