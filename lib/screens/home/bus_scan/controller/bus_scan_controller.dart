@@ -715,6 +715,52 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
                             color: Colors.deepOrange,
                           ),
                         )
+                      : title == 'Wrong Bus'
+                      ? IconButton(
+                          onPressed: () {
+                            removeTag(uniqId);
+                            // Remove from list
+                            displayList.removeWhere(
+                              (e) => e['uniq_id'] == uniqId,
+                            );
+
+                            // Update the main observable model correctly using copyWith
+                            final currentModel =
+                                controller.checkStatusResponse.value;
+                            if (currentModel != null) {
+                              final newWrongList = currentModel.wrongBus
+                                  .where((e) => e.uniqId != uniqId)
+                                  .toList();
+                              controller.checkStatusResponse.value =
+                                  currentModel.copyWith(
+                                    wrongBus: newWrongList,
+                                    wrongBusCount: newWrongList.length,
+                                  );
+
+                              // remove boarder list
+                              final newBoardedList = currentModel.boardedList
+                                  .where((e) => e.uniqId != uniqId)
+                                  .toList();
+                              controller.checkStatusResponse.value =
+                                  currentModel.copyWith(
+                                    boardedList: newBoardedList,
+                                    boardedCount: newBoardedList.length,
+                                  );
+                            }
+
+                            Get.snackbar(
+                              'Success',
+                              'Wrong Bus tag removed.',
+                              backgroundColor: const Color(0xFF22C55E),
+                              colorText: Colors.white,
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.delete,
+                            color: Colors.deepOrange,
+                          ),
+                        )
                       : null,
                 ),
               );
