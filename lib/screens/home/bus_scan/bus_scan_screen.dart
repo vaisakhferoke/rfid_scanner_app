@@ -78,9 +78,10 @@ class BusScanScreen extends StatelessWidget {
                         _buildLocationsSelector(context),
                         const SizedBox(height: 16),
                         _buildBusSelector(context),
-                        const SizedBox(height: 20),
                         _buildActionButtons(),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
+                        _buildFindSingleTagButton(),
+                        const SizedBox(height: 12),
                         _buildScanStatus(),
                         const SizedBox(height: 24),
                         _buildListHeader(),
@@ -165,12 +166,12 @@ class BusScanScreen extends StatelessWidget {
           border: Border.all(color: cardBorderColor, width: 1.5),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Row(
             children: [
               Container(
-                width: 24,
-                height: 24,
+                width: 16,
+                height: 16,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isConnected
@@ -179,8 +180,8 @@ class BusScanScreen extends StatelessWidget {
                 ),
                 child: Center(
                   child: Container(
-                    width: 10,
-                    height: 10,
+                    width: 8,
+                    height: 8,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: isConnected
@@ -198,7 +199,7 @@ class BusScanScreen extends StatelessWidget {
                     Text(
                       isConnected ? 'Reader Connected' : 'Reader Disconnected',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: textColor,
                       ),
@@ -208,7 +209,7 @@ class BusScanScreen extends StatelessWidget {
                           ? 'Real RFID Hardware Active'
                           : 'Tap retry to check connection',
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 11,
                         color: Color(0xFF64748B),
                       ),
                     ),
@@ -477,6 +478,58 @@ class BusScanScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFindSingleTagButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Obx(() {
+        final isScanning = controller.isScanning.value;
+        final bool isEnabled = !isScanning;
+        return SizedBox(
+          width: double.infinity,
+          height: 40,
+          child: OutlinedButton(
+            onPressed: isEnabled ? () => controller.findSingleTag() : null,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFF213AEC),
+              side: BorderSide(
+                color: isEnabled
+                    ? const Color(0xFF213AEC)
+                    : const Color(0xFF94A3B8),
+                width: 2,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search_rounded,
+                  size: 18,
+                  color: isEnabled
+                      ? const Color(0xFF213AEC)
+                      : const Color(0xFF94A3B8),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Find Single RFID',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: isEnabled
+                        ? const Color(0xFF213AEC)
+                        : const Color(0xFF94A3B8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }),
     );
   }
 

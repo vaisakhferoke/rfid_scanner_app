@@ -41,9 +41,10 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
   StreamSubscription? _tagSubscription;
   bool _showResumeWarning = false;
 
-  // Event day info
-
   var day = ''.obs;
+
+  StreamSubscription? _findSingleTagSubscription;
+  var isFindingSingle = false.obs;
 
   @override
   void onInit() {
@@ -1184,8 +1185,85 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
     _tagSubscription?.cancel();
+    _findSingleTagSubscription?.cancel();
     _rfidService.stopInventory();
     super.onClose();
+  }
+
+  Future<void> stopFindingSingleTag() async {
+    await _findSingleTagSubscription?.cancel();
+    _findSingleTagSubscription = null;
+    await _rfidService.stopInventory();
+    isFindingSingle.value = false;
+  }
+
+  Future<void> findSingleTag() async {
+    if (isScanning.value || isFindingSingle.value) return;
+
+    isFindingSingle.value = true;
+
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Finding Tag...',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF213AEC)),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Bring a tag near the scanner.',
+              style: TextStyle(color: Color(0xFF64748B)),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              stopFindingSingleTag();
+              if (Get.isDialogOpen ?? false) {
+                Get.back();
+              }
+            },
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Color(0xFF213AEC)),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+
+    await _rfidService.startInventory();
+
+    _findSingleTagSubscription = _rfidService.tagStream.listen((event) async {
+      final epc = event['epc'] as String?;
+      if (epc != null && epc.isNotEmpty) {
+        await stopFindingSingleTag();
+        if (Get.isDialogOpen ?? false) {
+          Get.back();
+        }
+        
+        final rfidTag = RfidTag(epc: epc, rssi: 0, readTime: DateTime.now(), count: 1);
+        manuallyAddTag(rfidTag.displayName);
+        
+        Get.snackbar(
+          'Tag Found',
+          'Successfully scanned tag: ${rfidTag.displayName}',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFF10B981),
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12,
+        );
+      }
+    });
   }
 
   bool setFromLocation(LocationModel location) {

@@ -638,7 +638,7 @@ class HomeScreen extends StatelessWidget {
               'total_passengers',
               controller,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 5),
             _buildStatRow(
               'boarded count',
               controller.boardedCount.value,
@@ -647,7 +647,7 @@ class HomeScreen extends StatelessWidget {
             ),
 
             if (controller.missingCount.value > 0) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 5),
               _buildStatRow(
                 'missing count',
                 controller.missingCount.value,
@@ -702,6 +702,8 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             Container(
+              width: 100,
+              alignment: Alignment.center,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
                 color: Colors.white,
