@@ -118,10 +118,9 @@ class ActivityTrackerScreen extends StatelessWidget {
                       onPressed: () {
                         if (controller.isScanning.value) return;
 
-                        showDialog(
-                          context: context,
+                        Get.dialog(
                           barrierDismissible: false,
-                          builder: (context) => AlertDialog(
+                          AlertDialog(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -154,7 +153,7 @@ class ActivityTrackerScreen extends StatelessWidget {
                               TextButton(
                                 onPressed: () {
                                   controller.stopFinding();
-                                  Navigator.pop(context);
+                                  Get.back();
                                 },
                                 child: const Text(
                                   'Cancel',
