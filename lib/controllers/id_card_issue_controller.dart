@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:event_rfid_app/config/api_config.dart';
 import 'package:event_rfid_app/models/id_card_user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -7,15 +8,15 @@ import 'package:http/http.dart' as http;
 
 class IdCardIssueController extends GetxController {
   final TextEditingController searchController = TextEditingController();
-  
+
   var isLoading = false.obs;
   var usersList = <IdCardUser>[].obs;
-  
+
   var totalCount = '0'.obs;
   var issuedCount = '0'.obs;
   var pendingCount = '0'.obs;
   String type = '';
-  
+
   Timer? _debounce;
 
   @override
@@ -42,8 +43,9 @@ class IdCardIssueController extends GetxController {
 
   Future<void> fetchSummary() async {
     try {
+      final String baseUrl = await ApiConfig.getBaseUrl();
       final response = await http.post(
-        Uri.parse('http://newtest.vkcparivar.com/api/flutter/event_phuket/lssue_summary.aspx'),
+        Uri.parse('${baseUrl}flutter/event_phuket/lssue_summary.aspx'),
         body: {'type': type},
       );
 
@@ -63,8 +65,9 @@ class IdCardIssueController extends GetxController {
   Future<void> searchUsers(String keyword) async {
     isLoading(true);
     try {
+      final String baseUrl = await ApiConfig.getBaseUrl();
       final response = await http.post(
-        Uri.parse('http://newtest.vkcparivar.com/api/flutter/event_phuket/list_users.aspx'),
+        Uri.parse('${baseUrl}flutter/event_phuket/list_users.aspx'),
         body: {'keyword': keyword},
       );
 
@@ -78,12 +81,18 @@ class IdCardIssueController extends GetxController {
           usersList.clear();
         }
       } else {
-        Get.snackbar('Error', 'Failed to fetch users.',
-            snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar(
+          'Error',
+          'Failed to fetch users.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
       }
     } catch (e) {
-      Get.snackbar('Error', 'An error occurred while fetching users.',
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Error',
+        'An error occurred while fetching users.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       isLoading(false);
     }
@@ -95,13 +104,11 @@ class IdCardIssueController extends GetxController {
         const Center(child: CircularProgressIndicator()),
         barrierDismissible: false,
       );
+      final String baseUrl = await ApiConfig.getBaseUrl();
 
       final response = await http.post(
-        Uri.parse('http://newtest.vkcparivar.com/api/flutter/event_phuket/update_id_card.aspx'),
-        body: {
-          'type': type,
-          'unique_id': uniqueId,
-        },
+        Uri.parse('${baseUrl}flutter/event_phuket/update_id_card.aspx'),
+        body: {'type': type, 'unique_id': uniqueId},
       );
 
       Get.back(); // Close loading dialog

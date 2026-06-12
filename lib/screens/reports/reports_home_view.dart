@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'user_scan/user_scan_report_screen.dart';
 import 'location_wise/location_wise_report_screen.dart';
 import 'day_wise/daywise_report_screen.dart';
+import 'id_card_report/id_card_report_screen.dart';
 
 class ReportsPlaceholderScreen extends StatelessWidget {
   const ReportsPlaceholderScreen({super.key});
@@ -18,6 +19,35 @@ class ReportsPlaceholderScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _buildSectionHeader('ID Card'),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: [
+                _ReportCard(
+                  title: 'Travel ID\nCard',
+                  icon: Icons.card_membership,
+                  onTap: () {
+                    Get.to(
+                      () => IdCardReportScreen(),
+                      arguments: {'type': 'travel_id_card'},
+                    );
+                  },
+                ),
+                _ReportCard(
+                  title: 'Event ID\nCard',
+                  icon: Icons.badge,
+                  onTap: () {
+                    Get.to(
+                      () => IdCardReportScreen(),
+                      arguments: {'type': 'event_id_card'},
+                    );
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
             _buildSectionHeader('Vehicle'),
             const SizedBox(height: 16),
             Wrap(
