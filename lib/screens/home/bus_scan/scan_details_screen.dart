@@ -329,6 +329,7 @@ class ScanDetailsScreen extends StatelessWidget {
                 icon: Icons.error_outline_rounded,
                 bgColor: const Color(0xFFFEF2F2),
                 textColor: const Color(0xFFEF4444),
+                onTap: () => controller.showDetailsScreen('Missing Passengers'),
               ),
             ),
             const SizedBox(width: 10),
@@ -339,6 +340,7 @@ class ScanDetailsScreen extends StatelessWidget {
                 icon: Icons.warning_amber_rounded,
                 bgColor: const Color(0xFFFFFBEB),
                 textColor: const Color(0xFFF59E0B),
+                onTap: () => controller.showDetailsScreen('Wrong Bus'),
               ),
             ),
           ],
@@ -845,6 +847,19 @@ class ScanDetailsScreen extends StatelessWidget {
       Get.snackbar(
         'Invalid Users',
         'Some users are invalid. Please remove them before submitting.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+      );
+      return;
+    }
+    // If missing check
+    if (controller.checkStatusResponse.value!.missingPassengers!.isNotEmpty) {
+      Get.snackbar(
+        'Missing Users',
+        'Some users are missing. Please remove them before submitting.',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

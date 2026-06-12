@@ -543,6 +543,20 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
                 .toList() ??
             [],
       );
+    } else if (title == 'Missing Passengers') {
+      displayList.assignAll(
+        controller.checkStatusResponse.value?.missingPassengers
+                .map((e) => e.toJson())
+                .toList() ??
+            [],
+      );
+    } else if (title == 'Wrong Bus') {
+      displayList.assignAll(
+        controller.checkStatusResponse.value?.wrongBus
+                .map((e) => e.toJson())
+                .toList() ??
+            [],
+      );
     }
 
     Get.to(
@@ -658,106 +672,6 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
                                         : 0,
                                   );
                             }
-
-                            // Get.dialog(
-                            //   const Center(
-                            //     child: CircularProgressIndicator(
-                            //       color: Color(0xFF213AEC),
-                            //     ),
-                            //   ),
-                            //   barrierDismissible: false,
-                            // );
-
-                            // try {
-                            //   final String vehicleId = selectedBus.value!.id;
-                            //   final String locationId =
-                            //       selectedFromLocation.value!.id;
-
-                            //   final Map<String, String> payload = {
-                            //     "vehicle_id": vehicleId,
-                            //     "location_id": locationId,
-                            //     "user_id": userId,
-                            //   };
-
-                            //   final String baseUrl =
-                            //       await ApiConfig.getBaseUrl();
-                            //   final String fullUrl =
-                            //       '$baseUrl${ApiUrls.deleteTrip}';
-
-                            //   final response = await http
-                            //       .post(
-                            //         Uri.parse(fullUrl),
-                            //         headers: {
-                            //           'Content-Type': 'application/json',
-                            //         },
-                            //         body: json.encode(payload),
-                            //       )
-                            //       .timeout(const Duration(seconds: 15));
-
-                            //   if (Get.isDialogOpen ?? false) {
-                            //     Get.back();
-                            //   }
-
-                            //   if (response.statusCode == 200) {
-                            //     final Map<String, dynamic> data = json.decode(
-                            //       response.body,
-                            //     );
-                            //     if (data['status'] == true) {
-                            //       removeTag(userId);
-                            //       //  remove from display list
-                            //       displayList.removeWhere(
-                            //         (e) => e['uniq_id'] == userId,
-                            //       );
-
-                            //       // Update the main observable model correctly using copyWith
-                            //       final currentModel = controller.checkStatusResponse.value;
-                            //       if (currentModel != null) {
-                            //         final newBoardedList = currentModel.boardedList.where((e) => e.uniqId != userId).toList();
-                            //         controller.checkStatusResponse.value = currentModel.copyWith(
-                            //           boardedList: newBoardedList,
-                            //           boardedCount: newBoardedList.length,
-                            //           totalPassengers: currentModel.totalPassengers > 0 ? currentModel.totalPassengers - 1 : 0,
-                            //         );
-                            //       }
-
-                            //       Get.back(); // Close the dialog
-                            //       Get.snackbar(
-                            //         'Success',
-                            //         'User removed successfully.',
-                            //         backgroundColor: const Color(0xFF22C55E),
-                            //         colorText: Colors.white,
-                            //         snackPosition: SnackPosition.BOTTOM,
-                            //       );
-                            //       // Re-check status to get the updated lists
-                            //       checkStatus();
-                            //     } else {
-                            //       Get.snackbar(
-                            //         'Error',
-                            //         data['message']?.toString() ??
-                            //             'Failed to remove user',
-                            //         backgroundColor: const Color(0xFFEF4444),
-                            //         colorText: Colors.white,
-                            //       );
-                            //     }
-                            //   } else {
-                            //     Get.snackbar(
-                            //       'API Error',
-                            //       'Failed to remove user',
-                            //       backgroundColor: const Color(0xFFEF4444),
-                            //       colorText: Colors.white,
-                            //     );
-                            //   }
-                            // } catch (e) {
-                            //   if (Get.isDialogOpen ?? false) {
-                            //     Get.back();
-                            //   }
-                            //   Get.snackbar(
-                            //     'Network Error',
-                            //     'Could not connect to server.',
-                            //     backgroundColor: const Color(0xFFEF4444),
-                            //     colorText: Colors.white,
-                            //   );
-                            // }
                           },
                           icon: const Icon(
                             Icons.delete,
@@ -807,6 +721,43 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
             },
           );
         }),
+        bottomNavigationBar: title == 'Wrong Bus'
+            ? Obx(() {
+                if (displayList.isEmpty) return const SizedBox.shrink();
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, -5),
+                      ),
+                    ],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () =>
+                        controller.confirmUpdateWrongBusBatch(displayList),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF213AEC),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Update Wrong Bus',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                );
+              })
+            : null,
       ),
     );
   }
@@ -878,6 +829,139 @@ class BusScanController extends GetxController with WidgetsBindingObserver {
         snackPosition: SnackPosition.BOTTOM,
       );
       return false;
+    }
+  }
+
+  void confirmUpdateWrongBusBatch(List<dynamic> wrongUsers) {
+    if (selectedBus.value == null || selectedFromLocation.value == null) {
+      Get.snackbar(
+        'Validation Error',
+        'Missing bus or location selection.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.assignment_outlined, color: Color(0xFF213AEC)),
+            SizedBox(width: 8),
+            Text('Confirm Update'),
+          ],
+        ),
+        content: Text(
+          'Are you sure you want to update the bus for these ${wrongUsers.length} users?',
+          style: const TextStyle(fontSize: 15),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Get.back(); // close dialog
+              _performBatchUpdate(wrongUsers);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF213AEC),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Update',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  Future<void> _performBatchUpdate(List<dynamic> wrongUsers) async {
+    Get.dialog(
+      const Center(child: CircularProgressIndicator(color: Color(0xFF213AEC))),
+      barrierDismissible: false,
+    );
+
+    try {
+      final String vehicleId = selectedBus.value!.id;
+      final String locationId = selectedFromLocation.value!.id;
+
+      final List<Map<String, String>> payload = wrongUsers.map((user) {
+        return {
+          "vehicle_id": vehicleId,
+          "uniq_id": user['uniq_id']?.toString() ?? '',
+          "day": day.value,
+          "location_id": locationId,
+        };
+      }).toList();
+
+      final String baseUrl = await ApiConfig.getBaseUrl();
+      final String fullUrl = '$baseUrl${ApiUrls.updateUserBus}';
+      debugPrint('BusScanController batch update POST: $fullUrl');
+      debugPrint('Payload: ${json.encode(payload)}');
+
+      final response = await http
+          .post(
+            Uri.parse(fullUrl),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode(payload),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+
+      if (response.statusCode == 200) {
+        final currentModel = checkStatusResponse.value;
+        if (currentModel != null) {
+          checkStatusResponse.value = currentModel.copyWith(
+            wrongBus: [],
+            wrongBusCount: 0,
+          );
+        }
+        Get.back(); // Pop the details screen
+        Get.snackbar(
+          'Success',
+          'Successfully updated wrong bus users.',
+          backgroundColor: const Color(0xFF22C55E),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else {
+        Get.snackbar(
+          'API Error',
+          'Failed to update. Server responded with code ${response.statusCode}.',
+          backgroundColor: const Color(0xFFEF4444),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      debugPrint('Error updating batch bus: $e');
+      Get.snackbar(
+        'Network Error',
+        'Could not connect to the server.',
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 
