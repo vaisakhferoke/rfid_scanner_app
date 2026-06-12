@@ -68,9 +68,13 @@ class ActivityTrackerController extends GetxController {
       await _rfidService.startInventory();
 
       _tagStreamSubscription = _rfidService.tagStream.listen((event) async {
+        if (!isScanning.value) return; // Prevent multiple triggers
+
         final epc = event['epc'] as String?;
         final rssi = event['rssi'] as int?;
         if (epc != null && epc.isNotEmpty) {
+          isScanning(false); // Synchronously set to false to block further events
+
           final rfidTag = RfidTag(
             epc: epc,
             rssi: rssi ?? 0,

@@ -41,10 +41,10 @@ class ActivityUpdateController extends GetxController {
         'snorkeling': snorkeling.value,
         'banana_boat': bananaBoat.value,
       };
-      print("body :${json.encode(body)}");
+      print("body :$body");
       final response = await http.post(
         Uri.parse('${baseUrl}flutter/event_phuket/update_activity.aspx'),
-        body: json.encode(body),
+        body: body,
       );
 
       if (response.statusCode == 200) {
