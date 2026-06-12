@@ -568,14 +568,19 @@ class BusScanScreen extends StatelessWidget {
           ),
         );
       }
+      final sortedList = list.toList();
+      sortedList.sort(
+        (a, b) =>
+            a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase()),
+      );
 
       return ListView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-        itemCount: list.length,
+        itemCount: sortedList.length,
         itemBuilder: (context, index) {
-          final tag = list[index];
+          final tag = sortedList[index];
 
           return Container(
             margin: const EdgeInsets.only(bottom: 10.0),
@@ -672,7 +677,7 @@ class BusScanScreen extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                controller.removeTag(tag.epc);
+                controller.removeTag(tag.displayName);
                 Navigator.of(context).pop();
                 Get.snackbar(
                   'Deleted',
