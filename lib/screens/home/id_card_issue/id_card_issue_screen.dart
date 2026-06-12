@@ -114,7 +114,8 @@ class IdCardIssueScreen extends StatelessWidget {
                 );
               }),
             ),
-            _buildSummarySection(controller),
+            if (MediaQuery.of(context).viewInsets.bottom == 0)
+              _buildSummarySection(controller),
           ],
         ),
       ),
@@ -123,8 +124,8 @@ class IdCardIssueScreen extends StatelessWidget {
 
   Widget _buildSummarySection(IdCardIssueController controller) {
     return Container(
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -136,13 +137,13 @@ class IdCardIssueScreen extends StatelessWidget {
           const Text(
             'Issue Summary',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
               color: Color(0xFF0F172A),
               fontFamily: 'Inter',
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
           Obx(() => Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -153,7 +154,7 @@ class IdCardIssueScreen extends StatelessWidget {
                     count: controller.issuedCount.value,
                     label: 'Issued',
                   ),
-                  Container(width: 1, height: 40, color: const Color(0xFFF1F5F9)),
+                  Container(width: 1, height: 30, color: const Color(0xFFF1F5F9)),
                   _buildSummaryItem(
                     icon: Icons.access_time,
                     iconColor: const Color(0xFFF59E0B),
@@ -161,7 +162,7 @@ class IdCardIssueScreen extends StatelessWidget {
                     count: controller.pendingCount.value,
                     label: 'Pending',
                   ),
-                  Container(width: 1, height: 40, color: const Color(0xFFF1F5F9)),
+                  Container(width: 1, height: 30, color: const Color(0xFFF1F5F9)),
                   _buildSummaryItem(
                     icon: Icons.people_alt_outlined,
                     iconColor: const Color(0xFF64748B),
@@ -186,18 +187,18 @@ class IdCardIssueScreen extends StatelessWidget {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
             color: iconBgColor,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: iconColor, size: 20),
+          child: Icon(icon, color: iconColor, size: 16),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Text(
           count,
           style: const TextStyle(
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
             color: Color(0xFF0F172A),
             fontFamily: 'Inter',
@@ -207,7 +208,7 @@ class IdCardIssueScreen extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            fontSize: 12,
+            fontSize: 10,
             color: Color(0xFF64748B),
             fontFamily: 'Inter',
           ),
