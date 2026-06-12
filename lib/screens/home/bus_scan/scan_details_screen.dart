@@ -855,11 +855,11 @@ class ScanDetailsScreen extends StatelessWidget {
       );
       return;
     }
-    // If missing check
-    if (controller.checkStatusResponse.value!.missingPassengers!.isNotEmpty) {
+    // If wrong bus check
+    if (controller.checkStatusResponse.value!.wrongBus.isNotEmpty) {
       Get.snackbar(
-        'Missing Users',
-        'Some users are missing. Please remove them before submitting.',
+        'Wrong Bus Users',
+        'Some users are in the wrong bus. Please remove them before submitting.',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
