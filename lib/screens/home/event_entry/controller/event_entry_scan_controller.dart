@@ -40,7 +40,7 @@ class EventEntryScannController extends GetxController
   }
 
   void _startApiSyncTimer() {
-    _apiSyncTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+    _apiSyncTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       _processNextPendingTag();
     });
   }
@@ -58,11 +58,11 @@ class EventEntryScannController extends GetxController
       final String baseUrl = await ApiConfig.getBaseUrl2();
 
       print(
-        'Printing URL: $baseUrl/event_entry?id=${tag.displayName}&type=$type',
+        'Printing URL: ${baseUrl}event_entry?id=${tag.displayName}&type=$type',
       );
       final response = await http
           .get(
-            Uri.parse('$baseUrl/event_entry?id=${tag.displayName}&type=$type'),
+            Uri.parse('${baseUrl}event_entry?id=${tag.displayName}&type=$type'),
           )
           .timeout(const Duration(seconds: 5));
 
