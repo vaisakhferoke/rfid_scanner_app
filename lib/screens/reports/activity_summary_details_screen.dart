@@ -25,6 +25,14 @@ class ActivitySummaryDetailsScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Color(0xFF0F172A)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share, color: Color(0xFF0F172A)),
+            onPressed: () {
+              controller.downloadExcel();
+            },
+          ),
+        ],
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
