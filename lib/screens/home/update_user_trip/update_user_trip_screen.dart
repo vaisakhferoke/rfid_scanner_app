@@ -63,9 +63,13 @@ class UpdateUserTripScreen extends StatelessWidget {
             _buildSectionTitle('Tag'),
             const SizedBox(height: 8),
             _buildTextField(
-              controller: controller.tagController,
+              textController: controller.tagController,
               hintText: 'Enter tag no',
               icon: Icons.tag,
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.search_rounded, color: Color(0xFF0043A4)),
+                onPressed: () => controller.findSingleTag(),
+              ),
             ),
             const SizedBox(height: 24),
 
@@ -267,9 +271,10 @@ class UpdateUserTripScreen extends StatelessWidget {
   }
 
   Widget _buildTextField({
-    required TextEditingController controller,
+    required TextEditingController textController,
     required String hintText,
     required IconData icon,
+    Widget? suffixIcon,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -285,7 +290,7 @@ class UpdateUserTripScreen extends StatelessWidget {
         ],
       ),
       child: TextField(
-        controller: controller,
+        controller: textController,
         style: const TextStyle(
           fontSize: 16,
           color: Color(0xFF0F172A),
@@ -299,6 +304,7 @@ class UpdateUserTripScreen extends StatelessWidget {
             fontFamily: 'Inter',
           ),
           prefixIcon: Icon(icon, color: const Color(0xFF64748B), size: 20),
+          suffixIcon: suffixIcon,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,

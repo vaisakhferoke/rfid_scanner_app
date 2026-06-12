@@ -1,4 +1,5 @@
 import 'package:event_rfid_app/controllers/activity_tracker_controller.dart';
+import 'package:event_rfid_app/screens/home/activity_tracker/activity_update_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -315,107 +316,120 @@ class ActivityTrackerScreen extends StatelessWidget {
                     const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final user = controller.usersList[index];
-                  return Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFF1F5F9),
-                            shape: BoxShape.circle,
+                  return InkWell(
+                    onTap: () async {
+                      final result = await Get.to(
+                        () => ActivityUpdateScreen(),
+                        arguments: user,
+                      );
+                      if (result == true) {
+                        // Refresh the list after update
+                        controller.performSearch();
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFF1F5F9),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.person,
+                              color: Color(0xFF94A3B8),
+                              size: 28,
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.person,
-                            color: Color(0xFF94A3B8),
-                            size: 28,
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user.givenname ?? 'Unknown',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: Color(0xFF0F172A),
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${user.name ?? ''} ${user.surname ?? ''}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF64748B),
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Unique ID: ${user.uniqueId ?? 'N/A'} ',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xFF94A3B8),
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'State: ${user.state ?? 'N/A'} ',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xFF94A3B8),
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
+                          const SizedBox(width: 12),
+                          Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                user.givenname ?? 'Unknown',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  color: Color(0xFF0F172A),
-                                  fontFamily: 'Inter',
-                                ),
+                              _buildActivityRow(
+                                Icons.paragliding,
+                                const Color(0xFF8B5CF6),
+                                'Parasailing',
+                                _formatActivityStatus(user.parasailing),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${user.name ?? ''} ${user.surname ?? ''}',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF64748B),
-                                  fontFamily: 'Inter',
-                                ),
+                              const SizedBox(height: 8),
+                              _buildActivityRow(
+                                Icons.scuba_diving,
+                                const Color(0xFF3B82F6),
+                                'Snorkeling',
+                                _formatActivityStatus(user.snorkeling),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Unique ID: ${user.uniqueId ?? 'N/A'} ',
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Color(0xFF94A3B8),
-                                  fontFamily: 'Inter',
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'State: ${user.state ?? 'N/A'} ',
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Color(0xFF94A3B8),
-                                  fontFamily: 'Inter',
-                                ),
+                              const SizedBox(height: 8),
+                              _buildActivityRow(
+                                Icons.sailing,
+                                const Color(0xFF10B981),
+                                'Banana Boat',
+                                _formatActivityStatus(user.bananaBoat),
                               ),
                             ],
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildActivityRow(
-                              Icons.paragliding,
-                              const Color(0xFF8B5CF6),
-                              'Parasailing',
-                              _formatActivityStatus(user.parasailing),
+                          const SizedBox(width: 8),
+                          const Center(
+                            child: Icon(
+                              Icons.chevron_right,
+                              color: Color(0xFF94A3B8),
                             ),
-                            const SizedBox(height: 8),
-                            _buildActivityRow(
-                              Icons.scuba_diving,
-                              const Color(0xFF3B82F6),
-                              'Snorkeling',
-                              _formatActivityStatus(user.snorkeling),
-                            ),
-                            const SizedBox(height: 8),
-                            _buildActivityRow(
-                              Icons.sailing,
-                              const Color(0xFF10B981),
-                              'Banana Boat',
-                              _formatActivityStatus(user.bananaBoat),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(width: 8),
-                        const Center(
-                          child: Icon(
-                            Icons.chevron_right,
-                            color: Color(0xFF94A3B8),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },

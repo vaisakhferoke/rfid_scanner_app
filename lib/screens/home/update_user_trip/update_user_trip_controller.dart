@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../api/api_client.dart';
 import '../../../controllers/location_master_controller.dart';
+import 'dart:async';
+import '../../../services/rfid_service.dart';
+import '../../../models/rfid_tag.dart';
 
 class UpdateUserTripController extends GetxController {
   final tagController = TextEditingController();
@@ -13,9 +16,15 @@ class UpdateUserTripController extends GetxController {
   final RxBool isUpdateMode = false.obs;
   final RxString warningMessage = ''.obs;
 
+  final RfidService _rfidService = RfidService();
+  StreamSubscription? _tagStreamSubscription;
+  final RxBool isFinding = false.obs;
+  bool _isRfidInitialized = false;
+
   @override
   void onInit() {
     super.onInit();
+    _initRfid();
     _setDefaultLocation();
     fetchEventDay();
     tagController.addListener(() {
@@ -24,6 +33,18 @@ class UpdateUserTripController extends GetxController {
         warningMessage.value = '';
       }
     });
+  }
+
+  Future<void> _initRfid() async {
+    try {
+      bool connected = await _rfidService.checkConnectionStatus();
+      if (!connected) {
+        connected = await _rfidService.initializeReader();
+      }
+      _isRfidInitialized = connected;
+    } catch (e) {
+      debugPrint('RFID Init Error: $e');
+    }
   }
 
   Future<void> fetchEventDay() async {
@@ -77,8 +98,95 @@ class UpdateUserTripController extends GetxController {
 
   @override
   void onClose() {
+    stopFinding();
     tagController.dispose();
     super.onClose();
+  }
+
+  Future<void> stopFinding() async {
+    await _tagStreamSubscription?.cancel();
+    _tagStreamSubscription = null;
+    await _rfidService.stopInventory();
+    isFinding.value = false;
+  }
+
+  void findSingleTag() async {
+    if (isFinding.value) return;
+
+    if (!_isRfidInitialized) {
+      await _initRfid();
+    }
+
+    isFinding.value = true;
+
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Finding Tag...',
+          style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold),
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0043A4)),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Bring a tag near the scanner.',
+              style: TextStyle(fontFamily: 'Inter', color: Color(0xFF64748B)),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              stopFinding();
+              Get.back();
+            },
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Color(0xFF0043A4)),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+
+    await _rfidService.startInventory();
+
+    _tagStreamSubscription = _rfidService.tagStream.listen((event) async {
+      final epc = event['epc'] as String?;
+      final rssi = event['rssi'] as int?;
+      if (epc != null && epc.isNotEmpty) {
+        final rfidTag = RfidTag(
+          epc: epc,
+          rssi: rssi ?? 0,
+          readTime: DateTime.now(),
+          count: 1,
+        );
+        debugPrint('Tag Found: ${rfidTag.displayName}');
+
+        await stopFinding();
+        if (Get.isDialogOpen ?? false) {
+          Get.back();
+        }
+
+        tagController.text = rfidTag.displayName;
+
+        Get.snackbar(
+          'Tag Found',
+          'Successfully read tag data.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFF10B981),
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12,
+        );
+      }
+    });
   }
 
   Future<void> submitTrip() async {
