@@ -73,6 +73,9 @@ class IdCardIssueScreen extends StatelessWidget {
                     },
                   ),
                 ),
+                onChanged: (value) {
+                  controller.onSearchChanged(value);
+                },
                 onSubmitted: (value) {
                   controller.searchUsers(value);
                 },
@@ -111,9 +114,105 @@ class IdCardIssueScreen extends StatelessWidget {
                 );
               }),
             ),
+            _buildSummarySection(controller),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSummarySection(IdCardIssueController controller) {
+    return Container(
+      margin: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFF1F5F9)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Issue Summary',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0F172A),
+              fontFamily: 'Inter',
+            ),
+          ),
+          const SizedBox(height: 20),
+          Obx(() => Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildSummaryItem(
+                    icon: Icons.badge,
+                    iconColor: const Color(0xFF10B981),
+                    iconBgColor: const Color(0xFFECFDF5),
+                    count: controller.issuedCount.value,
+                    label: 'Issued',
+                  ),
+                  Container(width: 1, height: 40, color: const Color(0xFFF1F5F9)),
+                  _buildSummaryItem(
+                    icon: Icons.access_time,
+                    iconColor: const Color(0xFFF59E0B),
+                    iconBgColor: const Color(0xFFFFFBEB),
+                    count: controller.pendingCount.value,
+                    label: 'Pending',
+                  ),
+                  Container(width: 1, height: 40, color: const Color(0xFFF1F5F9)),
+                  _buildSummaryItem(
+                    icon: Icons.people_alt_outlined,
+                    iconColor: const Color(0xFF64748B),
+                    iconBgColor: const Color(0xFFF8FAFC),
+                    count: controller.totalCount.value,
+                    label: 'Total Users',
+                  ),
+                ],
+              )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryItem({
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBgColor,
+    required String count,
+    required String label,
+  }) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: iconBgColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: iconColor, size: 20),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          count,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF0F172A),
+            fontFamily: 'Inter',
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Color(0xFF64748B),
+            fontFamily: 'Inter',
+          ),
+        ),
+      ],
     );
   }
 

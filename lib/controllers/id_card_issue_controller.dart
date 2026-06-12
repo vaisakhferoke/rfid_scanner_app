@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:event_rfid_app/models/id_card_user_model.dart';
 import 'package:flutter/material.dart';
@@ -9,17 +10,54 @@ class IdCardIssueController extends GetxController {
   
   var isLoading = false.obs;
   var usersList = <IdCardUser>[].obs;
+  
+  var totalCount = '0'.obs;
+  var issuedCount = '0'.obs;
+  var pendingCount = '0'.obs;
+  String type = '';
+  
+  Timer? _debounce;
 
   @override
   void onInit() {
     super.onInit();
+    type = Get.arguments['type'] ?? '';
     searchUsers('');
+    fetchSummary();
   }
 
   @override
   void onClose() {
     searchController.dispose();
+    _debounce?.cancel();
     super.onClose();
+  }
+
+  void onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      searchUsers(query);
+    });
+  }
+
+  Future<void> fetchSummary() async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://newtest.vkcparivar.com/api/flutter/event_phuket/lssue_summary.aspx'),
+        body: {'type': type},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == true) {
+          totalCount.value = data['total_count']?.toString() ?? '0';
+          issuedCount.value = data['issued_count']?.toString() ?? '0';
+          pendingCount.value = data['not_issued_count']?.toString() ?? '0';
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching summary: $e');
+    }
   }
 
   Future<void> searchUsers(String keyword) async {
@@ -78,8 +116,9 @@ class IdCardIssueController extends GetxController {
             backgroundColor: Colors.green,
             colorText: Colors.white,
           );
-          // Refresh the list
+          // Refresh the list and summary
           searchUsers(searchController.text);
+          fetchSummary();
         } else {
           Get.snackbar(
             'Error',
