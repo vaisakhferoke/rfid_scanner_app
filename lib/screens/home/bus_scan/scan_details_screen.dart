@@ -320,29 +320,29 @@ class ScanDetailsScreen extends StatelessWidget {
         ),
         const SizedBox(height: 10),
 
-        // Row(
-        //   children: [
-        //     Expanded(
-        //       child: _buildStatCard(
-        //         label: 'Missing',
-        //         value: missing.toString().padLeft(2, '0'),
-        //         icon: Icons.error_outline_rounded,
-        //         bgColor: const Color(0xFFFEF2F2),
-        //         textColor: const Color(0xFFEF4444),
-        //       ),
-        //     ),
-        //     const SizedBox(width: 10),
-        //     Expanded(
-        //       child: _buildStatCard(
-        //         label: 'Wrong Bus',
-        //         value: wrongBus.toString().padLeft(2, '0'),
-        //         icon: Icons.warning_amber_rounded,
-        //         bgColor: const Color(0xFFFFFBEB),
-        //         textColor: const Color(0xFFF59E0B),
-        //       ),
-        //     ),
-        //   ],
-        // ),
+        Row(
+          children: [
+            Expanded(
+              child: _buildStatCard(
+                label: 'Missing',
+                value: missing.toString().padLeft(2, '0'),
+                icon: Icons.error_outline_rounded,
+                bgColor: const Color(0xFFFEF2F2),
+                textColor: const Color(0xFFEF4444),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildStatCard(
+                label: 'Wrong Bus',
+                value: wrongBus.toString().padLeft(2, '0'),
+                icon: Icons.warning_amber_rounded,
+                bgColor: const Color(0xFFFFFBEB),
+                textColor: const Color(0xFFF59E0B),
+              ),
+            ),
+          ],
+        ),
         // const SizedBox(height: 10),
         // Row(
         //   children: [
