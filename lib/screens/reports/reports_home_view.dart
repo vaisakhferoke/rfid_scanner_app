@@ -6,6 +6,7 @@ import 'user_scan/user_scan_report_screen.dart';
 import 'location_wise/location_wise_report_screen.dart';
 import 'day_wise/daywise_report_screen.dart';
 import 'id_card_report/id_card_report_screen.dart';
+import 'activity_summary_screen.dart';
 
 class ReportsPlaceholderScreen extends StatelessWidget {
   const ReportsPlaceholderScreen({super.key});
@@ -103,6 +104,22 @@ class ReportsPlaceholderScreen extends StatelessWidget {
                   icon: Icons.document_scanner,
                   onTap: () {
                     Get.to(() => UserScanReportScreen());
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+            _buildSectionHeader('Activity'),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: [
+                _ReportCard(
+                  title: 'Activity\nTrack',
+                  icon: Icons.local_activity,
+                  onTap: () {
+                    Get.to(() => ActivitySummaryScreen());
                   },
                 ),
               ],
