@@ -149,13 +149,13 @@ class AddEventEntryScreen extends StatelessWidget {
           border: Border.all(color: cardBorderColor, width: 1.5),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Row(
             children: [
               // Pulse-like status dot matching mockup (outer transparent ring, inner solid ring)
               Container(
-                width: 24,
-                height: 24,
+                width: 16,
+                height: 16,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isConnected
@@ -164,8 +164,8 @@ class AddEventEntryScreen extends StatelessWidget {
                 ),
                 child: Center(
                   child: Container(
-                    width: 10,
-                    height: 10,
+                    width: 8,
+                    height: 8,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: isConnected
@@ -183,7 +183,7 @@ class AddEventEntryScreen extends StatelessWidget {
                     Text(
                       isConnected ? 'Reader Connected' : 'Reader Disconnected',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: textColor,
                       ),
@@ -193,7 +193,7 @@ class AddEventEntryScreen extends StatelessWidget {
                           ? 'Real RFID Hardware Active'
                           : 'Tap retry to check connection',
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 11,
                         color: Color(0xFF64748B),
                       ),
                     ),
@@ -334,7 +334,7 @@ class AddEventEntryScreen extends StatelessWidget {
         final bool isEnabled = !isScanning;
         return SizedBox(
           width: double.infinity,
-          height: 48,
+          height: 40,
           child: OutlinedButton(
             onPressed: isEnabled ? () => controller.findSingleTag() : null,
             style: OutlinedButton.styleFrom(
@@ -354,7 +354,7 @@ class AddEventEntryScreen extends StatelessWidget {
               children: [
                 Icon(
                   Icons.search_rounded,
-                  size: 20,
+                  size: 18,
                   color: isEnabled
                       ? const Color(0xFF213AEC)
                       : const Color(0xFF94A3B8),
@@ -363,7 +363,7 @@ class AddEventEntryScreen extends StatelessWidget {
                 Text(
                   'Find Single RFID',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: isEnabled
                         ? const Color(0xFF213AEC)
