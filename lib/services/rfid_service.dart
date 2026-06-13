@@ -65,7 +65,6 @@ class RfidService {
     }
   }
 
-  // Write EPC data to target tag
   Future<bool> writeTag({
     required String hexData,
     String password = "00000000",
@@ -84,7 +83,7 @@ class RfidService {
       return result;
     } on PlatformException catch (e) {
       debugPrint("Failed to write tag: '${e.message}'.");
-      return false;
+      throw Exception(e.message ?? "Failed to write tag");
     }
   }
 

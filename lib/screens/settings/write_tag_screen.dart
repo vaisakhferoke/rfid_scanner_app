@@ -146,6 +146,11 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
         if (mounted && Navigator.canPop(context)) {
           Navigator.pop(context);
         }
+        print('Tag displayname: ${rfidTag.displayName}');
+        print('Tag epc: ${rfidTag.epc}');
+        print('Tag rssi: ${rfidTag.rssi}');
+        print('Tag readTime: ${rfidTag.readTime}');
+        print('Tag count: ${rfidTag.count}');
         setState(() {
           _epcController.text = rfidTag.displayName; // hex to convet string
         });
@@ -460,6 +465,7 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
 
     // Apply the saved power setting right before writing to make sure reader is configured correctly
     _rfidService.setPower(power).then((_) {
+      print('Tag Written: $hexData');
       try {
         _rfidService
             .writeTag(
@@ -480,6 +486,10 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
                 });
                 _verifyWrittenTag(hexData);
               } else {
+                print('Tag Not Written: $hexData');
+                // Print error
+                print('Error: Tag Not Written');
+
                 try {
                   _rfidService.checkConnectionStatus().then((connected) {
                     if (mounted) {
@@ -491,24 +501,56 @@ class _WriteTagScreenState extends State<WriteTagScreen> {
                 } catch (e, stackTrace) {
                   print('Error: $e');
                   print('Stack Trace: $stackTrace');
-                  Get.snackbar(
-                    'Error',
-                    '$e , $stackTrace',
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: const Color(0xFFEF4444),
-                    colorText: Colors.white,
-                    margin: const EdgeInsets.all(16),
-                    borderRadius: 12,
-                    icon: const Icon(
-                      Icons.error_outline_rounded,
-                      color: Colors.white,
-                    ),
-                    duration: const Duration(seconds: 3),
-                  );
                 }
 
                 // show exact error
+                Get.snackbar(
+                  'Write Failed',
+                  'Could not write data to the tag.',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: const Color(0xFFEF4444),
+                  colorText: Colors.white,
+                  margin: const EdgeInsets.all(16),
+                  borderRadius: 12,
+                  icon: const Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.white,
+                  ),
+                  duration: const Duration(seconds: 3),
+                );
               }
+            })
+            .catchError((error, stackTrace) {
+              if (!mounted) return;
+              // Dismiss writing dialog
+              navigator.pop();
+
+              print('Write Error: $error');
+              print('Stack Trace: $stackTrace');
+
+              // show exact error
+              Get.snackbar(
+                'Write Failed',
+                error.toString(),
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: const Color(0xFFEF4444),
+                colorText: Colors.white,
+                margin: const EdgeInsets.all(16),
+                borderRadius: 12,
+                icon: const Icon(
+                  Icons.error_outline_rounded,
+                  color: Colors.white,
+                ),
+                duration: const Duration(seconds: 3),
+              );
+
+              _rfidService.checkConnectionStatus().then((connected) {
+                if (mounted) {
+                  setState(() {
+                    _isConnected = connected;
+                  });
+                }
+              });
             });
       } catch (e, stackTrace) {
         print('Error: $e');
