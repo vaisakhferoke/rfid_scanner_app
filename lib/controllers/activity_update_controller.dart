@@ -44,7 +44,8 @@ class ActivityUpdateController extends GetxController {
       print("body :$body");
       final response = await http.post(
         Uri.parse('${baseUrl}flutter/event_phuket/update_activity.aspx'),
-        body: body,
+        body: jsonEncode(body),
+        headers: {'Content-Type': 'application/json'},
       );
 
       if (response.statusCode == 200) {
