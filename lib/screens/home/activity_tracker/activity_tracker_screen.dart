@@ -216,7 +216,24 @@ class ActivityTrackerScreen extends StatelessWidget {
                           Icons.search,
                           color: Color(0xFF94A3B8),
                         ),
-
+                        suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                          valueListenable: controller.searchController,
+                          builder: (context, value, child) {
+                            if (value.text.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+                            return IconButton(
+                              icon: const Icon(
+                                Icons.clear,
+                                color: Color(0xFF94A3B8),
+                              ),
+                              onPressed: () {
+                                controller.searchController.clear();
+                                controller.performSearch();
+                              },
+                            );
+                          },
+                        ),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,

@@ -36,7 +36,7 @@ class IdCardIssueController extends GetxController {
 
   void onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
+    _debounce = Timer(const Duration(milliseconds: 1000), () {
       searchUsers(query);
     });
   }
