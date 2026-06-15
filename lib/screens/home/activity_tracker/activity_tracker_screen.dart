@@ -408,6 +408,15 @@ class ActivityTrackerScreen extends StatelessWidget {
                                     fontFamily: 'Inter',
                                   ),
                                 ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Typ: ${user.type ?? 'N/A'} ',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xFF94A3B8),
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
                               ],
                             ),
                           ),

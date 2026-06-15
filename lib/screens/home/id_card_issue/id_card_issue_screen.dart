@@ -144,34 +144,36 @@ class IdCardIssueScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Obx(() => Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildSummaryItem(
-                    icon: Icons.badge,
-                    iconColor: const Color(0xFF10B981),
-                    iconBgColor: const Color(0xFFECFDF5),
-                    count: controller.issuedCount.value,
-                    label: 'Issued',
-                  ),
-                  Container(width: 1, height: 30, color: const Color(0xFFF1F5F9)),
-                  _buildSummaryItem(
-                    icon: Icons.access_time,
-                    iconColor: const Color(0xFFF59E0B),
-                    iconBgColor: const Color(0xFFFFFBEB),
-                    count: controller.pendingCount.value,
-                    label: 'Pending',
-                  ),
-                  Container(width: 1, height: 30, color: const Color(0xFFF1F5F9)),
-                  _buildSummaryItem(
-                    icon: Icons.people_alt_outlined,
-                    iconColor: const Color(0xFF64748B),
-                    iconBgColor: const Color(0xFFF8FAFC),
-                    count: controller.totalCount.value,
-                    label: 'Total Users',
-                  ),
-                ],
-              )),
+          Obx(
+            () => Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildSummaryItem(
+                  icon: Icons.badge,
+                  iconColor: const Color(0xFF10B981),
+                  iconBgColor: const Color(0xFFECFDF5),
+                  count: controller.issuedCount.value,
+                  label: 'Issued',
+                ),
+                Container(width: 1, height: 30, color: const Color(0xFFF1F5F9)),
+                _buildSummaryItem(
+                  icon: Icons.access_time,
+                  iconColor: const Color(0xFFF59E0B),
+                  iconBgColor: const Color(0xFFFFFBEB),
+                  count: controller.pendingCount.value,
+                  label: 'Pending',
+                ),
+                Container(width: 1, height: 30, color: const Color(0xFFF1F5F9)),
+                _buildSummaryItem(
+                  icon: Icons.people_alt_outlined,
+                  iconColor: const Color(0xFF64748B),
+                  iconBgColor: const Color(0xFFF8FAFC),
+                  count: controller.totalCount.value,
+                  label: 'Total Users',
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -294,7 +296,7 @@ class IdCardIssueScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${user.name ?? ''} • ${user.state ?? ''}',
+                        '${user.name ?? ''}}',
                         style: const TextStyle(
                           fontSize: 13,
                           color: Color(0xFF64748B),
@@ -302,6 +304,15 @@ class IdCardIssueScreen extends StatelessWidget {
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${user.state ?? 'N/A'} ',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF94A3B8),
+                          fontFamily: 'Inter',
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
