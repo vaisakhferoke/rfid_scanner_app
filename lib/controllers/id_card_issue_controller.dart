@@ -99,15 +99,15 @@ class IdCardIssueController extends GetxController {
           searchController.text = rfidTag.displayName;
           searchUsers(rfidTag.displayName);
 
-          Get.snackbar(
-            'Tag Found',
-            'Successfully read tag data.',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: const Color(0xFF10B981),
-            colorText: Colors.white,
-            margin: const EdgeInsets.all(16),
-            borderRadius: 12,
-          );
+          // Get.snackbar(
+          //   'Tag Found',
+          //   'Successfully read tag data.',
+          //   snackPosition: SnackPosition.BOTTOM,
+          //   backgroundColor: const Color(0xFF10B981),
+          //   colorText: Colors.white,
+          //   margin: const EdgeInsets.all(16),
+          //   borderRadius: 12,
+          // );
         }
       });
     } catch (e) {

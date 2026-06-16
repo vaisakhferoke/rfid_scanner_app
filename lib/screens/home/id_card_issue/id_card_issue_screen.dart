@@ -420,17 +420,19 @@ class IdCardIssueScreen extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${user.name ?? ''}}',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF64748B),
-                          fontFamily: 'Inter',
+                      if (user.name != null && user.name!.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          user.name ?? '',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF64748B),
+                            fontFamily: 'Inter',
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      ],
                       const SizedBox(height: 2),
                       Text(
                         '${user.state ?? 'N/A'} ',
@@ -442,7 +444,7 @@ class IdCardIssueScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${user.uniqueId ?? ''} • ${user.type ?? ''}',
+                        'Code : ${user.uniqueId ?? ''} • ${user.type ?? ''}',
                         style: const TextStyle(
                           fontSize: 13,
                           color: Color(0xFF64748B),
