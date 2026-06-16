@@ -180,6 +180,18 @@ class UserListScreen extends StatelessWidget {
                                     color: Color(0xFF0F172A),
                                   ),
                                 ),
+                                // Show name
+                                if (user.name.isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    user.name,
+                                    style: const TextStyle(
+                                      fontFamily: 'Inter',
+                                      color: Color(0xFF64748B),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
                                 const SizedBox(height: 4),
                                 Text(
                                   '${user.uniqueId} • ${user.state}',
@@ -192,6 +204,16 @@ class UserListScreen extends StatelessWidget {
                                 // Vehicle name
                                 Text(
                                   'Vehicle: ${user.vehicleName}',
+                                  style: const TextStyle(
+                                    fontFamily: 'Inter',
+                                    color: Color(0xFF64748B),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                // Type
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Type: ${user.type}',
                                   style: const TextStyle(
                                     fontFamily: 'Inter',
                                     color: Color(0xFF64748B),

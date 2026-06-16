@@ -117,6 +117,8 @@ class UserListController extends GetxController {
         'Unique ID',
         'State',
         'Vehicle Name',
+        'Dealer Name',
+        'Type',
       ];
       sheetObject.appendRow(headers.map((e) => TextCellValue(e)).toList());
 
@@ -129,6 +131,8 @@ class UserListController extends GetxController {
           TextCellValue(user.uniqueId),
           TextCellValue(user.state),
           TextCellValue(user.vehicleName),
+          TextCellValue(user.name),
+          TextCellValue(user.type),
         ];
         sheetObject.appendRow(row);
       }
@@ -169,9 +173,7 @@ class UserListController extends GetxController {
         );
         await file.writeAsBytes(bytes);
 
-        await Share.shareXFiles([
-          XFile(file.path),
-        ], text: 'User List Export');
+        await Share.shareXFiles([XFile(file.path)], text: 'User List Export');
       } else {
         Get.snackbar(
           'Error',
