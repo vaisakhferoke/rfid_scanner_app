@@ -42,6 +42,10 @@ class ActivitySummaryDetailsController extends GetxController {
     usersList.clear();
     try {
       final String baseUrl = await ApiConfig.getBaseUrl();
+      print('type: ${type.value}');
+      print(
+        'baseUrl: ${baseUrl}flutter/event_phuket/activity_summary_details.aspx',
+      );
       final response = await http.post(
         Uri.parse(
           '${baseUrl}flutter/event_phuket/activity_summary_details.aspx',

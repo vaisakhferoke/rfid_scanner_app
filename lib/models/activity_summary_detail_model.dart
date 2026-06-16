@@ -19,7 +19,7 @@ class ActivitySummaryDetailModel {
       name: json['name']?.toString() ?? json['user']?.toString() ?? '',
       code: json['code']?.toString() ?? '',
       state: json['state']?.toString() ?? '',
-      givenname: json['givenname']?.toString() ?? '',
+      givenname: json['given_name']?.toString() ?? '',
     );
   }
 }
