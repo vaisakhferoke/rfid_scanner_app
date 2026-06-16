@@ -39,6 +39,132 @@ class IdCardIssueScreen extends StatelessWidget {
         color: const Color(0xFFF8FAFC), // Sleek light background
         child: Column(
           children: [
+            // Find RFID Area
+            Container(
+              color: Colors.white,
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.document_scanner_outlined,
+                              color: Color(0xFF3B82F6),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Find RFID',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: Color(0xFF0F172A),
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                                Text(
+                                  'Scan RFID card to find user',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF64748B),
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    SizedBox(
+                      height: 48,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          if (controller.isScanning.value) return;
+
+                          Get.dialog(
+                            barrierDismissible: false,
+                            AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              title: const Text(
+                                'Finding Tag...',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              content: const Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Color(0xFF0043A4),
+                                    ),
+                                  ),
+                                  SizedBox(height: 16),
+                                  Text(
+                                    'Bring a tag near the scanner.',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      color: Color(0xFF64748B),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    controller.stopFinding();
+                                    Get.back();
+                                  },
+                                  child: const Text(
+                                    'Cancel',
+                                    style: TextStyle(color: Color(0xFF0043A4)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          controller.findRfid();
+                        },
+                        icon: const Icon(Icons.sensors),
+                        label: const Text('Find RFID'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0043A4),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             // Search Bar Area
             Container(
               color: Colors.white,
