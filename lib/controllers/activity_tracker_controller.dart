@@ -5,6 +5,7 @@ import 'package:event_rfid_app/models/id_card_user_model.dart';
 import 'package:event_rfid_app/models/rfid_tag.dart';
 import 'package:event_rfid_app/services/rfid_service.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
@@ -73,7 +74,9 @@ class ActivityTrackerController extends GetxController {
         final epc = event['epc'] as String?;
         final rssi = event['rssi'] as int?;
         if (epc != null && epc.isNotEmpty) {
-          isScanning(false); // Synchronously set to false to block further events
+          isScanning(
+            false,
+          ); // Synchronously set to false to block further events
 
           final rfidTag = RfidTag(
             epc: epc,
@@ -91,25 +94,39 @@ class ActivityTrackerController extends GetxController {
           searchController.text = rfidTag.displayName;
           searchUsers(rfidTag.displayName);
 
-          Get.snackbar(
-            'Tag Found',
-            'Successfully read tag data.',
-            snackPosition: SnackPosition.BOTTOM,
+          // Get.snackbar(
+          //   'Tag Found',
+          //   'Successfully read tag data.',
+          //   snackPosition: SnackPosition.BOTTOM,
+          //   backgroundColor: const Color(0xFF10B981),
+          //   colorText: Colors.white,
+          //   margin: const EdgeInsets.all(16),
+          //   borderRadius: 12,
+          // );
+          // toast message
+          Fluttertoast.showToast(
+            msg: "RFID Tag found successfully",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
             backgroundColor: const Color(0xFF10B981),
-            colorText: Colors.white,
-            margin: const EdgeInsets.all(16),
-            borderRadius: 12,
+            textColor: Colors.white,
+            fontSize: 16.0,
           );
         }
       });
     } catch (e) {
       isScanning(false);
-      Get.snackbar(
-        'Error',
-        'Error scanning RFID: $e',
-        snackPosition: SnackPosition.BOTTOM,
+
+      // toast message
+      Fluttertoast.showToast(
+        msg: "RFID Tag not found",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
         backgroundColor: Colors.red,
-        colorText: Colors.white,
+        textColor: Colors.white,
+        fontSize: 16.0,
       );
     }
   }

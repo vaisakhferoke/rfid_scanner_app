@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:event_rfid_app/config/api_config.dart';
 import 'package:event_rfid_app/models/id_card_user_model.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
@@ -52,12 +53,22 @@ class ActivityUpdateController extends GetxController {
         final data = json.decode(response.body);
         if (data['status'] == true) {
           Get.back(result: true); // Return true to refresh list
-          Get.snackbar(
-            'Success',
-            data['Message'] ?? 'Activities updated successfully.',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.green,
-            colorText: Colors.white,
+          // Get.snackbar(
+          //   'Success',
+          //   data['Message'] ?? 'Activities updated successfully.',
+          //   snackPosition: SnackPosition.BOTTOM,
+          //   backgroundColor: Colors.green,
+          //   colorText: Colors.white,
+          // );
+          // toast message
+          Fluttertoast.showToast(
+            msg: data['Message'] ?? 'Activities updated successfully.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: const Color(0xFF10B981),
+            textColor: Colors.white,
+            fontSize: 16.0,
           );
         } else {
           Get.snackbar(

@@ -5,6 +5,7 @@ import 'package:event_rfid_app/models/id_card_user_model.dart';
 import 'package:event_rfid_app/models/rfid_tag.dart';
 import 'package:event_rfid_app/services/rfid_service.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
@@ -204,13 +205,22 @@ class IdCardIssueController extends GetxController {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['status'] == true) {
-          Get.snackbar(
-            'Success',
-            data['Message'] ?? 'ID Card issued successfully.',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.green,
-            colorText: Colors.white,
+          Fluttertoast.showToast(
+            msg: data['Message'] ?? 'ID Card issued successfully.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: const Color(0xFF10B981),
+            textColor: Colors.white,
+            fontSize: 16.0,
           );
+          // Get.snackbar(
+          //   'Success',
+          //   data['Message'] ?? 'ID Card issued successfully.',
+          //   snackPosition: SnackPosition.BOTTOM,
+          //   backgroundColor: Colors.green,
+          //   colorText: Colors.white,
+          // );
           // Refresh the list and summary
           searchUsers(searchController.text);
           fetchSummary();
