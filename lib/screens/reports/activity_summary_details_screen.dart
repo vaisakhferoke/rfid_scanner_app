@@ -73,97 +73,115 @@ class ActivitySummaryDetailsScreen extends StatelessWidget {
 
               final displayList = controller.filteredUsersList;
 
-              if (displayList.isEmpty) {
-                return const Center(
-                  child: Text(
-                    'No records found.',
-                    style: TextStyle(color: Color(0xFF64748B), fontSize: 16),
-                  ),
-                );
-              }
-
-              return ListView.builder(
-                padding: const EdgeInsets.only(
-                  left: 16.0,
-                  right: 16.0,
-                  bottom: 16.0,
-                ),
-                itemCount: displayList.length,
-                itemBuilder: (context, index) {
-                  final user = displayList[index];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    elevation: 1,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  user.givenname.isNotEmpty
-                                      ? user.givenname
-                                      : user.givenname,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0F172A),
-                                  ),
-                                ),
-                              ),
-                              if (user.uniqueId.isNotEmpty)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFEEF2FF),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    user.uniqueId,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFF213AEC),
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          if (user.name.isNotEmpty) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              'Dealer Name: ${user.name}',
-                              style: const TextStyle(color: Color(0xFF64748B)),
-                            ),
-                          ],
-                          if (user.code.isNotEmpty) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              'Code: ${user.code}',
-                              style: const TextStyle(color: Color(0xFF64748B)),
-                            ),
-                          ],
-                          if (user.state.isNotEmpty) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              'State: ${user.state}',
-                              style: const TextStyle(color: Color(0xFF64748B)),
-                            ),
-                          ],
-                        ],
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      'Total count: ${displayList.length}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0F172A),
                       ),
                     ),
-                  );
-                },
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: displayList.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'No records found.',
+                              style: TextStyle(
+                                  color: Color(0xFF64748B), fontSize: 16),
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.only(
+                              left: 16.0,
+                              right: 16.0,
+                              bottom: 16.0,
+                            ),
+                            itemCount: displayList.length,
+                            itemBuilder: (context, index) {
+                              final user = displayList[index];
+                              return Card(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                elevation: 1,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              user.givenname.isNotEmpty
+                                                  ? user.givenname
+                                                  : user.givenname,
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF0F172A),
+                                              ),
+                                            ),
+                                          ),
+                                          if (user.uniqueId.isNotEmpty)
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 8,
+                                                vertical: 4,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFEEF2FF),
+                                                borderRadius: BorderRadius.circular(4),
+                                              ),
+                                              child: Text(
+                                                user.uniqueId,
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  color: Color(0xFF213AEC),
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                      if (user.name.isNotEmpty) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Dealer Name: ${user.name}',
+                                          style: const TextStyle(color: Color(0xFF64748B)),
+                                        ),
+                                      ],
+                                      if (user.code.isNotEmpty) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Code: ${user.code}',
+                                          style: const TextStyle(color: Color(0xFF64748B)),
+                                        ),
+                                      ],
+                                      if (user.state.isNotEmpty) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'State: ${user.state}',
+                                          style: const TextStyle(color: Color(0xFF64748B)),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                ],
               );
             }),
           ),
