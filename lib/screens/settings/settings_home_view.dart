@@ -268,7 +268,7 @@ class SettingsPlaceholderScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 4),
                                 const Text(
-                                  'Version 1.0.0 (Build 1)',
+                                  'Version 2.1.0 (Build 2)',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Color(0xFF94A3B8),
