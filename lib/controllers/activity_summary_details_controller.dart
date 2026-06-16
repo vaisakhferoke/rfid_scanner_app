@@ -13,6 +13,20 @@ class ActivitySummaryDetailsController extends GetxController {
   var isLoading = false.obs;
   var usersList = <ActivitySummaryDetailModel>[].obs;
   var type = ''.obs;
+  var searchQuery = ''.obs;
+
+  List<ActivitySummaryDetailModel> get filteredUsersList {
+    if (searchQuery.value.isEmpty) {
+      return usersList;
+    }
+    final query = searchQuery.value.toLowerCase();
+    return usersList.where((user) {
+      return user.name.toLowerCase().contains(query) ||
+          user.state.toLowerCase().contains(query) ||
+          user.uniqueId.toLowerCase().contains(query) ||
+          user.givenname.toLowerCase().contains(query);
+    }).toList();
+  }
 
   @override
   void onInit() {
@@ -29,7 +43,9 @@ class ActivitySummaryDetailsController extends GetxController {
     try {
       final String baseUrl = await ApiConfig.getBaseUrl();
       final response = await http.post(
-        Uri.parse('${baseUrl}flutter/event_phuket/activity_summary_details.aspx'),
+        Uri.parse(
+          '${baseUrl}flutter/event_phuket/activity_summary_details.aspx',
+        ),
         body: {'type': type.value},
       );
 
@@ -76,11 +92,13 @@ class ActivitySummaryDetailsController extends GetxController {
         'Name',
         'Code',
         'State',
+        'Given Name',
       ];
       sheetObject.appendRow(headers.map((e) => TextCellValue(e)).toList());
 
-      for (int i = 0; i < usersList.length; i++) {
-        var item = usersList[i];
+      final exportList = filteredUsersList;
+      for (int i = 0; i < exportList.length; i++) {
+        var item = exportList[i];
         String displayName = item.name.isNotEmpty ? item.name : item.givenname;
 
         List<CellValue> row = [
@@ -89,6 +107,7 @@ class ActivitySummaryDetailsController extends GetxController {
           TextCellValue(displayName),
           TextCellValue(item.code),
           TextCellValue(item.state),
+          TextCellValue(item.givenname),
         ];
         sheetObject.appendRow(row);
       }
@@ -101,7 +120,7 @@ class ActivitySummaryDetailsController extends GetxController {
   }
 
   Future<void> downloadExcel() async {
-    if (usersList.isEmpty) {
+    if (filteredUsersList.isEmpty) {
       Get.snackbar(
         'Notice',
         'No data to export.',
@@ -129,7 +148,9 @@ class ActivitySummaryDetailsController extends GetxController {
         );
         await file.writeAsBytes(bytes);
 
-        await Share.shareXFiles([XFile(file.path)], text: 'Activity Summary Details');
+        await Share.shareXFiles([
+          XFile(file.path),
+        ], text: 'Activity Summary Details');
       } else {
         Get.snackbar(
           'Error',
