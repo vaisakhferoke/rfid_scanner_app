@@ -119,35 +119,6 @@ class UserScanReportScreen extends StatelessWidget {
         children: [
           Expanded(
             child: InkWell(
-              onTap: () => controller.setScanType('scanned'),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: scanType == 'scanned'
-                          ? const Color(0xFF213AEC)
-                          : Colors.transparent,
-                      width: 2,
-                    ),
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    'Scanned (${controller.scannedCount.value})',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: scanType == 'scanned'
-                          ? const Color(0xFF213AEC)
-                          : const Color(0xFF64748B),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: InkWell(
               onTap: () => controller.setScanType('notscanned'),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -175,6 +146,35 @@ class UserScanReportScreen extends StatelessWidget {
               ),
             ),
           ),
+          Expanded(
+            child: InkWell(
+              onTap: () => controller.setScanType('scanned'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: scanType == 'scanned'
+                          ? const Color(0xFF213AEC)
+                          : Colors.transparent,
+                      width: 2,
+                    ),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    'Scanned (${controller.scannedCount.value})',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: scanType == 'scanned'
+                          ? const Color(0xFF213AEC)
+                          : const Color(0xFF64748B),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       );
     });
@@ -185,99 +185,136 @@ class UserScanReportScreen extends StatelessWidget {
       if (controller.isLoading.value) {
         return const Center(child: CircularProgressIndicator());
       }
-      if (controller.filteredData.isEmpty) {
-        return const Center(
-          child: Text(
-            'No data found.',
-            style: TextStyle(color: Color(0xFF64748B)),
-          ),
-        );
-      }
-      return ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: controller.filteredData.length,
-        itemBuilder: (context, index) {
-          final item = controller.filteredData[index];
-          return Card(
-            margin: const EdgeInsets.only(bottom: 12),
-            elevation: 1,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.givenname,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF0F172A),
-                          ),
-                        ),
-                        Text(
-                          item.name,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF0F172A),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'State: ${item.state}',
-                          style: const TextStyle(color: Color(0xFF64748B)),
-                        ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEEF2FF),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            item.uniqueId,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF213AEC),
-                              fontWeight: FontWeight.bold,
+      return RefreshIndicator(
+        onRefresh: () async {
+          controller.fetchCounts();
+          await controller.fetchReport();
+        },
+        child: controller.filteredData.isEmpty
+            ? LayoutBuilder(
+                builder: (context, constraints) => SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'No data found.',
+                        style: TextStyle(color: Color(0xFF64748B)),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            : ListView.builder(
+                padding: const EdgeInsets.all(16.0),
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: controller.filteredData.length,
+                itemBuilder: (context, index) {
+                  final item = controller.filteredData[index];
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    elevation: 1,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.givenname,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF0F172A),
+                                  ),
+                                ),
+                                Text(
+                                  item.name,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF0F172A),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'State: ${item.state}',
+                                  style: const TextStyle(
+                                    color: Color(0xFF64748B),
+                                  ),
+                                ),
+                                if (item.awardType.isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Award Type: ${item.awardType}',
+                                    style: const TextStyle(
+                                      color: Color(0xFF0F172A),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                                if (item.orderBy.isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Order By: ${item.orderBy}',
+                                    style: const TextStyle(
+                                      color: Color(0xFF64748B),
+                                    ),
+                                  ),
+                                ],
+                                const SizedBox(height: 4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFEEF2FF),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    item.uniqueId,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF213AEC),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      controller.updateUserScan(item.uniqueId);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF213AEC),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                          ElevatedButton(
+                            onPressed: () {
+                              controller.updateUserScan(item.uniqueId);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF213AEC),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                            ),
+                            child: const Text('Update'),
+                          ),
+                        ],
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
                     ),
-                    child: const Text('Update'),
-                  ),
-                ],
+                  );
+                },
               ),
-            ),
-          );
-        },
       );
     });
   }

@@ -11,7 +11,7 @@ class UserScanReportController extends GetxController {
   var filteredData = <UserScanModel>[].obs;
 
   var selectedType = 'evententry'.obs;
-  var selectedScanType = 'scanned'.obs;
+  var selectedScanType = 'notscanned'.obs;
   var scannedCount = 0.obs;
   var notScannedCount = 0.obs;
   final TextEditingController searchController = TextEditingController();

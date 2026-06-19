@@ -14,6 +14,11 @@ class UserScanModel {
   final String awardTime;
   final String photoboothStatus;
   final String photoboothTime;
+  final String specialawardStatus;
+  final String specialawardTime;
+  final String awardType;
+  final String specialAwardType;
+  final String orderBy;
 
   UserScanModel({
     required this.id,
@@ -31,6 +36,11 @@ class UserScanModel {
     required this.awardTime,
     required this.photoboothStatus,
     required this.photoboothTime,
+    required this.specialawardStatus,
+    required this.specialawardTime,
+    required this.awardType,
+    required this.specialAwardType,
+    required this.orderBy,
   });
 
   factory UserScanModel.fromJson(Map<String, dynamic> json) {
@@ -50,6 +60,11 @@ class UserScanModel {
       awardTime: json['award_time']?.toString() ?? '',
       photoboothStatus: json['photobooth_status']?.toString() ?? '',
       photoboothTime: json['photobooth_time']?.toString() ?? '',
+      specialawardStatus: json['specialaward_status']?.toString() ?? '',
+      specialawardTime: json['specialaward_time']?.toString() ?? '',
+      awardType: json['award_type']?.toString() ?? '',
+      specialAwardType: json['special_award_type']?.toString() ?? '',
+      orderBy: json['order_by']?.toString() ?? '',
     );
   }
 }
