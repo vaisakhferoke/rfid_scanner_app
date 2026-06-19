@@ -47,8 +47,9 @@ class UserScanReportScreen extends StatelessWidget {
             children: [
               Expanded(flex: 1, child: _buildTypeDropdown(context)),
               Obx(() {
-                if (controller.awardTypes.length <= 1)
+                if (controller.awardTypes.length <= 1) {
                   return const SizedBox.shrink();
+                }
                 return Expanded(
                   flex: 1,
                   child: Padding(
@@ -64,10 +65,7 @@ class UserScanReportScreen extends StatelessWidget {
             controller: controller.searchController,
             decoration: InputDecoration(
               hintText: 'Search...',
-              prefixIcon: const Icon(
-                Icons.search,
-                color: Color(0xFF64748B),
-              ),
+              prefixIcon: const Icon(Icons.search, color: Color(0xFF64748B)),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 12,
                 vertical: 14,
@@ -315,34 +313,43 @@ class UserScanReportScreen extends StatelessWidget {
                                     ),
                                   ),
                                 ],
-                                if (item.orderBy.isNotEmpty) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Order By: ${item.orderBy}',
-                                    style: const TextStyle(
-                                      color: Color(0xFF64748B),
-                                    ),
-                                  ),
-                                ],
                                 const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFEEF2FF),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    item.uniqueId,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFF213AEC),
-                                      fontWeight: FontWeight.bold,
+
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    if (item.orderBy.isNotEmpty) ...[
+                                      Text(
+                                        'Order By: ${item.orderBy}',
+                                        style: const TextStyle(
+                                          color: Color(0xFF64748B),
+                                        ),
+                                      ),
+                                    ],
+                                    //
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFEEF2FF),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        "Code: ${item.uniqueId}",
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFF213AEC),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
+
+                                const SizedBox(height: 4),
                               ],
                             ),
                           ),
