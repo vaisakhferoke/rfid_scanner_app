@@ -46,31 +46,39 @@ class UserScanReportScreen extends StatelessWidget {
           Row(
             children: [
               Expanded(flex: 1, child: _buildTypeDropdown(context)),
-              const SizedBox(width: 8),
-              Expanded(
-                flex: 2,
-                child: TextField(
-                  controller: controller.searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search...',
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: Color(0xFF64748B),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 14,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
+              Obx(() {
+                if (controller.awardTypes.length <= 1)
+                  return const SizedBox.shrink();
+                return Expanded(
+                  flex: 1,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: _buildAwardTypeDropdown(context),
                   ),
-                ),
-              ),
+                );
+              }),
             ],
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: controller.searchController,
+            decoration: InputDecoration(
+              hintText: 'Search...',
+              prefixIcon: const Icon(
+                Icons.search,
+                color: Color(0xFF64748B),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 14,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+            ),
           ),
         ],
       ),
@@ -110,6 +118,39 @@ class UserScanReportScreen extends StatelessWidget {
         ),
       );
     });
+  }
+
+  Widget _buildAwardTypeDropdown(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: controller.selectedAwardType.value,
+          isExpanded: true,
+          icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF64748B)),
+          items: controller.awardTypes.map((String type) {
+            return DropdownMenuItem<String>(
+              value: type,
+              child: Text(
+                type == 'All' ? 'All Award Types' : type,
+                style: const TextStyle(color: Color(0xFF0F172A)),
+                overflow: TextOverflow.ellipsis,
+              ),
+            );
+          }).toList(),
+          onChanged: (value) {
+            if (value != null) {
+              controller.setAwardType(value);
+            }
+          },
+        ),
+      ),
+    );
   }
 
   Widget _buildTabs() {
@@ -228,16 +269,29 @@ class UserScanReportScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  item.givenname,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0F172A),
-                                  ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+
+                                  children: [
+                                    //  SHop Icon
+                                    Icon(
+                                      Icons.storefront,
+                                      size: 18,
+                                      color: Color(0xff213AEC),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      item.name,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.blue,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 Text(
-                                  item.name,
+                                  item.givenname,
                                   style: const TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
