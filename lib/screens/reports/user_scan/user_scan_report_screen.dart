@@ -173,7 +173,7 @@ class UserScanReportScreen extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'Not Scanned (${controller.notScannedCount.value})',
+                    'Not Scanned (${scanType == 'notscanned' ? controller.filteredData.length : controller.notScannedCount.value})',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: scanType == 'notscanned'
@@ -202,7 +202,7 @@ class UserScanReportScreen extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'Scanned (${controller.scannedCount.value})',
+                    'Scanned (${scanType == 'scanned' ? controller.filteredData.length : controller.scannedCount.value})',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: scanType == 'scanned'
@@ -278,12 +278,14 @@ class UserScanReportScreen extends StatelessWidget {
                                       color: Color(0xff213AEC),
                                     ),
                                     const SizedBox(width: 4),
-                                    Text(
-                                      item.name,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.blue,
+                                    Expanded(
+                                      child: Text(
+                                        item.name,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blue,
+                                        ),
                                       ),
                                     ),
                                   ],
